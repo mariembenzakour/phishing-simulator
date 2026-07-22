@@ -1,0 +1,92 @@
+<app-navbar></app-navbar>
+
+<div style="background: #0a1628; min-height: calc(100vh - 64px); padding: 32px; display: flex; justify-content: center;">
+  <div style="width: 100%; max-width: 600px;">
+
+    <div style="margin-bottom: 32px;">
+      <a routerLink="/campaigns" style="color: #8899aa; text-decoration: none; font-size: 14px;">← Retour</a>
+      <h1 style="color: white; font-size: 28px; font-weight: 800; margin: 16px 0 4px 0;">👤 Nouvel opérateur</h1>
+      <p style="color: #8899aa; margin: 0; font-size: 14px;">Créer un compte pour un nouvel opérateur</p>
+    </div>
+
+    <div style="background: #0f1f35; border-radius: 12px; padding: 32px; border: 1px solid #1e3a5c;">
+
+      <!-- Email -->
+      <div style="margin-bottom: 20px;">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL *</label>
+        <input type="email" [(ngModel)]="form.email" placeholder="prenom.nom@intellisec.com"
+               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+      </div>
+
+      <!-- Prénom & Nom -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">PRÉNOM *</label>
+          <input type="text" [(ngModel)]="form.firstName" placeholder="Chiheb"
+                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        </div>
+        <div>
+          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOM *</label>
+          <input type="text" [(ngModel)]="form.lastName" placeholder="Ben Salah"
+                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        </div>
+      </div>
+
+      <!-- Téléphone & Date -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">TÉLÉPHONE</label>
+          <input type="tel" [(ngModel)]="form.phone" placeholder="+216 XX XXX XXX"
+                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        </div>
+        <div>
+          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">DATE DE NAISSANCE</label>
+          <input type="date" [(ngModel)]="form.birthDate"
+                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; color-scheme: dark;">
+        </div>
+      </div>
+
+      <!-- Mot de passe -->
+      <div style="margin-bottom: 20px;">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">MOT DE PASSE *</label>
+        <input type="password" [(ngModel)]="form.password" placeholder="••••••••"
+               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        <div style="font-size: 11px; color: #556677; margin-top: 6px;">
+          Min. 8 caractères • Majuscule • Minuscule • Chiffre • Symbole
+        </div>
+      </div>
+
+      <!-- Rôle - Seul le SUPER_ADMIN peut créer un ADMIN -->
+      <div style="margin-bottom: 28px;">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">RÔLE *</label>
+        <select [(ngModel)]="form.role"
+                style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+          <!-- ✅ Seul SUPER_ADMIN peut voir/choisir ADMIN -->
+          <option *ngIf="authService.isSuperAdmin()" value="ADMIN">🔴 ADMIN - Tous les droits</option>
+          <option *ngIf="authService.isSuperAdmin()" value="SUPER_ADMIN">⭐ SUPER_ADMIN - Droits illimités</option>
+          <option value="OPERATOR">🟠 OPERATOR - Gère les campagnes</option>
+          <option value="VIEWER">🟢 VIEWER - Consultation uniquement</option>
+        </select>
+        <div style="font-size: 11px; color: #556677; margin-top: 6px;">
+          ⚠️ Seul un SUPER_ADMIN peut créer un ADMIN.
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="error"
+           style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+        ⚠️ {{ error }}
+      </div>
+      <div *ngIf="success"
+           style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+        ✅ {{ success }}
+      </div>
+
+      <button (click)="create()"
+              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700;">
+        CRÉER L'OPÉRATEUR →
+      </button>
+
+    </div>
+  </div>
+</div>
