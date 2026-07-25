@@ -3,11 +3,8 @@ package com.intellisec.phishsim.email;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface EmailRepository extends JpaRepository<EmailTemplate, UUID> {
-
-    List<EmailTemplate> findByStatus(String status);
+public interface SenderProfileRepository extends JpaRepository<SenderProfile, UUID> {
 }

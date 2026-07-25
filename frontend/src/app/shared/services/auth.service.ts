@@ -83,6 +83,7 @@ export class AuthService {
     return userInfo?.role || null;
   }
 
+  // ✅ MODIFICATION : Ajout de l'ID dans getUserInfo
   getUserInfo(): any {
     const token = this.getToken();
     if (!token) return null;
@@ -92,23 +93,27 @@ export class AuthService {
       return {
         email: decoded.sub,
         role: decoded.role,
-        exp: decoded.exp
+        exp: decoded.exp,
+        id: decoded.id || null   // ✅ ID extrait du token
       };
     } catch {
       return null;
     }
   }
 
+  // ✅ NOUVELLE MÉTHODE : Récupérer l'ID de l'utilisateur
+  getUserId(): string | null {
+    return this.getUserInfo()?.id || null;
+  }
+
   // ============================================
   // VÉRIFICATIONS DE RÔLE (RBAC)
   // ============================================
 
-  // ✅ SUPER_ADMIN
   isSuperAdmin(): boolean {
     return this.getRole() === 'SUPER_ADMIN';
   }
 
-  // ✅ ADMIN inclut SUPER_ADMIN
   isAdmin(): boolean {
     const role = this.getRole();
     return role === 'ADMIN' || role === 'SUPER_ADMIN';
@@ -122,12 +127,10 @@ export class AuthService {
     return this.getRole() === 'VIEWER';
   }
 
-  // ✅ Peut créer un ADMIN ? → Seul SUPER_ADMIN
   canCreateAdmin(): boolean {
     return this.isSuperAdmin();
   }
 
-  // ✅ Peut supprimer un ADMIN ? → Seul SUPER_ADMIN
   canDeleteAdmin(): boolean {
     return this.isSuperAdmin();
   }

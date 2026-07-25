@@ -3,6 +3,7 @@ package com.intellisec.phishsim.campaign;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,29 @@ public class CampaignService {
         return campaignRepository.save(campaign);
     }
 
+    // ✅ NOUVELLE MÉTHODE UPDATE
+    public Campaign update(UUID id, Campaign campaignData) {
+        Campaign campaign = getById(id);
+
+        // Mettre à jour les champs de base
+        campaign.setName(campaignData.getName());
+        campaign.setTemplateId(campaignData.getTemplateId());
+        campaign.setTargetGroupId(campaignData.getTargetGroupId());
+        campaign.setSenderEmail(campaignData.getSenderEmail());
+        campaign.setScheduledAt(campaignData.getScheduledAt());
+
+        // ✅ Mettre à jour les nouveaux champs email
+        campaign.setSenderProfile(campaignData.getSenderProfile());
+        campaign.setDryRun(campaignData.getDryRun());
+        campaign.setDryRunEmail(campaignData.getDryRunEmail());
+        campaign.setThrottleSeconds(campaignData.getThrottleSeconds());
+
+        // Ne pas modifier le statut via cette méthode
+        // (utiliser authorize, pause, resume pour changer le statut)
+
+        return campaignRepository.save(campaign);
+    }
+
     // ── CLONE ────────────────────────────────────────
     public Campaign clone(UUID id) {
         Campaign original = getById(id);
@@ -44,6 +68,10 @@ public class CampaignService {
         clone.setTemplateId(original.getTemplateId());
         clone.setTargetGroupId(original.getTargetGroupId());
         clone.setCreatedBy(original.getCreatedBy());
+        clone.setSenderProfile(original.getSenderProfile());
+        clone.setDryRun(original.getDryRun());
+        clone.setDryRunEmail(original.getDryRunEmail());
+        clone.setThrottleSeconds(original.getThrottleSeconds());
         clone.setStatus("DRAFT");
         clone.setCreatedAt(LocalDateTime.now());
         return campaignRepository.save(clone);
@@ -90,7 +118,6 @@ public class CampaignService {
     }
 
     // ── SCHEDULER ────────────────────────────────────
-    // Vérifie toutes les minutes si des campagnes SCHEDULED doivent démarrer
     @Scheduled(fixedRate = 60000)
     public void checkScheduledCampaigns() {
         List<Campaign> scheduled = campaignRepository

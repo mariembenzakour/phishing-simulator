@@ -55,18 +55,15 @@ public class AuthService {
                                           boolean isAdminCreation,
                                           String currentUserEmail) {
 
-        // ✅ Si c'est une création par ADMIN, vérifier les droits
         if (isAdminCreation && currentUserEmail != null) {
             Operator currentUser = operatorRepository.findByEmail(currentUserEmail)
                     .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-            // ✅ Si l'utilisateur actuel est ADMIN (pas SUPER_ADMIN) → il ne peut pas créer un autre ADMIN
             if (Operator.ROLE_ADMIN.equals(currentUser.getRole()) &&
                     Operator.ROLE_ADMIN.equals(role)) {
                 throw new RuntimeException("❌ Un ADMIN ne peut pas créer un autre ADMIN. Seul un SUPER_ADMIN peut le faire.");
             }
 
-            // ✅ Si l'utilisateur actuel est ADMIN (pas SUPER_ADMIN) → il ne peut pas créer un SUPER_ADMIN
             if (Operator.ROLE_ADMIN.equals(currentUser.getRole()) &&
                     Operator.ROLE_SUPER_ADMIN.equals(role)) {
                 throw new RuntimeException("❌ Un ADMIN ne peut pas créer un SUPER_ADMIN.");
@@ -77,7 +74,6 @@ public class AuthService {
         operator.setEmail(email);
         operator.setPasswordHash(passwordEncoder.encode(password));
 
-        // ✅ Déterminer le rôle
         if (isAdminCreation) {
             operator.setRole(role);
         } else {
@@ -91,11 +87,13 @@ public class AuthService {
         operator.setCreatedAt(LocalDateTime.now());
 
         Operator saved = operatorRepository.save(operator);
-        String token = jwtUtil.generateToken(saved.getEmail(), saved.getRole());
+
+        // ✅ Génération du token avec l'ID
+        String token = jwtUtil.generateToken(saved.getEmail(), saved.getRole(), saved.getId());
         return new AuthResponse(token, toDTO(saved), false);
     }
 
-    // ✅ Supprimer un opérateur (avec vérification)
+    // ✅ Supprimer un opérateur
     public void deleteOperator(UUID operatorId, String currentUserEmail) {
         Operator currentUser = operatorRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
@@ -103,21 +101,18 @@ public class AuthService {
         Operator operatorToDelete = operatorRepository.findById(operatorId)
                 .orElseThrow(() -> new RuntimeException("Opérateur non trouvé"));
 
-        // ✅ Seul SUPER_ADMIN peut supprimer un ADMIN
         if (Operator.ROLE_ADMIN.equals(operatorToDelete.getRole())) {
             if (!Operator.ROLE_SUPER_ADMIN.equals(currentUser.getRole())) {
                 throw new RuntimeException("❌ Seul un SUPER_ADMIN peut supprimer un ADMIN.");
             }
         }
 
-        // ✅ Seul SUPER_ADMIN peut supprimer un SUPER_ADMIN
         if (Operator.ROLE_SUPER_ADMIN.equals(operatorToDelete.getRole())) {
             if (!Operator.ROLE_SUPER_ADMIN.equals(currentUser.getRole())) {
                 throw new RuntimeException("❌ Seul un SUPER_ADMIN peut supprimer un SUPER_ADMIN.");
             }
         }
 
-        // ✅ Ne pas se supprimer soi-même
         if (currentUser.getId().equals(operatorToDelete.getId())) {
             throw new RuntimeException("❌ Vous ne pouvez pas supprimer votre propre compte.");
         }
@@ -161,7 +156,8 @@ public class AuthService {
             throw new RuntimeException("Invalid MFA code");
         }
 
-        String token = jwtUtil.generateToken(operator.getEmail(), operator.getRole());
+        // ✅ Génération du token avec l'ID
+        String token = jwtUtil.generateToken(operator.getEmail(), operator.getRole(), operator.getId());
         return new AuthResponse(token, toDTO(operator));
     }
 

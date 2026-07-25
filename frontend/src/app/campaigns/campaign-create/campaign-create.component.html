@@ -1,7 +1,7 @@
 <app-navbar></app-navbar>
 
 <div style="background: #0a1628; min-height: calc(100vh - 64px); padding: 32px; display: flex; justify-content: center;">
-  <div style="width: 100%; max-width: 600px;">
+  <div style="width: 100%; max-width: 700px;">
 
     <!-- Header -->
     <div style="margin-bottom: 32px;">
@@ -19,11 +19,26 @@
                style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
       </div>
 
-      <!-- Sender Email -->
+      <!-- Sender Email (champ de secours) -->
       <div style="margin-bottom: 20px;">
         <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL EXPÉDITEUR *</label>
         <input type="email" [(ngModel)]="form.senderEmail" placeholder="it-support&#64;fake-company.com"
                style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+      </div>
+
+      <!-- ✅ NOUVEAU : Profil expéditeur -->
+      <div style="margin-bottom: 20px;">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">PROFIL EXPÉDITEUR (optionnel)</label>
+        <select [(ngModel)]="form.senderProfileId"
+                style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+          <option value="">-- Aucun (utiliser l'email ci-dessus) --</option>
+          <option *ngFor="let profile of senderProfiles" [value]="profile.id">
+            {{ profile.name }} ({{ profile.fromEmail }})
+          </option>
+        </select>
+        <div style="font-size: 11px; color: #556677; margin-top: 4px;">
+          Si sélectionné, remplace l'email expéditeur.
+        </div>
       </div>
 
       <!-- Groupe de cibles -->
@@ -35,7 +50,6 @@
           <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
         </select>
 
-        <!-- Lien vers création groupe si vide -->
         <div *ngIf="groups.length === 0"
              style="background: rgba(224,123,42,0.1); border: 1px solid rgba(224,123,42,0.2); border-radius: 6px; padding: 10px 14px; margin-top: 8px;">
           <p style="color: #e07b2a; font-size: 13px; margin: 0;">
@@ -43,21 +57,44 @@
             <a routerLink="/groups/create" style="color: #e07b2a; font-weight: 700; text-decoration: underline;">Créer un groupe →</a>
           </p>
         </div>
-
-        <!-- Aperçu du groupe sélectionné -->
-        <div *ngIf="form.targetGroupId"
-             style="margin-top: 8px; font-size: 12px; color: #4ade80;">
-          ✅ Groupe sélectionné — les cibles de ce groupe recevront le mail
-        </div>
       </div>
 
       <!-- Scheduled At -->
-      <div style="margin-bottom: 28px;">
+      <div style="margin-bottom: 20px;">
         <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">DATE DE LANCEMENT (optionnel)</label>
         <input type="datetime-local" [(ngModel)]="form.scheduledAt"
                style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; color-scheme: dark;">
         <div style="font-size: 11px; color: #556677; margin-top: 6px;">
           Si non renseignée → statut DRAFT. Si renseignée → statut SCHEDULED automatiquement.
+        </div>
+      </div>
+
+      <!-- ✅ NOUVEAU : DRY RUN -->
+      <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+        <input type="checkbox" [(ngModel)]="form.dryRun" id="dryRun"
+               style="width: 18px; height: 18px; accent-color: #e07b2a;">
+        <label for="dryRun" style="color: #8899aa; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
+          🔬 Mode Dry Run (test sur un seul email)
+        </label>
+      </div>
+
+      <!-- ✅ NOUVEAU : Email Dry Run -->
+      <div style="margin-bottom: 20px;" *ngIf="form.dryRun">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL DE TEST (Dry Run) *</label>
+        <input type="email" [(ngModel)]="form.dryRunEmail" placeholder="test@intellisec.com"
+               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        <div style="font-size: 11px; color: #556677; margin-top: 4px;">
+          En mode Dry Run, la campagne sera envoyée UNIQUEMENT à cette adresse.
+        </div>
+      </div>
+
+      <!-- ✅ NOUVEAU : Throttle -->
+      <div style="margin-bottom: 28px;">
+        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">INTERVALLE ENTRE LES ENVOIS (secondes)</label>
+        <input type="number" [(ngModel)]="form.throttleSeconds" min="1" max="60"
+               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+        <div style="font-size: 11px; color: #556677; margin-top: 4px;">
+          Évite d'être blacklisté. 5 secondes par défaut.
         </div>
       </div>
 

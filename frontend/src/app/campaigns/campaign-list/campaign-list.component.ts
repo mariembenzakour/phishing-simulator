@@ -45,19 +45,29 @@ export class CampaignListComponent implements OnInit {
     return group ? group.name : '';
   }
 
+  // ✅ Correction : utiliser getUserId()
   authorize(id: string) {
-    const operatorId = this.authService.getUserInfo()?.id;
+    const operatorId = this.authService.getUserId();
+    if (!operatorId) {
+      this.error = 'Utilisateur non identifié';
+      return;
+    }
     this.campaignService.authorize(id, operatorId).subscribe({
       next: (updated) => {
         const index = this.campaigns.findIndex(c => c.id === id);
         if (index !== -1) this.campaigns[index] = updated;
+        this.error = '';
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Erreur lors de l\'autorisation';
       }
     });
   }
 
   clone(id: string) {
     this.campaignService.clone(id).subscribe({
-      next: () => this.load()
+      next: () => this.load(),
+      error: () => { this.error = 'Erreur lors du clonage'; }
     });
   }
 
@@ -66,7 +76,8 @@ export class CampaignListComponent implements OnInit {
       next: (updated) => {
         const index = this.campaigns.findIndex(c => c.id === id);
         if (index !== -1) this.campaigns[index] = updated;
-      }
+      },
+      error: () => { this.error = 'Erreur lors de la pause'; }
     });
   }
 
@@ -75,14 +86,49 @@ export class CampaignListComponent implements OnInit {
       next: (updated) => {
         const index = this.campaigns.findIndex(c => c.id === id);
         if (index !== -1) this.campaigns[index] = updated;
-      }
+      },
+      error: () => { this.error = 'Erreur lors de la reprise'; }
     });
   }
 
   delete(id: string) {
     if (!confirm('Supprimer cette campagne ?')) return;
     this.campaignService.delete(id).subscribe({
-      next: () => { this.campaigns = this.campaigns.filter(c => c.id !== id); }
+      next: () => { this.campaigns = this.campaigns.filter(c => c.id !== id); },
+      error: () => { this.error = 'Erreur lors de la suppression'; }
+    });
+  }
+
+  // ✅ NOUVELLE MÉTHODE : Envoyer une campagne (message adapté au Dry Run)
+  sendCampaign(id: string) {
+    // ✅ Récupérer la campagne pour vérifier le mode Dry Run
+    const campaign = this.campaigns.find(c => c.id === id);
+    if (!campaign) {
+      this.error = 'Campagne non trouvée';
+      return;
+    }
+
+    // ✅ Message adapté au mode Dry Run
+    let confirmMessage = '⚠️ Envoyer cette campagne ';
+    if (campaign.dryRun) {
+      confirmMessage += `en mode DRY RUN (uniquement à ${campaign.dryRunEmail || 'l\'adresse de test'}) ?`;
+    } else {
+      confirmMessage += `à toutes les cibles sélectionnées (groupe : ${this.getGroupName(campaign.targetGroupId) || 'Non défini'}) ?`;
+    }
+    
+    if (!confirm(confirmMessage)) return;
+    
+    this.loading = true;
+    this.campaignService.sendCampaign(id).subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.load();
+        this.error = '';
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = typeof err.error === 'string' ? err.error : 'Erreur lors de l\'envoi';
+      }
     });
   }
 
