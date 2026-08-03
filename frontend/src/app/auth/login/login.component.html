@@ -1,7 +1,7 @@
 <div style="min-height: 100vh; background: #0a1628; display: flex;">
   
-  <!-- Partie gauche — Branding -->
-  <div style="flex: 1; background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%); display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden;">
+  <!-- Partie gauche — Branding (Fond légèrement éclairci) -->
+  <div style="flex: 1; background: linear-gradient(135deg, #1a2a4a 0%, #2a4a6a 100%); display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden;">
     
     <!-- Background pattern -->
     <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(0deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px);"></div>
@@ -9,10 +9,13 @@
     <!-- Logo -->
     <div style="margin-bottom: 48px; position: relative;">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 48px; height: 48px; background: #e07b2a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🛡️</div>
+        <!-- ✅ Logo en image PNG (visible sur fond éclairci) -->
+        <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+          <img src="/assets/logo.png" alt="Intellisec Solutions" style="width: 48px; height: 48px; border-radius: 10px; object-fit: contain; background: #ffffff; padding: 4px;">
+        </div>
         <div>
           <div style="color: white; font-size: 24px; font-weight: 800; letter-spacing: 1px;">INTELLI<span style="color: #e07b2a;">SEC</span></div>
-          
+          <div style="color: #8899aa; font-size: 11px; letter-spacing: 2px;">SOLUTIONS</div>
         </div>
       </div>
     </div>
@@ -47,7 +50,7 @@
     </div>
   </div>
 
-  <!-- Partie droite — Login Form -->
+  <!-- Partie droite — Login Form (inchangée) -->
   <div style="width: 480px; background: #0f1f35; display: flex; align-items: center; justify-content: center; padding: 60px 48px;">
     <div style="width: 100%;">
       
@@ -57,7 +60,7 @@
       <!-- Email -->
       <div style="margin-bottom: 20px;">
         <label style="color: #8899aa; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">EMAIL PROFESSIONNEL</label>
-        <input type="email" [(ngModel)]="email" placeholder="prenom.nom&#64;intellisec.com"
+        <input type="email" [(ngModel)]="email" placeholder="prenom.nom&#64;intellisecsolutions.com"
                style="width: 100%; padding: 14px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
       </div>
 

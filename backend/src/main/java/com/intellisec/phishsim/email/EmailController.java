@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -38,7 +39,6 @@ public class EmailController {
             return ResponseEntity.badRequest().body("❌ La campagne doit être autorisée avant d'être envoyée");
         }
 
-        // ✅ Récupérer ou créer un template par défaut
         EmailTemplate template;
         if (campaign.getTemplateId() != null) {
             template = emailRepository.findById(campaign.getTemplateId()).orElse(null);
@@ -47,7 +47,6 @@ public class EmailController {
         }
 
         if (template == null) {
-            // ✅ Créer un template par défaut
             template = new EmailTemplate();
             template.setName("Template par défaut - " + campaign.getName());
             template.setSubject("Test de phishing - " + campaign.getName());
@@ -55,16 +54,15 @@ public class EmailController {
                     "<h1>Phishing Simulation</h1>" +
                             "<p>Bonjour {{firstName}},</p>" +
                             "<p>Ceci est un test de simulation de phishing.</p>" +
-                            "<p>Cliquez sur le lien pour vous connecter : " +
-                            "<a href='http://localhost:4200/login'>Connexion</a></p>" +
-                            "<p>L'équipe Intellisec</p>"
+                            "<p>Votre mot de passe a expiré. Veuillez le renouveler immédiatement :</p>" +
+                            "<p><a href='TRACKING_LINK'>Cliquez ici pour vous connecter</a></p>" +
+                            "<p>L'équipe Intellisecsollutions</p>"
             );
             template.setBodyText("Phishing Simulation. Bonjour. Ceci est un test.");
             template.setIsHtml(true);
             template.setStatus("APPROVED");
             template = emailRepository.save(template);
 
-            // ✅ Mettre à jour la campagne avec le templateId
             campaign.setTemplateId(template.getId());
             campaignService.update(campaignId, campaign);
         }
@@ -78,5 +76,36 @@ public class EmailController {
         campaignService.update(campaignId, campaign);
 
         return ResponseEntity.ok("✅ Campagne envoyée avec succès !");
+    }
+
+    // ✅ NOUVEAU : Récupérer les statistiques de délivrabilité
+    @GetMapping("/stats/{campaignId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<Map<String, Object>> getDeliverabilityStats(@PathVariable UUID campaignId) {
+        Campaign campaign = campaignService.getById(campaignId);
+        EmailService.DeliverabilityStats stats = emailService.getDeliverabilityStats(campaignId);
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("campaignId", campaignId.toString());
+        response.put("campaignName", campaign.getName());
+        response.put("sent", stats.getSent());
+        response.put("received", stats.getReceived());
+        response.put("opens", stats.getOpens());
+        response.put("clicks", stats.getClicks());
+        response.put("submits", stats.getSubmits());
+        response.put("openRate", stats.getOpenRate());
+        response.put("clickRate", stats.getClickRate());
+        response.put("submitRate", stats.getSubmitRate());
+
+        return ResponseEntity.ok(response);
+    }
+
+    // ✅ NOUVEAU : Récupérer les statistiques globales
+    @GetMapping("/stats/global")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ResponseEntity<Map<String, Object>> getGlobalStats() {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("totalEmailsSent", emailService.getTotalSent());
+        return ResponseEntity.ok(response);
     }
 }

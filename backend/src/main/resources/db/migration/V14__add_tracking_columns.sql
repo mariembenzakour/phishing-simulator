@@ -1,0 +1,3 @@
+ALTER TABLE tracking_events
+    ADD COLUMN IF NOT EXISTS user_agent TEXT,
+    ADD COLUMN IF NOT EXISTS ip_hash VARCHAR(255);
