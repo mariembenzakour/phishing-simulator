@@ -1,0 +1,119 @@
+<app-navbar></app-navbar>
+
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <a routerLink="/dashboard" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour au tableau de bord</a>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 8px 0 4px 0;">👤 Statistiques utilisateurs</h1>
+      <p style="color: #6b7a8a; font-size: 14px;">Historique des interactions par utilisateur</p>
+    </div>
+    <button (click)="loadUserStats()" 
+            style="background: #e07b2a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+      🔄 Rafraîchir
+    </button>
+  </div>
+
+  <div *ngIf="loading" style="text-align: center; padding: 60px;">
+    <p style="color: #6b7a8a;">Chargement...</p>
+  </div>
+
+  <div *ngIf="error" 
+       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+    ⚠️ {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+
+    <div style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
+      <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+        <h3 style="color: #1a3a5c; margin: 0; font-size: 16px;">👥 Utilisateurs</h3>
+        <span style="color: #6b7a8a; font-size: 13px;">{{ users.length }} utilisateurs</span>
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #e8f0f7;">
+              <th style="padding: 12px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">EMAIL</th>
+              <th style="padding: 12px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">NOM</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">👁️ OUVERTS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">🖱️ CLICS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">📝 SOUMISSIONS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 12px 16px; color: #6b7a8a; font-size: 13px;">{{ user.email }}</td>
+              <td style="padding: 12px 16px; color: #1a3a5c;">{{ user.firstName }} {{ user.lastName }}</td>
+              <td style="padding: 12px 16px; text-align: center; color: #22c55e; font-weight: 600;">{{ user.totalOpens || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center; color: #8b5cf6; font-weight: 600;">
+                {{ user.totalClicks || 0 }}
+                <span *ngIf="user.totalClicks > 1" style="font-size: 11px; color: #f59e0b; margin-left: 4px;">🔁</span>
+              </td>
+              <td style="padding: 12px 16px; text-align: center; color: #f59e0b; font-weight: 600;">{{ user.totalSubmits || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center;">
+                <button (click)="viewUserHistory(user)"
+                        style="background: #e07b2a; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                  📋 Voir
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px; padding: 16px 20px; margin-bottom: 24px;">
+      <h4 style="color: #f59e0b; margin: 0 0 8px 0;">⚠️ Repeat Clickers (2 clics ou plus)</h4>
+      <div *ngIf="repeatClickers.length === 0" style="color: #6b7a8a; font-size: 14px;">
+        Aucun repeat clicker détecté.
+      </div>
+      <div *ngFor="let user of repeatClickers" 
+           style="color: #6b7a8a; font-size: 14px; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
+        {{ user.firstName }} {{ user.lastName }} ({{ user.email }}) — {{ user.totalClicks }} clics
+      </div>
+    </div>
+
+    <div *ngIf="showHistory" 
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;">
+      <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="color: #1a3a5c; margin: 0;">📋 {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</h3>
+          <button (click)="closeHistory()" 
+                  style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+            ✕ Fermer
+          </button>
+        </div>
+        
+        <div style="color: #6b7a8a; font-size: 14px; margin-bottom: 16px;">
+          {{ selectedUser?.email }} — 
+          {{ userHistory.length }} événements
+        </div>
+
+        <div *ngIf="userHistory.length === 0" style="text-align: center; color: #6b7a8a; padding: 20px;">
+          Aucun événement trouvé pour cet utilisateur.
+        </div>
+
+        <div *ngFor="let event of userHistory" 
+             style="background: #f8fafc; border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; border-left: 3px solid; display: flex; justify-content: space-between; align-items: center;"
+             [style.border-left-color]="getEventColor(event.eventType)">
+          <div>
+            <span style="font-size: 18px; margin-right: 8px;">{{ getEventIcon(event.eventType) }}</span>
+            <span style="color: #1a3a5c; font-weight: 600;">{{ event.eventType }}</span>
+            <span style="color: #6b7a8a; font-size: 12px; margin-left: 12px;">
+              {{ event.occurredAt | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+          <span style="color: #8899aa; font-size: 11px; font-family: monospace;">
+            {{ event.ipHash || 'N/A' }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>

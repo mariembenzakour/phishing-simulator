@@ -150,24 +150,24 @@ export class AuthService {
   // ============================================
 
   isLoggedIn(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
+  const token = this.getToken();
+  if (!token) return false;
 
-    try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload));
-      if (decoded.exp) {
-        const now = Math.floor(Date.now() / 1000);
-        if (decoded.exp < now) {
-          this.logout();
-          return false;
-        }
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    if (decoded.exp) {
+      const now = Math.floor(Date.now() / 1000);
+      if (decoded.exp < now) {
+        this.logout();
+        return false;
       }
-      return true;
-    } catch {
-      return false;
     }
+    return true;
+  } catch {
+    return false;
   }
+}
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);

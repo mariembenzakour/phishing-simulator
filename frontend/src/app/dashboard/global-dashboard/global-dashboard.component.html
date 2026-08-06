@@ -1,0 +1,106 @@
+<app-navbar></app-navbar>
+
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">📊 Tableau de bord</h1>
+      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">Vue d'ensemble de toutes les campagnes</p>
+    </div>
+    <button (click)="loadDashboard()" 
+            style="background: #e07b2a; color: white; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+      🔄 Rafraîchir
+    </button>
+  </div>
+
+  <div *ngIf="loading" style="text-align: center; padding: 60px;">
+    <p style="color: #6b7a8a;">Chargement...</p>
+  </div>
+
+  <div *ngIf="error" 
+       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+    ⚠️ {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error && data">
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px;">
+      <div style="background: linear-gradient(135deg, #e07b2a 0%, #c96a20 100%); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(224,123,42,0.3);">
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Campagnes</div>
+        <div style="color: white; font-size: 32px; font-weight: 800; margin: 8px 0 4px 0;">{{ data.totalCampaigns || 0 }}</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 13px;">📣 Total des campagnes</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #1a3a5c 0%, #2a5a8c 100%); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(26,58,92,0.3);">
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Cibles</div>
+        <div style="color: white; font-size: 32px; font-weight: 800; margin: 8px 0 4px 0;">{{ data.totalTargets || 0 }}</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 13px;">🎯 Cibles enregistrées</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Ouvertures</div>
+        <div style="color: white; font-size: 32px; font-weight: 800; margin: 8px 0 4px 0;">{{ data.totalOpens || 0 }}</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 13px;">👁️ Taux : {{ data.globalOpenRate | number:'1.1-1' }}%</div>
+      </div>
+      <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 12px; padding: 24px; box-shadow: 0 4px 12px rgba(139,92,246,0.3);">
+        <div style="color: rgba(255,255,255,0.8); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Soumissions</div>
+        <div style="color: white; font-size: 32px; font-weight: 800; margin: 8px 0 4px 0;">{{ data.totalSubmits || 0 }}</div>
+        <div style="color: rgba(255,255,255,0.6); font-size: 13px;">📝 Taux : {{ data.globalSubmitRate | number:'1.1-1' }}%</div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+      <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="color: #1a3a5c; margin: 0; font-size: 16px; font-weight: 700;">📋 Campagnes</h3>
+        <span style="color: #6b7a8a; font-size: 13px;">{{ campaigns.length }} campagnes</span>
+      </div>
+      <div style="overflow-x: auto; padding: 0 4px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #e8f0f7;">
+              <th style="padding: 12px 16px; text-align: left; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">NOM</th>
+              <th style="padding: 12px 16px; text-align: left; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">STATUT</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">📧 ENVOYÉS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">👁️ OUVERTS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">🖱️ CLICS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">📝 SOUMISSIONS</th>
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 12px; font-weight: 600; letter-spacing: 0.5px;">ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let campaign of campaigns" style="border-bottom: 1px solid #e2e8f0;">
+              <td style="padding: 12px 16px; color: #1a3a5c; font-weight: 600;">{{ campaign.name }}</td>
+              <td style="padding: 12px 16px;">
+                <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;"
+                      [style.background]="campaign.status === 'AUTHORIZED' ? 'rgba(34,197,94,0.1)' : campaign.status === 'RUNNING' ? 'rgba(59,130,246,0.1)' : campaign.status === 'DRAFT' ? 'rgba(245,158,11,0.1)' : 'rgba(107,114,128,0.1)'"
+                      [style.color]="campaign.status === 'AUTHORIZED' ? '#22c55e' : campaign.status === 'RUNNING' ? '#3b82f6' : campaign.status === 'DRAFT' ? '#f59e0b' : '#6b7280'">
+                  {{ campaign.status }}
+                </span>
+              </td>
+              <td style="padding: 12px 16px; text-align: center; color: #6b7a8a;">{{ campaign.sent || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center; color: #22c55e; font-weight: 600;">{{ campaign.opens || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center; color: #8b5cf6; font-weight: 600;">{{ campaign.clicks || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center; color: #f59e0b; font-weight: 600;">{{ campaign.submits || 0 }}</td>
+              <td style="padding: 12px 16px; text-align: center;">
+                <button (click)="goToCampaignDetail(campaign.id)"
+                        style="background: #e07b2a; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                  Détails
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div *ngIf="campaigns.length === 0" style="padding: 40px; text-align: center; color: #6b7a8a;">
+        Aucune campagne trouvée.
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 16px; margin-top: 24px; justify-content: center;">
+      <button (click)="goToUserReport()"
+              style="background: #e8f0f7; color: #1a3a5c; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+        👤 Statistiques utilisateurs
+      </button>
+    </div>
+
+  </div>
+
+</div>

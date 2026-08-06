@@ -1,93 +1,92 @@
-<nav style="background: #0f1f35; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 64px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+<!-- Sidebar -->
+<div class="sidebar" [class.collapsed]="isCollapsed">
 
-  <!-- Logo officiel INTELLISEC SOLUTIONS -->
-  <div style="display: flex; align-items: center;">
-    <img
-      src="/logo.png"
-      alt="INTELLISEC SOLUTIONS"
-      style="width: 130px; height: auto; display: block;"
-    >
-  </div>
-
-  <!-- Liens principaux -->
-  <div style="display: flex; align-items: center; gap: 4px;">
-
-    <a
-      routerLink="/campaigns"
-      routerLinkActive="active-nav"
-      style="color: #8899aa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;"
-    >
-      📣 Campagnes
-    </a>
-
-    <a
-      routerLink="/groups"
-      routerLinkActive="active-nav"
-      style="color: #8899aa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;"
-    >
-      👥 Groupes
-    </a>
-
-    <a
-      routerLink="/targets"
-      routerLinkActive="active-nav"
-      style="color: #8899aa; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 500;"
-    >
-      🎯 Cibles
-    </a>
-
-    <a
-      *ngIf="authService.isAdmin() || authService.isSuperAdmin()"
-      routerLink="/operators/create"
-      routerLinkActive="active-nav"
-      style="color: #e07b2a; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; border: 1px solid rgba(224,123,42,0.3);"
-    >
-      👑 Opérateurs
-    </a>
-
-  </div>
-
-  <!-- Profil -->
-  <div style="display: flex; align-items: center; gap: 16px;">
-
-    <div style="text-align: right;">
-
-      <div style="color: white; font-size: 13px; font-weight: 600;">
-        {{ authService.getUserInfo()?.email }}
+  <!-- Logo -->
+  <div class="sidebar-header">
+    <div class="logo-container" (click)="toggleSidebar()">
+      <div class="logo-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="36" height="36" rx="8" fill="#e07b2a"/>
+          <path d="M18 6L10 13V19C10 24 13 28 18 30C23 28 26 24 26 19V13L18 6Z" stroke="white" stroke-width="1.8" fill="none"/>
+          <path d="M13.5 18L16.5 21L22.5 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="18" r="1.5" fill="white" opacity="0.3"/>
+        </svg>
       </div>
+      <div class="logo-text" *ngIf="!isCollapsed">
+        <span>INTELLI<span>SEC</span></span>
+        <small>SOLUTIONS</small>
+      </div>
+    </div>
+  </div>
 
-      <span
-        style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; display: inline-block;"
-        [style.background]="authService.isSuperAdmin() ? 'rgba(224,123,42,0.3)' : authService.isAdmin() ? 'rgba(224,123,42,0.2)' : authService.isOperator() ? 'rgba(59,130,246,0.2)' : 'rgba(34,197,94,0.2)'"
-        [style.color]="authService.isSuperAdmin() ? '#e07b2a' : authService.isAdmin() ? '#e07b2a' : authService.isOperator() ? '#60a5fa' : '#4ade80'"
-      >
-        {{
-          authService.isSuperAdmin()
-            ? '⭐ SUPER_ADMIN'
-            : authService.isAdmin()
-              ? 'ADMIN'
-              : authService.isOperator()
-                ? 'OPERATOR'
-                : 'VIEWER'
-        }}
-      </span>
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <ul>
+      <!-- Dashboard -->
+      <li>
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Dashboard</span>
+        </a>
+      </li>
 
+      <!-- Campagnes -->
+      <li>
+        <a routerLink="/campaigns" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="nav-icon">📣</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Campagnes</span>
+        </a>
+      </li>
+
+      <!-- Groupes -->
+      <li>
+        <a routerLink="/groups" routerLinkActive="active">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Groupes</span>
+        </a>
+      </li>
+
+      <!-- Cibles -->
+      <li>
+        <a routerLink="/targets" routerLinkActive="active">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Cibles</span>
+        </a>
+      </li>
+
+      <!-- Opérateurs (Admin seulement) -->
+      <li *ngIf="authService.isAdmin() || authService.isSuperAdmin()">
+        <a routerLink="/operators/create" routerLinkActive="active">
+          <span class="nav-icon">👑</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Opérateurs</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Footer de la sidebar -->
+  <div class="sidebar-footer">
+    <!-- Profil utilisateur -->
+    <div class="user-profile">
+      <div class="user-avatar">
+        {{ authService.getUserInfo()?.email?.charAt(0)?.toUpperCase() || 'U' }}
+      </div>
+      <div class="user-info" *ngIf="!isCollapsed">
+        <div class="user-name">{{ authService.getUserInfo()?.email || 'Utilisateur' }}</div>
+        <div class="user-role" [style.color]="
+          authService.isSuperAdmin() ? '#e07b2a' : 
+          authService.isAdmin() ? '#e07b2a' : 
+          authService.isOperator() ? '#60a5fa' : '#4ade80'">
+          {{ authService.isSuperAdmin() ? '⭐ SUPER_ADMIN' : authService.isAdmin() ? 'ADMIN' : authService.isOperator() ? 'OPERATOR' : 'VIEWER' }}
+        </div>
+      </div>
     </div>
 
-    <button
-      (click)="logout()"
-      style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;"
-    >
-      Déconnexion
+    <!-- Déconnexion -->
+    <button class="logout-btn" (click)="logout()" title="Déconnexion">
+      <span class="nav-icon">🚪</span>
+      <span class="nav-label" *ngIf="!isCollapsed">Déconnexion</span>
     </button>
-
   </div>
 
-</nav>
-
-<style>
-  .active-nav {
-    color: #e07b2a !important;
-    background: rgba(224, 123, 42, 0.1) !important;
-  }
-</style>
+</div>

@@ -1,5 +1,6 @@
 package com.intellisec.phishsim.auth;
 
+import com.intellisec.phishsim.common.util.EncryptionUtil;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,6 +23,8 @@ public class Operator {
     @Column(nullable = false)
     private String passwordHash;
 
+    // ✅ Le secret TOTP est stocké chiffré en base
+    @Column(name = "totp_secret")
     private String totpSecret;
 
     @Column(nullable = false)
@@ -33,6 +36,46 @@ public class Operator {
     private LocalDate birthDate;
 
     private LocalDateTime createdAt;
+
+    // ✅ Pour le chiffrement/déchiffrement
+    private static EncryptionUtil encryptionUtil;
+
+    /**
+     * ✅ Déchiffrer le secret TOTP à l'utilisation
+     */
+    public String getDecryptedTotpSecret() {
+        if (totpSecret == null || totpSecret.isEmpty()) {
+            return null;
+        }
+        try {
+            if (encryptionUtil == null) {
+                encryptionUtil = new EncryptionUtil();
+            }
+            return encryptionUtil.decrypt(totpSecret);
+        } catch (Exception e) {
+            // Fallback: si le secret n'est pas chiffré (anciennes données)
+            return totpSecret;
+        }
+    }
+
+    /**
+     * ✅ Chiffrer le secret TOTP avant stockage
+     */
+    public void setEncryptedTotpSecret(String plainText) {
+        if (plainText == null || plainText.isEmpty()) {
+            this.totpSecret = null;
+            return;
+        }
+        try {
+            if (encryptionUtil == null) {
+                encryptionUtil = new EncryptionUtil();
+            }
+            this.totpSecret = encryptionUtil.encrypt(plainText);
+        } catch (Exception e) {
+            // Fallback: stocker en clair si le chiffrement échoue
+            this.totpSecret = plainText;
+        }
+    }
 
     // ✅ Constantes pour les rôles
     public static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";

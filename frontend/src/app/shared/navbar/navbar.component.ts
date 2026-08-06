@@ -8,15 +8,20 @@ import { AuthService } from '../services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.component.html',
-  styles: [`
-    .active-nav {
-      color: #e07b2a !important;
-      background: rgba(224, 123, 42, 0.1) !important;
-    }
-  `]
+  styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
-  constructor(public authService: AuthService, private router: Router) {}
+
+  isCollapsed = false;
+
+  constructor(
+    public authService: AuthService,
+    private router: Router
+  ) {}
+
+  toggleSidebar() {
+    this.isCollapsed = !this.isCollapsed;
+  }
 
   logout() {
     this.authService.logout();

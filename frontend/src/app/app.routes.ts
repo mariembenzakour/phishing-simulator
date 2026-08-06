@@ -10,10 +10,11 @@ import { GroupCreateComponent } from './groups/group-create/group-create.compone
 import { TargetListComponent } from './targets/target-list/target-list.component';
 import { TargetCreateComponent } from './targets/target-create/target-create.component';
 import { UnauthorizedComponent } from './shared/unauthorized/unauthorized.component';
-import { authGuard } from './shared/guards/auth.guard';
-
-// ✅ IMPORT DU NOUVEAU COMPOSANT
 import { OperatorCreateComponent } from './operators/operator-create/operator-create.component';
+import { authGuard } from './shared/guards/auth.guard';
+import { GlobalDashboardComponent } from './dashboard/global-dashboard/global-dashboard.component';
+import { CampaignDetailComponent } from './dashboard/campaign-detail/campaign-detail.component';
+import { UserReportComponent } from './dashboard/user-report/user-report.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -22,16 +23,84 @@ export const routes: Routes = [
   { path: 'setup-mfa', component: SetupMfaComponent },
   { path: 'mfa', component: MfaComponent },
   { path: 'unauthorized', component: UnauthorizedComponent },
-  { path: 'campaigns', component: CampaignListComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } },
-  { path: 'campaigns/create', component: CampaignCreateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR'] } },
-  { path: 'groups', component: GroupListComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } },
-  { path: 'groups/create', component: GroupCreateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR'] } },
-  { path: 'targets', component: TargetListComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } },
-  { path: 'targets/create', component: TargetCreateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'OPERATOR'] } },
-  
-  // ✅ NOUVELLE ROUTE : Création d'opérateur (ADMIN uniquement)
-  { path: 'operators/create', component: OperatorCreateComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
-  // ✅ AJOUTER SUPER_ADMIN DANS LES RÔLES AUTORISÉS
-  { path: 'operators/create', component: OperatorCreateComponent, canActivate: [authGuard], data: { roles: ['ADMIN', 'SUPER_ADMIN'] } },
+
+  // ── CAMPAGNES ──────────────────────────────────
+  { 
+    path: 'campaigns', 
+    component: CampaignListComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+  },
+  { 
+    path: 'campaigns/create', 
+    component: CampaignCreateComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR'] } 
+  },
+  // ✅ ROUTE D'ÉDITION
+  { 
+    path: 'campaigns/edit/:id', 
+    component: CampaignCreateComponent,  // ← Réutilisation du même composant
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR'] } 
+  },
+
+  // ── GROUPES ──────────────────────────────────
+  { 
+    path: 'groups', 
+    component: GroupListComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+  },
+  { 
+    path: 'groups/create', 
+    component: GroupCreateComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR'] } 
+  },
+
+  // ── CIBLES ───────────────────────────────────
+  { 
+    path: 'targets', 
+    component: TargetListComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+  },
+  { 
+    path: 'targets/create', 
+    component: TargetCreateComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'OPERATOR'] } 
+  },
+
+  // ── OPÉRATEURS ──────────────────────────────
+  { 
+    path: 'operators/create', 
+    component: OperatorCreateComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['ADMIN', 'SUPER_ADMIN'] } 
+  },
+
+  // ── DASHBOARD ────────────────────────────────
+  { 
+    path: 'dashboard', 
+    component: GlobalDashboardComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+  },
+  { 
+    path: 'dashboard/campaign/:id', 
+    component: CampaignDetailComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+  },
+  { 
+    path: 'dashboard/users', 
+    component: UserReportComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+  },
+
+  // Redirection 404
   { path: '**', redirectTo: 'login' }
 ];

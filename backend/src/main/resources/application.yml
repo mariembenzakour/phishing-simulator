@@ -43,3 +43,9 @@ spring:
 
 server:
   port: 8086
+
+# ✅ Configuration du chiffrement
+app:
+  encryption:
+    password: phishsim-encryption-key-2026
+    salt: phishsim-salt-2026

@@ -1,112 +1,109 @@
 <app-navbar></app-navbar>
 
-<div style="background: #0a1628; min-height: calc(100vh - 64px); padding: 32px;">
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
 
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
     <div>
-      <h1 style="color: white; font-size: 28px; font-weight: 800; margin: 0;">📣 Campagnes</h1>
-      <p style="color: #8899aa; margin: 4px 0 0 0; font-size: 14px;">Gérez vos campagnes de simulation</p>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">📣 Campagnes</h1>
+      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">Gérez vos campagnes de simulation</p>
     </div>
-    <a *ngIf="authService.hasRole('ADMIN', 'OPERATOR')" routerLink="/campaigns/create"
+    <a *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])" routerLink="/campaigns/create"
        style="background: #e07b2a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
       + Nouvelle campagne
     </a>
   </div>
 
   <div *ngIf="loading" style="text-align: center; padding: 60px;">
-    <p style="color: #8899aa;">Chargement...</p>
+    <p style="color: #6b7a8a;">Chargement...</p>
   </div>
 
   <div *ngIf="error"
-       style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
     ⚠️ {{ error }}
   </div>
 
   <div *ngIf="!loading && campaigns.length === 0"
-       style="text-align: center; padding: 60px; background: #0f1f35; border-radius: 12px; border: 1px dashed #1e3a5c;">
-    <p style="color: #8899aa; font-size: 16px;">Aucune campagne pour le moment</p>
-    <a *ngIf="authService.hasRole('ADMIN', 'OPERATOR')" routerLink="/campaigns/create"
+       style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
+    <p style="color: #6b7a8a; font-size: 16px;">Aucune campagne pour le moment</p>
+    <a *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])" routerLink="/campaigns/create"
        style="color: #e07b2a; text-decoration: none; font-weight: 600;">Créer la première →</a>
   </div>
 
   <div *ngIf="!loading && campaigns.length > 0"
-       style="background: #0f1f35; border-radius: 12px; overflow: hidden; border: 1px solid #1e3a5c;">
+       style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
     <table style="width: 100%; border-collapse: collapse;">
       <thead>
-        <tr style="background: #162032;">
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">NOM</th>
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">EXPÉDITEUR</th>
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">GROUPE CIBLE</th>
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">PLANIFIÉE</th>
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">STATUT</th>
-          <th style="padding: 16px; text-align: left; color: #8899aa; font-size: 12px; letter-spacing: 1px;">ACTIONS</th>
+        <tr style="background: #e8f0f7;">
+          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">NOM</th>
+          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">EXPÉDITEUR</th>
+          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">GROUPE</th>
+          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">PLANIFIÉE</th>
+          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">STATUT</th>
+          <th style="padding: 14px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600; min-width: 180px;">ACTIONS</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let campaign of campaigns" style="border-top: 1px solid #1e3a5c;">
-
-          <td style="padding: 16px; color: white; font-weight: 600;">{{ campaign.name }}</td>
-
-          <td style="padding: 16px; color: #8899aa; font-size: 13px;">{{ campaign.senderEmail }}</td>
-
-          <!-- Groupe cible -->
-          <td style="padding: 16px;">
+        <tr *ngFor="let campaign of campaigns" style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 14px 16px; color: #1a3a5c; font-weight: 600; font-size: 14px;">{{ campaign.name }}</td>
+          <td style="padding: 14px 16px; color: #6b7a8a; font-size: 13px;">{{ campaign.senderEmail }}</td>
+          <td style="padding: 14px 16px;">
             <span *ngIf="getGroupName(campaign.targetGroupId)"
-                  style="background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
-              👥 {{ getGroupName(campaign.targetGroupId) }}
+                  style="background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #8b5cf6; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+              {{ getGroupName(campaign.targetGroupId) }}
             </span>
-            <span *ngIf="!getGroupName(campaign.targetGroupId)"
-                  style="color: #556677; font-size: 12px;">—</span>
+            <span *ngIf="!getGroupName(campaign.targetGroupId)" style="color: #8899aa; font-size: 12px;">—</span>
           </td>
-
-          <td style="padding: 16px; color: #8899aa; font-size: 13px;">
+          <td style="padding: 14px 16px; color: #6b7a8a; font-size: 13px;">
             {{ campaign.scheduledAt ? (campaign.scheduledAt | date:'dd/MM/yyyy HH:mm') : '—' }}
           </td>
-
-          <td style="padding: 16px;">
-            <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;"
-                  [style.background]="getStatusBg(campaign.status)"
-                  [style.color]="getStatusColor(campaign.status)">
+          <td style="padding: 14px 16px;">
+            <span style="padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;"
+                  [style.background]="
+                    campaign.status === 'AUTHORIZED' ? 'rgba(34,197,94,0.15)' : 
+                    campaign.status === 'RUNNING' ? 'rgba(59,130,246,0.15)' : 
+                    campaign.status === 'PAUSED' ? 'rgba(245,158,11,0.15)' : 
+                    campaign.status === 'SCHEDULED' ? 'rgba(139,92,246,0.15)' : 
+                    'rgba(245,158,11,0.15)'"
+                  [style.color]="
+                    campaign.status === 'AUTHORIZED' ? '#22c55e' : 
+                    campaign.status === 'RUNNING' ? '#3b82f6' : 
+                    campaign.status === 'PAUSED' ? '#f59e0b' : 
+                    campaign.status === 'SCHEDULED' ? '#8b5cf6' : 
+                    '#f59e0b'">
               {{ campaign.status }}
             </span>
           </td>
-
-          <td style="padding: 16px;">
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <td style="padding: 10px 16px; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
+              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && (campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED')"
+                      (click)="editCampaign(campaign.id)"
+                      title="Modifier la campagne"
+                      class="action-btn action-btn-edit">✏️</button>
               <button *ngIf="authService.isAdmin() && (campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED')"
                       (click)="authorize(campaign.id)"
-                      style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                ✅ Autoriser
-              </button>
-              <!-- ✅ NOUVEAU : Bouton ENVOYER (visible si AUTHORIZED et ADMIN) -->
+                      title="Autoriser la campagne"
+                      class="action-btn action-btn-authorize">✅</button>
               <button *ngIf="authService.isAdmin() && campaign.status === 'AUTHORIZED'"
-              (click)="sendCampaign(campaign.id)"
-              style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-             📧 Envoyer
-             </button>
-              <button *ngIf="authService.hasRole('ADMIN', 'OPERATOR')"
+                      (click)="sendCampaign(campaign.id)"
+                      title="Envoyer la campagne"
+                      class="action-btn action-btn-send">📧</button>
+              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])"
                       (click)="clone(campaign.id)"
-                      style="background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                📋 Cloner
-              </button>
-              <button *ngIf="authService.hasRole('ADMIN', 'OPERATOR') && campaign.status === 'RUNNING'"
+                      title="Cloner la campagne"
+                      class="action-btn action-btn-clone">📋</button>
+              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && campaign.status === 'RUNNING'"
                       (click)="pause(campaign.id)"
-                      style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                ⏸️ Pause
-              </button>
-              <button *ngIf="authService.hasRole('ADMIN', 'OPERATOR') && campaign.status === 'PAUSED'"
+                      title="Mettre en pause"
+                      class="action-btn action-btn-pause">⏸️</button>
+              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && campaign.status === 'PAUSED'"
                       (click)="resume(campaign.id)"
-                      style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                ▶️ Reprendre
-              </button>
+                      title="Reprendre"
+                      class="action-btn action-btn-resume">▶️</button>
               <button *ngIf="authService.isAdmin()"
                       (click)="delete(campaign.id)"
-                      style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                🗑️
-              </button>
-              <span *ngIf="authService.isViewer()" style="color: #556677; font-size: 12px; padding: 6px 0;">
-                Lecture seule
-              </span>
+                      title="Supprimer"
+                      class="action-btn action-btn-delete">🗑️</button>
+              <span *ngIf="authService.isViewer()" style="color: #8899aa; font-size: 12px; padding: 6px 0;">🔒 Lecture seule</span>
             </div>
           </td>
         </tr>

@@ -1,0 +1,104 @@
+<app-navbar></app-navbar>
+
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <a routerLink="/dashboard" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour au tableau de bord</a>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 8px 0 4px 0;">📊 {{ data.campaignName || 'Détails de la campagne' }}</h1>
+      <p style="color: #6b7a8a; font-size: 14px;">
+        Statut : <span [style.color]="getStatusColor(data.status)">{{ data.status || 'Inconnu' }}</span>
+        <span style="margin-left: 16px;">📅 {{ data.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </p>
+    </div>
+    <button (click)="loadCampaignDetail()" 
+            style="background: #e07b2a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+      🔄 Rafraîchir
+    </button>
+  </div>
+
+  <div *ngIf="loading" style="text-align: center; padding: 60px;">
+    <p style="color: #6b7a8a;">Chargement...</p>
+  </div>
+
+  <div *ngIf="error" 
+       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+    ⚠️ {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
+      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.total || 0 }}</div>
+        <div style="color: #6b7a8a; font-size: 12px;">📧 Envoyés</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.opens || 0 }}</div>
+        <div style="color: #6b7a8a; font-size: 12px;">👁️ Ouverts</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.clicks || 0 }}</div>
+        <div style="color: #6b7a8a; font-size: 12px;">🖱️ Clics</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.submits || 0 }}</div>
+        <div style="color: #6b7a8a; font-size: 12px;">📝 Soumissions</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
+      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="color: #6b7a8a; font-size: 12px;">Taux d'ouverture</div>
+        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.openRate | number:'1.1-1' }}%</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="color: #6b7a8a; font-size: 12px;">Taux de clics</div>
+        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.clickRate | number:'1.1-1' }}%</div>
+      </div>
+      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+        <div style="color: #6b7a8a; font-size: 12px;">Taux de soumission</div>
+        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.submitRate | number:'1.1-1' }}%</div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 32px;">
+      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📊 Entonnoir de conversion</h3>
+      <div *ngFor="let item of [
+        { label: '📧 Emails envoyés', value: stats.total || 0 },
+        { label: '👁️ Ouverts', value: stats.opens || 0 },
+        { label: '🖱️ Clics', value: stats.clicks || 0 },
+        { label: '📝 Soumissions', value: stats.submits || 0 }
+      ]">
+        <div style="display: flex; justify-content: space-between; color: #6b7a8a; font-size: 14px; margin-bottom: 4px;">
+          <span>{{ item.label }}</span>
+          <span>{{ item.value }} ({{ getFunnelPercent(item.value) | number:'1.1-1' }}%)</span>
+        </div>
+        <div style="width: 100%; height: 8px; background: #e8f0f7; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+          <div [style.width]="getFunnelPercent(item.value) + '%'" 
+               [style.background]="item.value === (stats.total || 0) ? '#1a3a5c' : item.value >= (stats.opens || 0) ? '#22c55e' : item.value >= (stats.clicks || 0) ? '#8b5cf6' : '#f59e0b'"
+               style="height: 100%; border-radius: 4px; transition: width 0.5s;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📅 Distribution des clics par heure</h3>
+      <div style="display: flex; gap: 4px; align-items: flex-end; height: 120px; padding: 8px 0;">
+        <div *ngFor="let hour of getHourlyDistributionKeys()" 
+             style="display: flex; flex-direction: column; align-items: center; flex: 1;">
+          <div [style.height]="(stats.hourlyDistribution[hour] / getHourlyMax() * 100) + '%'"
+               [style.background]="stats.hourlyDistribution[hour] > 0 ? '#e07b2a' : '#e8f0f7'"
+               style="width: 100%; min-height: 4px; border-radius: 4px 4px 0 0; transition: height 0.3s;">
+          </div>
+          <span style="color: #6b7a8a; font-size: 10px; margin-top: 4px;">{{ hour }}h</span>
+        </div>
+      </div>
+      <div style="text-align: center; color: #6b7a8a; font-size: 12px; margin-top: 8px;">
+        {{ stats.clicks || 0 }} clics au total
+      </div>
+    </div>
+
+  </div>
+
+</div>

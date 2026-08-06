@@ -10,6 +10,7 @@ export class TrackingService {
 
   constructor(private http: HttpClient) {}
 
+  // ── EXISTANT ──────────────────────────────────────
   getCampaignEvents(campaignId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/campaign/${campaignId}`);
   }
@@ -18,13 +19,31 @@ export class TrackingService {
     return this.http.get<any[]>(`${this.apiUrl}/events/${sendEventId}`);
   }
 
-  // ✅ NOUVEAU : Récupérer les statistiques de délivrabilité
   getDeliverabilityStats(campaignId: string): Observable<any> {
     return this.http.get<any>(`${this.emailApiUrl}/stats/${campaignId}`);
   }
 
-  // ✅ NOUVEAU : Récupérer les statistiques globales
   getGlobalStats(): Observable<any> {
     return this.http.get<any>(`${this.emailApiUrl}/stats/global`);
+  }
+
+  // ✅ NOUVEAU : Dashboard global
+  getGlobalDashboard(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/dashboard/global`);
+  }
+
+  // ✅ NOUVEAU : Détails d'une campagne
+  getCampaignDetails(campaignId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/campaign/${campaignId}/details`);
+  }
+
+  // ✅ NOUVEAU : Statistiques par utilisateur
+  getUserStats(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/user/stats`);
+  }
+
+  // ✅ NOUVEAU : Historique d'un utilisateur
+  getUserHistory(targetId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/user/${targetId}/history`);
   }
 }

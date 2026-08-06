@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,14 @@ public class CampaignController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Campaign> create(@RequestBody Campaign campaign) {
         return ResponseEntity.ok(campaignService.create(campaign));
+    }
+
+    // ✅ NOUVEAU : Mettre à jour une campagne
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<Campaign> update(@PathVariable UUID id,
+                                           @RequestBody Campaign campaign) {
+        return ResponseEntity.ok(campaignService.update(id, campaign));
     }
 
     @PostMapping("/{id}/clone")

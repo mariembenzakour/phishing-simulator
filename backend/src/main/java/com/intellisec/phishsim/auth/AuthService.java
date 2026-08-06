@@ -88,7 +88,6 @@ public class AuthService {
 
         Operator saved = operatorRepository.save(operator);
 
-        // ✅ Génération du token avec l'ID
         String token = jwtUtil.generateToken(saved.getEmail(), saved.getRole(), saved.getId());
         return new AuthResponse(token, toDTO(saved), false);
     }
@@ -133,17 +132,20 @@ public class AuthService {
         return dto;
     }
 
+    // ✅ Activer le MFA avec chiffrement du secret
     public String enableMfa(String email) {
         Operator operator = operatorRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Operator not found"));
 
         String secret = mfaService.generateSecret();
-        operator.setTotpSecret(secret);
+        // ✅ Stocker le secret chiffré
+        operator.setEncryptedTotpSecret(secret);
         operatorRepository.save(operator);
 
         return mfaService.generateQrUrl(email, secret);
     }
 
+    // ✅ Vérifier le MFA avec déchiffrement du secret
     public AuthResponse verifyMfa(String email, int code) {
         Operator operator = operatorRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Operator not found"));
@@ -152,11 +154,17 @@ public class AuthService {
             throw new RuntimeException("MFA not enabled");
         }
 
-        if (!mfaService.verifyCode(operator.getTotpSecret(), code)) {
+        // ✅ Récupérer le secret déchiffré
+        String decryptedSecret = operator.getDecryptedTotpSecret();
+
+        if (decryptedSecret == null || decryptedSecret.isEmpty()) {
+            throw new RuntimeException("MFA not properly configured");
+        }
+
+        if (!mfaService.verifyCode(decryptedSecret, code)) {
             throw new RuntimeException("Invalid MFA code");
         }
 
-        // ✅ Génération du token avec l'ID
         String token = jwtUtil.generateToken(operator.getEmail(), operator.getRole(), operator.getId());
         return new AuthResponse(token, toDTO(operator));
     }

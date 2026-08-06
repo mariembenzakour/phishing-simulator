@@ -1,11 +1,11 @@
 <app-navbar></app-navbar>
 
-<div style="background: #0a1628; min-height: calc(100vh - 64px); padding: 32px;">
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
 
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
     <div>
-      <h1 style="color: white; font-size: 28px; font-weight: 800; margin: 0;">👥 Groupes</h1>
-      <p style="color: #8899aa; margin: 4px 0 0 0; font-size: 14px;">Organisez vos cibles par département</p>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">👥 Groupes</h1>
+      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">Organisez vos cibles par département</p>
     </div>
     <a *ngIf="authService.hasRole('ADMIN', 'OPERATOR')" routerLink="/groups/create"
        style="background: #e07b2a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
@@ -14,28 +14,31 @@
   </div>
 
   <div *ngIf="loading" style="text-align: center; padding: 60px;">
-    <p style="color: #8899aa;">Chargement...</p>
+    <p style="color: #6b7a8a;">Chargement...</p>
   </div>
 
   <div *ngIf="!loading && groups.length === 0"
-       style="text-align: center; padding: 60px; background: #0f1f35; border-radius: 12px; border: 1px dashed #1e3a5c;">
-    <p style="color: #8899aa;">Aucun groupe pour le moment</p>
+       style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
+    <p style="color: #6b7a8a;">Aucun groupe pour le moment</p>
     <a *ngIf="authService.hasRole('ADMIN', 'OPERATOR')" routerLink="/groups/create"
        style="color: #e07b2a; text-decoration: none; font-weight: 600;">Créer le premier →</a>
   </div>
 
   <div *ngIf="!loading && groups.length > 0"
-       style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+       style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
     <div *ngFor="let group of groups"
-         style="background: #0f1f35; border-radius: 12px; padding: 24px; border: 1px solid #1e3a5c;">
+         class="group-card"
+         style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s;">
       <div style="display: flex; justify-content: space-between; align-items: start;">
         <div>
-          <h3 style="color: white; margin: 0 0 8px 0; font-size: 16px;">{{ group.name }}</h3>
+          <h3 style="color: #1a3a5c; margin: 0 0 8px 0; font-size: 18px;">{{ group.name }}</h3>
           <a [routerLink]="['/targets']" [queryParams]="{groupId: group.id}"
-             style="color: #e07b2a; font-size: 13px; text-decoration: none;">Voir les cibles →</a>
+             style="color: #e07b2a; font-size: 13px; text-decoration: none; font-weight: 600;">
+            Voir les cibles →
+          </a>
         </div>
         <button *ngIf="authService.isAdmin()" (click)="delete(group.id)"
-                style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
           🗑️
         </button>
       </div>

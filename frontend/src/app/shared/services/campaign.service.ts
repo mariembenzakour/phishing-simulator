@@ -22,6 +22,11 @@ export class CampaignService {
     return this.http.post(this.apiUrl, campaign);
   }
 
+  // ✅ NOUVEAU : Mettre à jour une campagne
+  update(id: string, campaign: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, campaign);
+  }
+
   clone(id: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/${id}/clone`, {});
   }
@@ -44,12 +49,10 @@ export class CampaignService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ NOUVEAU : Envoyer une campagne
   sendCampaign(id: string): Observable<string> {
     return this.http.post(`${this.emailApiUrl}/send-campaign/${id}`, {}, { responseType: 'text' });
   }
 
-  // ✅ NOUVEAU : Envoyer un email de test
   sendTestEmail(to: string, subject: string, body: string): Observable<string> {
     return this.http.post(`${this.emailApiUrl}/test`, { to, subject, body }, { responseType: 'text' });
   }

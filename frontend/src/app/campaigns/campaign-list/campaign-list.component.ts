@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../shared/navbar/navbar.component';
 import { CampaignService } from '../../shared/services/campaign.service';
 import { TargetGroupService } from '../../shared/services/target-group.service';
@@ -10,7 +10,81 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-campaign-list',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent, DatePipe],
-  templateUrl: './campaign-list.component.html'
+  templateUrl: './campaign-list.component.html',
+  styles: [`
+    .action-btn {
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: transparent;
+    }
+
+    .action-btn-edit {
+      color: #e07b2a;
+      border-color: rgba(224,123,42,0.2);
+      background: rgba(224,123,42,0.08);
+    }
+    .action-btn-edit:hover {
+      background: rgba(224,123,42,0.2);
+    }
+
+    .action-btn-authorize {
+      color: #22c55e;
+      border-color: rgba(34,197,94,0.2);
+      background: rgba(34,197,94,0.08);
+    }
+    .action-btn-authorize:hover {
+      background: rgba(34,197,94,0.2);
+    }
+
+    .action-btn-send {
+      color: #3b82f6;
+      border-color: rgba(59,130,246,0.2);
+      background: rgba(59,130,246,0.08);
+    }
+    .action-btn-send:hover {
+      background: rgba(59,130,246,0.2);
+    }
+
+    .action-btn-clone {
+      color: #8b5cf6;
+      border-color: rgba(139,92,246,0.2);
+      background: rgba(139,92,246,0.08);
+    }
+    .action-btn-clone:hover {
+      background: rgba(139,92,246,0.2);
+    }
+
+    .action-btn-pause {
+      color: #f59e0b;
+      border-color: rgba(245,158,11,0.2);
+      background: rgba(245,158,11,0.08);
+    }
+    .action-btn-pause:hover {
+      background: rgba(245,158,11,0.2);
+    }
+
+    .action-btn-resume {
+      color: #3b82f6;
+      border-color: rgba(59,130,246,0.2);
+      background: rgba(59,130,246,0.08);
+    }
+    .action-btn-resume:hover {
+      background: rgba(59,130,246,0.2);
+    }
+
+    .action-btn-delete {
+      color: #dc2626;
+      border-color: rgba(239,68,68,0.2);
+      background: rgba(239,68,68,0.08);
+    }
+    .action-btn-delete:hover {
+      background: rgba(239,68,68,0.2);
+    }
+  `]
 })
 export class CampaignListComponent implements OnInit {
 
@@ -22,7 +96,8 @@ export class CampaignListComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private campaignService: CampaignService,
-    private groupService: TargetGroupService
+    private groupService: TargetGroupService,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -45,7 +120,10 @@ export class CampaignListComponent implements OnInit {
     return group ? group.name : '';
   }
 
-  // ✅ Correction : utiliser getUserId()
+  editCampaign(id: string) {
+    this.router.navigate(['/campaigns/edit', id]);
+  }
+
   authorize(id: string) {
     const operatorId = this.authService.getUserId();
     if (!operatorId) {
@@ -99,16 +177,13 @@ export class CampaignListComponent implements OnInit {
     });
   }
 
-  // ✅ NOUVELLE MÉTHODE : Envoyer une campagne (message adapté au Dry Run)
   sendCampaign(id: string) {
-    // ✅ Récupérer la campagne pour vérifier le mode Dry Run
     const campaign = this.campaigns.find(c => c.id === id);
     if (!campaign) {
       this.error = 'Campagne non trouvée';
       return;
     }
 
-    // ✅ Message adapté au mode Dry Run
     let confirmMessage = '⚠️ Envoyer cette campagne ';
     if (campaign.dryRun) {
       confirmMessage += `en mode DRY RUN (uniquement à ${campaign.dryRunEmail || 'l\'adresse de test'}) ?`;
@@ -120,7 +195,7 @@ export class CampaignListComponent implements OnInit {
     
     this.loading = true;
     this.campaignService.sendCampaign(id).subscribe({
-      next: (response) => {
+      next: () => {
         this.loading = false;
         this.load();
         this.error = '';
@@ -134,23 +209,23 @@ export class CampaignListComponent implements OnInit {
 
   getStatusColor(status: string): string {
     switch(status) {
-      case 'AUTHORIZED': return '#4ade80';
-      case 'RUNNING': return '#60a5fa';
+      case 'AUTHORIZED': return '#22c55e';
+      case 'RUNNING': return '#3b82f6';
       case 'PAUSED': return '#f59e0b';
-      case 'SCHEDULED': return '#a78bfa';
+      case 'SCHEDULED': return '#8b5cf6';
       case 'COMPLETED': return '#8899aa';
-      default: return '#e07b2a';
+      default: return '#f59e0b';
     }
   }
 
   getStatusBg(status: string): string {
     switch(status) {
-      case 'AUTHORIZED': return 'rgba(34,197,94,0.1)';
-      case 'RUNNING': return 'rgba(59,130,246,0.1)';
-      case 'PAUSED': return 'rgba(245,158,11,0.1)';
-      case 'SCHEDULED': return 'rgba(167,139,250,0.1)';
-      case 'COMPLETED': return 'rgba(136,153,170,0.1)';
-      default: return 'rgba(224,123,42,0.1)';
+      case 'AUTHORIZED': return 'rgba(34,197,94,0.15)';
+      case 'RUNNING': return 'rgba(59,130,246,0.15)';
+      case 'PAUSED': return 'rgba(245,158,11,0.15)';
+      case 'SCHEDULED': return 'rgba(139,92,246,0.15)';
+      case 'COMPLETED': return 'rgba(136,153,170,0.15)';
+      default: return 'rgba(245,158,11,0.15)';
     }
   }
 }

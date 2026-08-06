@@ -9,7 +9,21 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-group-list',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './group-list.component.html'
+  templateUrl: './group-list.component.html',
+  styles: [`
+    .group-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .group-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+  `]
 })
 export class GroupListComponent implements OnInit {
 
