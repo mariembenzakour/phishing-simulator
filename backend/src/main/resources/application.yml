@@ -26,26 +26,50 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  # ✅ CONFIGURATION BREVO (remplace Mailpit)
   mail:
-    host: localhost
-    port: 1025
-    username: ""
-    password: ""
+    host: smtp-relay.brevo.com
+    port: 587
+    username: b5634a001@smtp-brevo.com
+    password: bskvVFy2WBVQX8S
     properties:
       mail:
         smtp:
-          auth: false
+          auth: true
           starttls:
-            enable: false
+            enable: true
+            required: true
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
 
 server:
   port: 8086
+  address: 0.0.0.0
 
 # ✅ Configuration du chiffrement
 app:
   encryption:
     password: phishsim-encryption-key-2026
     salt: phishsim-salt-2026
+
+  # ✅ Configuration des URLs
+  base-url: https://indoor-val-delivery-remark.trycloudflare.com
+  frontend-url: http://localhost:4200
+
+  # ✅ Configuration de l'expéditeur Brevo
+  email:
+    sender: b5634a001@smtp-brevo.com
+    sender-name: PhishSim Test
+
+# ✅ Configuration Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always

@@ -1,19 +1,25 @@
 package com.intellisec.phishsim.email;
 
 import com.intellisec.phishsim.campaign.Campaign;
+import com.intellisec.phishsim.common.config.UrlConfig;
 import com.intellisec.phishsim.target.Target;
 import com.intellisec.phishsim.target.TargetRepository;
 import com.intellisec.phishsim.tracking.SendEvent;
 import com.intellisec.phishsim.tracking.TrackingEvent;
 import com.intellisec.phishsim.tracking.TrackingService;
 import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,8 +32,13 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final TargetRepository targetRepository;
     private final TrackingService trackingService;
+    private final UrlConfig urlConfig;
 
-    private static final String BASE_URL = "http://localhost:8086";
+    @Value("${app.email.sender:alertes@phishsim-training.tk}")
+    private String defaultSender;
+
+    @Value("${app.email.sender-name:Service Securite}")
+    private String defaultSenderName;
 
     private final AtomicInteger emailSentCount = new AtomicInteger(0);
     private final AtomicInteger emailReceivedCount = new AtomicInteger(0);
@@ -55,12 +66,37 @@ public class EmailService {
     // ENVOI D'UN SEUL EMAIL
     // ─────────────────────────────────────────────────
     public void sendEmail(String to, String from, String subject, String body, boolean isHtml) {
+        sendEmail(to, from, defaultSenderName, subject, body, isHtml);
+    }
+
+    public void sendEmail(String to, String from, String fromName, String subject, String body, boolean isHtml) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            // ✅ Version avec MimeMessageHelper et UTF-8
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED,
+                    StandardCharsets.UTF_8.name()
+            );
 
             helper.setTo(to);
-            helper.setFrom(from);
+
+            // ✅ Gestion robuste du nom avec InternetAddress pour éviter les erreurs d'encodage
+            if (fromName != null && !fromName.isEmpty()) {
+                try {
+                    // Utiliser InternetAddress avec encodage UTF-8
+                    InternetAddress fromAddress = new InternetAddress(from, fromName, StandardCharsets.UTF_8.name());
+                    helper.setFrom(fromAddress);
+                } catch (UnsupportedEncodingException e) {
+                    // Fallback : envoyer sans nom si l'encodage échoue
+                    log.warn("⚠️ Erreur d'encodage du nom '{}', envoi sans nom", fromName);
+                    helper.setFrom(from);
+                }
+            } else {
+                helper.setFrom(from);
+            }
+
             helper.setSubject(subject);
             helper.setText(body, isHtml);
 
@@ -96,8 +132,12 @@ public class EmailService {
                 : campaign.getSenderEmail();
 
         if (fromEmail == null || fromEmail.isEmpty()) {
-            throw new RuntimeException("❌ Aucun expéditeur configuré pour la campagne");
+            fromEmail = defaultSender;
         }
+
+        String fromName = campaign.getSenderProfile() != null
+                ? campaign.getSenderProfile().getFromName()
+                : defaultSenderName;
 
         resetCounters();
 
@@ -123,7 +163,7 @@ public class EmailService {
                     template.getBodyHtml(), dryRunTarget, sendEvent.getTrackingToken()
             );
 
-            sendEmail(campaign.getDryRunEmail(), fromEmail, personalizedSubject, personalizedBody, true);
+            sendEmail(campaign.getDryRunEmail(), fromEmail, fromName, personalizedSubject, personalizedBody, true);
 
             sendEvent.setStatus("SENT");
             trackingService.updateSendEvent(sendEvent);
@@ -151,7 +191,7 @@ public class EmailService {
                         template.getBodyHtml(), target, sendEvent.getTrackingToken()
                 );
 
-                sendEmail(target.getEmail(), fromEmail, personalizedSubject, personalizedBody, true);
+                sendEmail(target.getEmail(), fromEmail, fromName, personalizedSubject, personalizedBody, true);
 
                 sendEvent.setStatus("SENT");
                 trackingService.updateSendEvent(sendEvent);
@@ -206,7 +246,6 @@ public class EmailService {
 
         long opens = 0, clicks = 0, submits = 0;
         for (SendEvent se : sendEvents) {
-            // ✅ Utilisation de TrackingEvent correctement
             List<TrackingEvent> events = trackingService.getEventsBySendEvent(se.getId());
             opens += events.stream().filter(e -> "OPEN".equals(e.getEventType())).count();
             clicks += events.stream().filter(e -> "CLICK".equals(e.getEventType())).count();
@@ -237,7 +276,8 @@ public class EmailService {
     // INJECTION TRACKING
     // ─────────────────────────────────────────────────
     private String injectTracking(String body, Target target, String token) {
-        String trackingLink = BASE_URL + "/track/click/" + token;
+        String trackingLink = urlConfig.getTrackingClickUrl(token);
+        String pixelUrl = urlConfig.getTrackingPixelUrl(token);
 
         body = body
                 .replace("{{firstName}}", target.getFirstName() != null ? target.getFirstName() : "")
@@ -251,7 +291,7 @@ public class EmailService {
                 .replace("href=\"http://localhost:4200/login\"",
                         "href=\"" + trackingLink + "\"");
 
-        String pixel = "<img src='" + BASE_URL + "/track/pixel/" + token +
+        String pixel = "<img src='" + pixelUrl +
                 "' width='1' height='1' style='display:none;border:0;' alt=''/>";
 
         if (body.contains("</body>")) {

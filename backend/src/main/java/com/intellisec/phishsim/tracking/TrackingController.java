@@ -1,6 +1,7 @@
 package com.intellisec.phishsim.tracking;
 
 import com.intellisec.phishsim.campaign.Campaign;
+import com.intellisec.phishsim.common.config.UrlConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class TrackingController {
 
     private final TrackingService trackingService;
+    private final UrlConfig urlConfig;  // ✅ INJECTÉ
 
     // ── 1. TRACKING PIXEL ──────────────────────────
     @GetMapping(value = "/pixel/{token}", produces = MediaType.IMAGE_GIF_VALUE)
@@ -43,7 +45,11 @@ public class TrackingController {
         String userAgent = request.getHeader("User-Agent");
         String ipHash = hashIp(request.getRemoteAddr());
         trackingService.trackClick(token, userAgent, ipHash);
-        response.sendRedirect("http://localhost:8086/track/landing/" + token);
+
+        // ✅ REDIRECTION VERS LA LANDING PAGE AVEC URL CONFIGURÉE
+        String landingUrl = urlConfig.getLandingPageUrl(token);
+        log.info("🔄 Redirection vers: {}", landingUrl);
+        response.sendRedirect(landingUrl);
     }
 
     // ── 3. LANDING PAGE ────────────────────────────
@@ -91,10 +97,9 @@ public class TrackingController {
     }
 
     // ============================================================
-    // ✅ NOUVEAUX : POUR LE DASHBOARD
+    // DASHBOARD
     // ============================================================
 
-    // ── 8. GLOBAL DASHBOARD ─────────────────────────
     @GetMapping("/dashboard/global")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Map<String, Object>> getGlobalDashboard() {
@@ -142,7 +147,6 @@ public class TrackingController {
         return ResponseEntity.ok(response);
     }
 
-    // ── 9. CAMPAGNE DETAIL ──────────────────────────
     @GetMapping("/campaign/{campaignId}/details")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getCampaignDetails(@PathVariable UUID campaignId) {
@@ -159,14 +163,38 @@ public class TrackingController {
         return ResponseEntity.ok(response);
     }
 
-    // ── 10. USER STATS ──────────────────────────────
+    // ============================================================
+    // ✅ TIME-TO-CLICK ENDPOINTS
+    // ============================================================
+
+    @GetMapping("/campaign/{campaignId}/time-to-click")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
+    public ResponseEntity<Map<String, Object>> getTimeToClick(@PathVariable UUID campaignId) {
+        Map<String, Object> stats = trackingService.getTimeToClickStats(campaignId);
+        stats.put("campaignId", campaignId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/user/{targetId}/time-to-click")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<Map<String, Object>> getUserTimeToClick(@PathVariable UUID targetId) {
+        Map<String, Object> stats = trackingService.getUserTimeToClickStats(targetId);
+        stats.put("targetId", targetId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/campaign/{campaignId}/users/time-to-click")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<List<Map<String, Object>>> getUsersTimeToClick(@PathVariable UUID campaignId) {
+        return ResponseEntity.ok(trackingService.getUsersTimeToClick(campaignId));
+    }
+
     @GetMapping("/user/stats")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<Map<String, Object>>> getUserStats() {
         return ResponseEntity.ok(trackingService.getUserStats());
     }
 
-    // ── 11. USER HISTORY ────────────────────────────
     @GetMapping("/user/{targetId}/history")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<TrackingEvent>> getUserHistory(@PathVariable UUID targetId) {
@@ -187,8 +215,10 @@ public class TrackingController {
         }
     }
 
-    // ✅ CORRIGÉ : Utilisation de {token} au lieu de %%s
     private String buildLandingPage(String token) {
+        String submitUrl = urlConfig.getSubmitUrl(token);
+        String awarenessUrl = urlConfig.getAwarenessPageUrl(token);
+
         String html = """
     <!DOCTYPE html>
     <html lang="fr">
@@ -224,25 +254,27 @@ public class TrackingController {
             <p class="info">Connexion sécurisée SSL — Intellisec Solutions</p>
         </div>
         <script>
+            const submitUrl = '%s';
+            const awarenessUrl = '%s';
+
             document.getElementById('loginForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                fetch('/track/submit/{token}', {
+                fetch(submitUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({})
                 }).then(() => {
-                    window.location.href = '/track/awareness/{token}';
+                    window.location.href = awarenessUrl;
                 });
             });
         </script>
     </body>
     </html>
     """;
-        // ✅ Remplacer {token} par le vrai token
-        return html.replace("{token}", token);
+
+        return String.format(html, submitUrl, awarenessUrl);
     }
 
-    // ✅ CORRIGÉ : Retrait des %% dans le CSS
     private String buildAwarenessPage() {
         return """
     <!DOCTYPE html>
@@ -253,7 +285,7 @@ public class TrackingController {
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: 'Segoe UI', Arial, sans-serif; background: #0a1628; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-            .card { background: white; padding: 40px; border-radius: 12px; max-width: 600px; width: 90%; }
+            .card { background: white; padding: 40px; border-radius: 12px; max-width: 600px; width: 90%%; }
             .header { background: #e07b2a; color: white; padding: 20px; border-radius: 8px; margin-bottom: 24px; text-align: center; }
             .header h1 { font-size: 24px; margin-bottom: 8px; }
             h3 { color: #1a3a5c; margin: 16px 0 8px; }

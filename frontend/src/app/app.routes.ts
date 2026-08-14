@@ -15,6 +15,8 @@ import { authGuard } from './shared/guards/auth.guard';
 import { GlobalDashboardComponent } from './dashboard/global-dashboard/global-dashboard.component';
 import { CampaignDetailComponent } from './dashboard/campaign-detail/campaign-detail.component';
 import { UserReportComponent } from './dashboard/user-report/user-report.component';
+// ✅ AJOUTÉ : Import du composant Trends
+import { TrendsComponent } from './dashboard/trends/trends.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -37,10 +39,9 @@ export const routes: Routes = [
     canActivate: [authGuard], 
     data: { roles: ['ADMIN', 'OPERATOR'] } 
   },
-  // ✅ ROUTE D'ÉDITION
   { 
     path: 'campaigns/edit/:id', 
-    component: CampaignCreateComponent,  // ← Réutilisation du même composant
+    component: CampaignCreateComponent,
     canActivate: [authGuard], 
     data: { roles: ['ADMIN', 'OPERATOR'] } 
   },
@@ -97,6 +98,13 @@ export const routes: Routes = [
   { 
     path: 'dashboard/users', 
     component: UserReportComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+  },
+  // ✅ AJOUTÉ : Route pour les tendances
+  { 
+    path: 'dashboard/trends', 
+    component: TrendsComponent, 
     canActivate: [authGuard], 
     data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
   },

@@ -2,6 +2,9 @@
 
 <div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
 
+  <!-- ============================================ -->
+  <!-- HEADER -->
+  <!-- ============================================ -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
     <div>
       <a routerLink="/dashboard" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour au tableau de bord</a>
@@ -17,6 +20,9 @@
     </button>
   </div>
 
+  <!-- ============================================ -->
+  <!-- LOADING & ERROR -->
+  <!-- ============================================ -->
   <div *ngIf="loading" style="text-align: center; padding: 60px;">
     <p style="color: #6b7a8a;">Chargement...</p>
   </div>
@@ -26,8 +32,14 @@
     ⚠️ {{ error }}
   </div>
 
+  <!-- ============================================ -->
+  <!-- CONTENU PRINCIPAL -->
+  <!-- ============================================ -->
   <div *ngIf="!loading && !error">
 
+    <!-- ========================================== -->
+    <!-- 1. CARTES KPI (4 cartes) -->
+    <!-- ========================================== -->
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
       <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
         <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.total || 0 }}</div>
@@ -47,6 +59,9 @@
       </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 2. TAUX (3 cartes) -->
+    <!-- ========================================== -->
     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
       <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
         <div style="color: #6b7a8a; font-size: 12px;">Taux d'ouverture</div>
@@ -62,7 +77,10 @@
       </div>
     </div>
 
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 32px;">
+    <!-- ========================================== -->
+    <!-- 3. FONNEL DE CONVERSION -->
+    <!-- ========================================== -->
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
       <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📊 Entonnoir de conversion</h3>
       <div *ngFor="let item of [
         { label: '📧 Emails envoyés', value: stats.total || 0 },
@@ -82,23 +100,142 @@
       </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- 4. TIME-TO-CLICK GLOBAL -->
+    <!-- ========================================== -->
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: #1a3a5c; margin: 0;">⏱️ Temps moyen avant clic</h3>
+        <span style="font-size: 20px; font-weight: 800;" 
+              [style.color]="getTimeToClickColor(timeToClick?.averageSeconds || 0)">
+          {{ timeToClick?.formatted || 'N/A' }}
+        </span>
+      </div>
+      
+      <div *ngIf="timeToClick && timeToClick.totalClicks > 0" 
+           style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
+          <div style="color: #6b7a8a; font-size: 10px;">📊 Total clics</div>
+          <div style="color: #1a3a5c; font-weight: 700;">{{ timeToClick.totalClicks }}</div>
+        </div>
+        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
+          <div style="color: #6b7a8a; font-size: 10px;">⚡ Plus rapide</div>
+          <div style="color: #22c55e; font-weight: 700;">{{ formatTimeToClick(timeToClick.minSeconds) }}</div>
+        </div>
+        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
+          <div style="color: #6b7a8a; font-size: 10px;">🐢 Plus lent</div>
+          <div style="color: #dc2626; font-weight: 700;">{{ formatTimeToClick(timeToClick.maxSeconds) }}</div>
+        </div>
+        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
+          <div style="color: #6b7a8a; font-size: 10px;">📐 Médiane</div>
+          <div style="color: #1a3a5c; font-weight: 700;">{{ formatTimeToClick(timeToClick.medianSeconds) }}</div>
+        </div>
+      </div>
+
+      <!-- Distribution des temps -->
+      <div *ngIf="timeToClick && timeToClick.totalClicks > 0">
+        <div style="color: #6b7a8a; font-size: 12px; margin-bottom: 8px;">📊 Distribution des temps de clic</div>
+        <div style="display: flex; gap: 4px; height: 20px; border-radius: 4px; overflow: hidden;">
+          <div *ngFor="let key of getDistributionKeys()" 
+               [style.width]="getDistributionValue(key) + '%'" 
+               [style.background]="getDistributionColor(key)"
+               [title]="key + ': ' + (getDistributionValue(key) | number:'1.1-1') + '%'"
+               style="height: 100%; transition: width 0.5s; min-width: 4px;">
+          </div>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
+          <div *ngFor="let key of getDistributionKeys()" 
+               style="display: flex; align-items: center; gap: 4px; font-size: 10px; color: #6b7a8a;">
+            <span [style.color]="getDistributionColor(key)" style="font-size: 14px;">●</span>
+            {{ key }} : {{ getDistributionValue(key) | number:'1.1-1' }}%
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!timeToClick || timeToClick.totalClicks === 0" 
+           style="text-align: center; padding: 20px; color: #6b7a8a;">
+        ⏳ Aucun clic enregistré pour cette campagne
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. TIME-TO-CLICK PAR UTILISATEUR -->
+    <!-- ========================================== -->
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
+      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">👤 Temps de clic par utilisateur</h3>
+      
+      <div *ngIf="usersTimeToClick.length > 0">
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="background: #f8fafc; border-bottom: 2px solid #e8f0f7;">
+                <th style="padding: 10px 12px; text-align: left; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Utilisateur</th>
+                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Temps moyen</th>
+                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Clics</th>
+                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let user of usersTimeToClick.slice(0, 10)" 
+                  style="border-bottom: 1px solid #e8f0f7;">
+                <td style="padding: 10px 12px; color: #1a3a5c; font-weight: 500;">
+                  Utilisateur #{{ user.targetId?.substring(0, 8) || 'N/A' }}
+                </td>
+                <td style="padding: 10px 12px; text-align: center; font-weight: 700;" 
+                    [style.color]="getTimeToClickColor(user.averageSeconds)">
+                  {{ user.formatted || 'N/A' }}
+                </td>
+                <td style="padding: 10px 12px; text-align: center; color: #6b7a8a;">
+                  {{ user.totalClicks || 0 }}
+                </td>
+                <td style="padding: 10px 12px; text-align: center;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="flex: 1; height: 4px; background: #e8f0f7; border-radius: 2px; overflow: hidden; min-width: 50px;">
+                      <div [style.width]="(user.averageSeconds / (timeToClick?.maxSeconds || 1)) * 100 + '%'" 
+                           [style.background]="getTimeToClickColor(user.averageSeconds)"
+                           style="height: 100%; border-radius: 2px; transition: width 0.5s;">
+                      </div>
+                    </div>
+                    <span style="color: #6b7a8a; font-size: 10px; min-width: 30px; text-align: right;">
+                      #{{ usersTimeToClick.indexOf(user) + 1 }}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="usersTimeToClick.length > 10" 
+             style="text-align: center; color: #6b7a8a; font-size: 12px; padding-top: 8px;">
+          + {{ usersTimeToClick.length - 10 }} autres utilisateurs
+        </div>
+      </div>
+      
+      <div *ngIf="usersTimeToClick.length === 0" 
+           style="text-align: center; padding: 20px; color: #6b7a8a;">
+        👤 Aucun utilisateur n'a cliqué sur cette campagne
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 6. DISTRIBUTION HORAIRE -->
+    <!-- ========================================== -->
     <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
       <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📅 Distribution des clics par heure</h3>
       <div style="display: flex; gap: 4px; align-items: flex-end; height: 120px; padding: 8px 0;">
         <div *ngFor="let hour of getHourlyDistributionKeys()" 
              style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-          <div [style.height]="(stats.hourlyDistribution[hour] / getHourlyMax() * 100) + '%'"
-               [style.background]="stats.hourlyDistribution[hour] > 0 ? '#e07b2a' : '#e8f0f7'"
+          <div [style.height]="(timeToClick?.hourlyDistribution[hour] / getHourlyMax() * 100) + '%'"
+               [style.background]="timeToClick?.hourlyDistribution[hour] > 0 ? '#e07b2a' : '#e8f0f7'"
                style="width: 100%; min-height: 4px; border-radius: 4px 4px 0 0; transition: height 0.3s;">
           </div>
           <span style="color: #6b7a8a; font-size: 10px; margin-top: 4px;">{{ hour }}h</span>
         </div>
       </div>
       <div style="text-align: center; color: #6b7a8a; font-size: 12px; margin-top: 8px;">
-        {{ stats.clicks || 0 }} clics au total
+        {{ timeToClick?.totalClicks || 0 }} clics au total
       </div>
     </div>
 
   </div>
-
 </div>

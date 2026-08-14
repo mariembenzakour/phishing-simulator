@@ -2,6 +2,7 @@ package com.intellisec.phishsim.auth;
 
 import com.intellisec.phishsim.common.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthRepository operatorRepository;
@@ -29,8 +31,13 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
+        // ✅ GÉNÉRER LE TOKEN
+        String token = jwtUtil.generateToken(operator.getEmail(), operator.getRole(), operator.getId());
+
+        log.info("✅ Token généré pour {}: {}...", email, token.substring(0, 20));
+
         boolean mfaConfigured = operator.getTotpSecret() != null;
-        return new AuthResponse(null, toDTO(operator), mfaConfigured);
+        return new AuthResponse(token, toDTO(operator), mfaConfigured);
     }
 
     // ✅ REGISTER : Version publique (force VIEWER)
@@ -138,7 +145,6 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("Operator not found"));
 
         String secret = mfaService.generateSecret();
-        // ✅ Stocker le secret chiffré
         operator.setEncryptedTotpSecret(secret);
         operatorRepository.save(operator);
 
@@ -154,7 +160,6 @@ public class AuthService {
             throw new RuntimeException("MFA not enabled");
         }
 
-        // ✅ Récupérer le secret déchiffré
         String decryptedSecret = operator.getDecryptedTotpSecret();
 
         if (decryptedSecret == null || decryptedSecret.isEmpty()) {

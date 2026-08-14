@@ -39,6 +39,8 @@
               <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">👁️ OUVERTS</th>
               <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">🖱️ CLICS</th>
               <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">📝 SOUMISSIONS</th>
+              <!-- ✅ AJOUTÉ : Colonne Time-to-click -->
+              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">⏱️ TEMPS MOYEN</th>
               <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">ACTIONS</th>
             </tr>
           </thead>
@@ -52,6 +54,11 @@
                 <span *ngIf="user.totalClicks > 1" style="font-size: 11px; color: #f59e0b; margin-left: 4px;">🔁</span>
               </td>
               <td style="padding: 12px 16px; text-align: center; color: #f59e0b; font-weight: 600;">{{ user.totalSubmits || 0 }}</td>
+              <!-- ✅ AJOUTÉ : Affichage du time-to-click -->
+              <td style="padding: 12px 16px; text-align: center; font-weight: 700;" 
+                  [style.color]="getTimeToClickColor(getUserTimeToClickSeconds(user.targetId))">
+                {{ getUserTimeToClick(user.targetId) }}
+              </td>
               <td style="padding: 12px 16px; text-align: center;">
                 <button (click)="viewUserHistory(user)"
                         style="background: #e07b2a; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
@@ -72,6 +79,9 @@
       <div *ngFor="let user of repeatClickers" 
            style="color: #6b7a8a; font-size: 14px; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.05);">
         {{ user.firstName }} {{ user.lastName }} ({{ user.email }}) — {{ user.totalClicks }} clics
+        <span style="color: #6b7a8a; font-size: 12px; margin-left: 8px;">
+          ⏱️ {{ getUserTimeToClick(user.targetId) }}
+        </span>
       </div>
     </div>
 
@@ -80,7 +90,12 @@
       <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-          <h3 style="color: #1a3a5c; margin: 0;">📋 {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</h3>
+          <div>
+            <h3 style="color: #1a3a5c; margin: 0;">📋 {{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</h3>
+            <div style="color: #6b7a8a; font-size: 13px;">
+              ⏱️ Temps moyen avant clic : <strong>{{ getUserTimeToClick(selectedUser?.targetId) }}</strong>
+            </div>
+          </div>
           <button (click)="closeHistory()" 
                   style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
             ✕ Fermer
@@ -88,8 +103,7 @@
         </div>
         
         <div style="color: #6b7a8a; font-size: 14px; margin-bottom: 16px;">
-          {{ selectedUser?.email }} — 
-          {{ userHistory.length }} événements
+          {{ selectedUser?.email }} — {{ userHistory.length }} événements
         </div>
 
         <div *ngIf="userHistory.length === 0" style="text-align: center; color: #6b7a8a; padding: 20px;">

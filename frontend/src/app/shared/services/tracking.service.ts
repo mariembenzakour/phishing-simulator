@@ -27,22 +27,39 @@ export class TrackingService {
     return this.http.get<any>(`${this.emailApiUrl}/stats/global`);
   }
 
-  // ✅ NOUVEAU : Dashboard global
+  // ── DASHBOARD ─────────────────────────────────────
   getGlobalDashboard(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/dashboard/global`);
   }
 
-  // ✅ NOUVEAU : Détails d'une campagne
   getCampaignDetails(campaignId: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/campaign/${campaignId}/details`);
   }
 
-  // ✅ NOUVEAU : Statistiques par utilisateur
+  // ============================================================
+  // ✅ TIME-TO-CLICK (Option D - Complète)
+  // ============================================================
+
+  // 1. Time-to-click global de la campagne
+  getTimeToClick(campaignId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/campaign/${campaignId}/time-to-click`);
+  }
+
+  // 2. Time-to-click par utilisateur
+  getUserTimeToClick(targetId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/user/${targetId}/time-to-click`);
+  }
+
+  // 3. Time-to-click pour tous les utilisateurs d'une campagne
+  getUsersTimeToClick(campaignId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/campaign/${campaignId}/users/time-to-click`);
+  }
+
+  // ── EXISTANT ──────────────────────────────────────
   getUserStats(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/user/stats`);
   }
 
-  // ✅ NOUVEAU : Historique d'un utilisateur
   getUserHistory(targetId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/user/${targetId}/history`);
   }

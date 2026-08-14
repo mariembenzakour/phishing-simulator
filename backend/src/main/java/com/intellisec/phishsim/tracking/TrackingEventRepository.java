@@ -1,16 +1,30 @@
 package com.intellisec.phishsim.tracking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public interface TrackingEventRepository extends JpaRepository<TrackingEvent, UUID> {
+
     List<TrackingEvent> findBySendEventId(UUID sendEventId);
+
     List<TrackingEvent> findBySendEventIdAndEventType(UUID sendEventId, String eventType);
+
     List<TrackingEvent> findByEventType(String eventType);
+
+    // ✅ AJOUTÉ : Supprimer les événements avant une date
+    @Modifying
+    @Query("DELETE FROM TrackingEvent te WHERE te.occurredAt < :cutoff")
+    long deleteByOccurredAtBefore(@Param("cutoff") LocalDateTime cutoff);
+
+    // ✅ AJOUTÉ : Compter les événements avant une date (pour monitoring)
+    @Query("SELECT COUNT(te) FROM TrackingEvent te WHERE te.occurredAt < :cutoff")
+    long countByOccurredAtBefore(@Param("cutoff") LocalDateTime cutoff);
 
     // ✅ Statistiques par utilisateur
     @Query("SELECT t.id, t.email, t.firstName, t.lastName, " +

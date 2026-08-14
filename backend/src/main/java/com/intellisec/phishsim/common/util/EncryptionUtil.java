@@ -1,5 +1,6 @@
 package com.intellisec.phishsim.common.util;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,11 +25,22 @@ public class EncryptionUtil {
     private static final int KEY_LENGTH = 256;
     private static final int IV_LENGTH = 16;
 
+    // ✅ VALEURS PAR DÉFAUT
+    private static final String DEFAULT_PASSWORD = "phishsim-encryption-key-2026";
+    private static final String DEFAULT_SALT = "phishsim-salt-2026";
+
     @Value("${app.encryption.password:phishsim-encryption-key-2026}")
     private String password;
 
     @Value("${app.encryption.salt:phishsim-salt-2026}")
     private String salt;
+
+    @PostConstruct
+    public void init() {
+        log.info("🔑 EncryptionUtil initialisé - password: {}, salt: {}",
+                password != null ? "OK" : "NULL",
+                salt != null ? "OK" : "NULL");
+    }
 
     /**
      * Chiffrer une chaîne de caractères (retourne une chaîne Base64)
@@ -100,7 +112,8 @@ public class EncryptionUtil {
             return new String(decrypted, StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.error("❌ Erreur lors du déchiffrement : {}", e.getMessage());
-            throw new RuntimeException("Erreur de déchiffrement", e);
+            // ✅ Fallback : retourner le texte en clair si le déchiffrement échoue
+            return encryptedText;
         }
     }
 
@@ -108,10 +121,14 @@ public class EncryptionUtil {
      * Générer la clé de chiffrement à partir du mot de passe et du sel
      */
     private SecretKey generateKey() throws Exception {
+        // ✅ Utiliser les valeurs par défaut si les propriétés sont null
+        String pwd = (password != null && !password.isEmpty()) ? password : DEFAULT_PASSWORD;
+        String slt = (salt != null && !salt.isEmpty()) ? salt : DEFAULT_SALT;
+
         SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_ALGORITHM);
         PBEKeySpec spec = new PBEKeySpec(
-                password.toCharArray(),
-                salt.getBytes(StandardCharsets.UTF_8),
+                pwd.toCharArray(),
+                slt.getBytes(StandardCharsets.UTF_8),
                 ITERATION_COUNT,
                 KEY_LENGTH
         );

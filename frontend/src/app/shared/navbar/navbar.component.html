@@ -30,6 +30,14 @@
         </a>
       </li>
 
+      <!-- ✅ AJOUTÉ : Tendances -->
+      <li>
+        <a routerLink="/dashboard/trends" routerLinkActive="active">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Tendances</span>
+        </a>
+      </li>
+
       <!-- Campagnes -->
       <li>
         <a routerLink="/campaigns" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
