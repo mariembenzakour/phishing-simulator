@@ -1,5 +1,6 @@
 package com.intellisec.phishsim.email;
 
+import com.intellisec.phishsim.audit.AuditLogService;
 import com.intellisec.phishsim.campaign.Campaign;
 import com.intellisec.phishsim.common.config.UrlConfig;
 import com.intellisec.phishsim.target.Target;
@@ -10,7 +11,6 @@ import com.intellisec.phishsim.tracking.TrackingService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,11 +33,12 @@ public class EmailService {
     private final TargetRepository targetRepository;
     private final TrackingService trackingService;
     private final UrlConfig urlConfig;
+    private final AuditLogService auditLogService;
 
-    @Value("${app.email.sender:alertes@phishsim-training.tk}")
+    @Value("${app.email.sender:test@intellisec.com}")
     private String defaultSender;
 
-    @Value("${app.email.sender-name:Service Securite}")
+    @Value("${app.email.sender-name:PhishSim Test}")
     private String defaultSenderName;
 
     private final AtomicInteger emailSentCount = new AtomicInteger(0);
@@ -72,8 +73,6 @@ public class EmailService {
     public void sendEmail(String to, String from, String fromName, String subject, String body, boolean isHtml) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-
-            // ✅ Version avec MimeMessageHelper et UTF-8
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED,
@@ -82,14 +81,11 @@ public class EmailService {
 
             helper.setTo(to);
 
-            // ✅ Gestion robuste du nom avec InternetAddress pour éviter les erreurs d'encodage
             if (fromName != null && !fromName.isEmpty()) {
                 try {
-                    // Utiliser InternetAddress avec encodage UTF-8
                     InternetAddress fromAddress = new InternetAddress(from, fromName, StandardCharsets.UTF_8.name());
                     helper.setFrom(fromAddress);
                 } catch (UnsupportedEncodingException e) {
-                    // Fallback : envoyer sans nom si l'encodage échoue
                     log.warn("⚠️ Erreur d'encodage du nom '{}', envoi sans nom", fromName);
                     helper.setFrom(from);
                 }
@@ -141,6 +137,31 @@ public class EmailService {
 
         resetCounters();
 
+        // ✅ DÉTERMINER LE CONTENU DE L'EMAIL (PRIORITÉ IA)
+        String subject;
+        String bodyHtml;
+        String bodyText;
+
+        if (campaign.getCustomSubject() != null && !campaign.getCustomSubject().isEmpty()) {
+            // ✅ Contenu IA automatiquement chargé (priorité 1)
+            subject = campaign.getCustomSubject();
+            bodyHtml = campaign.getCustomBodyHtml() != null ? campaign.getCustomBodyHtml() : "";
+            bodyText = campaign.getCustomBodyText() != null ? campaign.getCustomBodyText() : "";
+            log.info("📧 Utilisation du contenu IA (draft: {})", campaign.getAiGenerationId());
+        } else if (template != null && template.getBodyHtml() != null && !template.getBodyHtml().isEmpty()) {
+            // ✅ Template existant (priorité 2)
+            subject = template.getSubject();
+            bodyHtml = template.getBodyHtml();
+            bodyText = template.getBodyText() != null ? template.getBodyText() : "";
+            log.info("📧 Utilisation du template: {}", template.getName());
+        } else {
+            // ✅ Template par défaut (fallback)
+            subject = "🔒 Action requise : Sécurisez votre compte";
+            bodyHtml = getDefaultTemplateBody();
+            bodyText = getDefaultTemplateText();
+            log.info("📧 Utilisation du template par défaut");
+        }
+
         // MODE DRY RUN
         if (Boolean.TRUE.equals(campaign.getDryRun()) && campaign.getDryRunEmail() != null) {
 
@@ -158,16 +179,22 @@ public class EmailService {
                     campaign.getId(), dryRunTarget.getId()
             );
 
-            String personalizedSubject = personalizeSubject(template.getSubject(), dryRunTarget);
-            String personalizedBody = injectTracking(
-                    template.getBodyHtml(), dryRunTarget, sendEvent.getTrackingToken()
-            );
+            String personalizedSubject = personalizeSubject(subject, dryRunTarget);
+            String personalizedBody = injectTracking(bodyHtml, dryRunTarget, sendEvent.getTrackingToken());
 
             sendEmail(campaign.getDryRunEmail(), fromEmail, fromName, personalizedSubject, personalizedBody, true);
 
             sendEvent.setStatus("SENT");
             trackingService.updateSendEvent(sendEvent);
             log.info("✅ DRY RUN terminé — token : {}", sendEvent.getTrackingToken());
+
+            auditLogService.logCampaignSend(
+                    campaign.getId(),
+                    campaign.getName(),
+                    1,
+                    true,
+                    campaign.getDryRunEmail()
+            );
 
             logDeliverabilityStats(campaign.getName());
             return;
@@ -186,10 +213,8 @@ public class EmailService {
                         campaign.getId(), target.getId()
                 );
 
-                String personalizedSubject = personalizeSubject(template.getSubject(), target);
-                String personalizedBody = injectTracking(
-                        template.getBodyHtml(), target, sendEvent.getTrackingToken()
-                );
+                String personalizedSubject = personalizeSubject(subject, target);
+                String personalizedBody = injectTracking(bodyHtml, target, sendEvent.getTrackingToken());
 
                 sendEmail(target.getEmail(), fromEmail, fromName, personalizedSubject, personalizedBody, true);
 
@@ -210,8 +235,98 @@ public class EmailService {
             }
         }
 
+        auditLogService.logCampaignSend(
+                campaign.getId(),
+                campaign.getName(),
+                targets.size(),
+                false,
+                null
+        );
+
         logDeliverabilityStats(campaign.getName());
         log.info("✅ Campagne '{}' envoyée à {} cibles", campaign.getName(), targets.size());
+    }
+
+    /**
+     * ✅ Template par défaut (fallback quand rien n'est défini)
+     */
+    private String getDefaultTemplateBody() {
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f7fa;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f7fa; padding: 30px 0;">
+                    <tr>
+                        <td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                <tr>
+                                    <td style="background-color: #1a3a5c; padding: 25px 30px; border-radius: 12px 12px 0 0; text-align: center;">
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 1px;">
+                                            INTELLI<span style="color: #e07b2a;">SEC</span>
+                                        </h1>
+                                        <p style="color: #8899aa; margin: 4px 0 0 0; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">
+                                            SOLUTIONS • SÉCURITÉ & FORMATION
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 30px;">
+                                        <h2 style="color: #1a3a5c; margin-top: 0; font-size: 20px; font-weight: 700;">
+                                            Bonjour {{firstName}} {{lastName}},
+                                        </h2>
+                                        <p style="color: #333333; line-height: 1.8; font-size: 14px;">
+                                            Ceci est un test de simulation de phishing organisé par Intellisec Solutions.
+                                            Votre mot de passe a expiré. Veuillez le renouveler immédiatement.
+                                        </p>
+                                        <div style="text-align: center; margin: 25px 0 20px 0;">
+                                            <a href="{{trackingLink}}"
+                                               style="display: inline-block; background-color: #e07b2a; color: #ffffff; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;">
+                                                Réinitialiser mon mot de passe
+                                            </a>
+                                        </div>
+                                        <p style="color: #8899aa; font-size: 12px; border-top: 1px solid #e8f0f7; padding-top: 15px; margin-top: 15px;">
+                                            ⚠️ Ce message est automatique. Merci de ne pas y répondre.
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #f8fafc; padding: 15px 30px; border-radius: 0 0 12px 12px; text-align: center;">
+                                        <p style="color: #8899aa; font-size: 11px; margin: 0;">
+                                            © 2026 <strong>Intellisec Solutions</strong> — Formation Cybersécurité
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            """;
+    }
+
+    private String getDefaultTemplateText() {
+        return """
+            INTELLISEC SOLUTIONS
+            SÉCURITÉ & FORMATION
+
+            ---
+
+            Bonjour {{firstName}} {{lastName}},
+
+            Ceci est un test de simulation de phishing organisé par Intellisec Solutions.
+            Votre mot de passe a expiré. Veuillez le renouveler immédiatement.
+
+            Cliquez sur le lien ci-dessous :
+            {{trackingLink}}
+
+            ---
+            © 2026 Intellisec Solutions — Formation Cybersécurité
+            """;
     }
 
     // ─────────────────────────────────────────────────

@@ -22,6 +22,7 @@
   <!-- Navigation -->
   <nav class="sidebar-nav">
     <ul>
+
       <!-- Dashboard -->
       <li>
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
@@ -30,7 +31,7 @@
         </a>
       </li>
 
-      <!-- ✅ AJOUTÉ : Tendances -->
+      <!-- Tendances -->
       <li>
         <a routerLink="/dashboard/trends" routerLinkActive="active">
           <span class="nav-icon">📈</span>
@@ -62,6 +63,14 @@
         </a>
       </li>
 
+      <!-- ✅ IA (Week 5) : visible pour ADMIN, OPERATOR, SUPER_ADMIN -->
+      <li *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR', 'SUPER_ADMIN'])">
+        <a routerLink="/ai/generate" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="nav-icon">🤖</span>
+          <span class="nav-label" *ngIf="!isCollapsed">IA</span>
+        </a>
+      </li>
+
       <!-- Opérateurs (Admin seulement) -->
       <li *ngIf="authService.isAdmin() || authService.isSuperAdmin()">
         <a routerLink="/operators/create" routerLinkActive="active">
@@ -69,6 +78,7 @@
           <span class="nav-label" *ngIf="!isCollapsed">Opérateurs</span>
         </a>
       </li>
+
     </ul>
   </nav>
 

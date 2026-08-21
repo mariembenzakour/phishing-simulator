@@ -1,0 +1,139 @@
+<app-navbar></app-navbar>
+
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <a routerLink="/ai/generate" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour à la génération</a>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 8px 0 4px 0;">📋 Drafts IA</h1>
+      <p style="color: #6b7a8a; font-size: 14px;">{{ total }} draft(s) approuvé(s) disponibles</p>
+    </div>
+    <button (click)="loadDrafts()" 
+            style="background: #e07b2a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+      🔄 Rafraîchir
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="error" 
+       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+    ⚠️ {{ error }}
+  </div>
+  <div *ngIf="success" 
+       style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+    ✅ {{ success }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" style="text-align: center; padding: 60px;">
+    <p style="color: #6b7a8a;">Chargement...</p>
+  </div>
+
+  <!-- Liste des drafts -->
+  <div *ngIf="!loading">
+
+    <div *ngIf="drafts.length === 0" 
+         style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
+      <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+      <p style="color: #6b7a8a; font-size: 16px;">Aucun draft approuvé disponible</p>
+      <a routerLink="/ai/generate" style="color: #e07b2a; text-decoration: none; font-weight: 600;">
+        Créer un nouveau draft →
+      </a>
+    </div>
+
+    <div *ngFor="let draft of drafts" 
+         style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; cursor: pointer;"
+         (click)="toggleExpand(draft.id)">
+
+      <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 12px;">
+
+        <!-- Informations du draft -->
+        <div style="flex: 1; min-width: 200px;">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <span style="font-weight: 700; color: #1a3a5c; font-size: 16px;">{{ draft.generatedSubject || draft.scenario }}</span>
+            <span style="padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;"
+                  [style.background]="draft.approved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)'"
+                  [style.color]="draft.approved ? '#22c55e' : '#f59e0b'">
+              {{ getStatusBadge(draft.approved) }}
+            </span>
+          </div>
+          <div style="display: flex; gap: 16px; color: #6b7a8a; font-size: 13px; margin-top: 4px; flex-wrap: wrap;">
+            <span>📌 {{ draft.scenario }}</span>
+            <span>{{ getLanguageLabel(draft.language) }}</span>
+            <span>👤 {{ draft.generatedBy }}</span>
+            <span>📅 {{ draft.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span *ngIf="draft.senderDomain" style="color: #8b5cf6;">{{ '@' }}{{ draft.senderDomain }}</span>
+          </div>
+          <!-- WEEK 6 : Red flags summary -->
+          <div *ngIf="draft.redFlags" style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
+            <span *ngFor="let flag of parseRedFlags(draft.redFlags)" 
+                  style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #fef3c7; color: #92400e;">
+              {{ getSeverityIcon(flag.severity) }} {{ flag.title }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button *ngIf="isAdmin() && !draft.approved" 
+                  (click)="$event.stopPropagation(); approve(draft.id)"
+                  style="background: #22c55e; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
+            ✅ Approuver
+          </button>
+          <button *ngIf="isAdmin() && !draft.approved" 
+                  (click)="$event.stopPropagation(); reject(draft.id)"
+                  style="background: #dc2626; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
+            ❌ Rejeter
+          </button>
+          <span *ngIf="draft.approved" 
+                style="background: rgba(34,197,94,0.15); color: #22c55e; padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
+            ✅ Approuvé
+          </span>
+          <span style="color: #6b7a8a; font-size: 13px;">
+            <span *ngIf="expandedDraftId === draft.id">▼</span>
+            <span *ngIf="expandedDraftId !== draft.id">▶</span>
+          </span>
+        </div>
+
+      </div>
+
+      <!-- WEEK 6 : Détails étendus -->
+      <div *ngIf="expandedDraftId === draft.id" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          <!-- Email -->
+          <div style="background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📧 Email</div>
+            <div style="font-weight: 600; color: #1a3a5c; font-size: 14px; margin-top: 4px;">{{ draft.generatedSubject }}</div>
+            <div style="font-size: 12px; color: #555; max-height: 80px; overflow: hidden; margin-top: 4px;" [innerHTML]="draft.generatedBody | slice:0:200"></div>
+          </div>
+
+          <!-- Landing Page -->
+          <div style="background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
+            <div style="font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🌐 Landing Page</div>
+            <div style="font-size: 13px; color: #1a3a5c; margin-top: 4px;">
+              {{ draft.landingPageHtml ? '✅ Générée' : '❌ Non générée' }}
+            </div>
+            <div *ngIf="draft.senderName" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
+              {{ draft.senderName }} <span style="color: #8b5cf6;">{{ '@' }}{{ draft.senderDomain }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Red Flags -->
+        <div *ngIf="draft.redFlags" style="margin-top: 12px; background: #fef3c7; border-radius: 8px; padding: 12px; border: 1px solid #f59e0b;">
+          <div style="font-size: 11px; color: #92400e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🚩 Red Flags</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+            <div *ngFor="let flag of parseRedFlags(draft.redFlags)" 
+                 style="font-size: 12px; background: white; padding: 6px 10px; border-radius: 4px; border-left: 3px solid;"
+                 [style.border-left-color]="flag.severity === 'critical' ? '#dc2626' : flag.severity === 'high' ? '#f59e0b' : '#f97316'">
+              <span style="font-weight: 600;">{{ flag.title }}</span>
+              <span style="font-size: 10px; color: #6b7a8a; display: block;">{{ flag.howToDetect }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

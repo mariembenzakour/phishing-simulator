@@ -1,0 +1,295 @@
+<app-navbar></app-navbar>
+
+<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">🤖 Génération IA</h1>
+      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">
+        Créez un brouillon d'email complet + landing page + sensibilisation
+        <span style="background: #e8f0f7; padding: 2px 10px; border-radius: 12px; font-size: 11px; margin-left: 8px; color: #1a3a5c;">
+          Gemini 3.6 Flash
+        </span>
+      </p>
+    </div>
+    <a routerLink="/ai/drafts" 
+       style="background: #1a3a5c; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+      📋 Voir les drafts
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+
+    <!-- ===== FORMULAIRE ===== -->
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+
+      <h3 style="color: #1a3a5c; margin: 0 0 16px 0; font-size: 16px;">✏️ Saisir le brief</h3>
+
+      <!-- Scénario -->
+      <div style="margin-bottom: 16px;">
+        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
+          SCÉNARIO *
+        </label>
+        <select [(ngModel)]="form.scenario"
+                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+          <option value="" disabled>-- Sélectionner un scénario --</option>
+          <option *ngFor="let s of scenarios" [value]="s">{{ s }}</option>
+        </select>
+        <input *ngIf="!scenarios.includes(form.scenario) && form.scenario" 
+               type="text" [(ngModel)]="form.scenario" 
+               placeholder="Ou saisissez un scénario personnalisé"
+               style="width: 100%; padding: 10px 14px; margin-top: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+      </div>
+
+      <!-- Département -->
+      <div style="margin-bottom: 16px;">
+        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
+          DÉPARTEMENT
+        </label>
+        <select [(ngModel)]="form.department"
+                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+          <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+
+      <!-- Langue -->
+      <div style="margin-bottom: 16px;">
+        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
+          LANGUE
+        </label>
+        <select [(ngModel)]="form.language"
+                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+          <option *ngFor="let lang of languages" [value]="lang.value">{{ lang.label }}</option>
+        </select>
+      </div>
+
+      <!-- Urgence -->
+      <div style="margin-bottom: 16px;">
+        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
+          URGENCE
+        </label>
+        <select [(ngModel)]="form.urgency"
+                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+          <option *ngFor="let u of urgencies" [value]="u.value">{{ u.label }}</option>
+        </select>
+      </div>
+
+      <!-- Détails supplémentaires -->
+      <div style="margin-bottom: 20px;">
+        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
+          DÉTAILS SUPPLÉMENTAIRES
+        </label>
+        <textarea [(ngModel)]="form.additionalDetails" rows="3"
+                  placeholder="Informations complémentaires pour l'IA..."
+                  style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: inherit;">
+        </textarea>
+      </div>
+
+      <!-- Messages -->
+      <div *ngIf="error" 
+           style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
+        ⚠️ {{ error }}
+      </div>
+
+      <button (click)="generate()" [disabled]="loading"
+              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;"
+              [style.opacity]="loading ? '0.6' : '1'">
+        <span *ngIf="loading" class="spinner">⏳</span>
+        {{ loading ? 'Génération en cours...' : '🚀 Générer l\'email' }}
+      </button>
+
+    </div>
+
+    <!-- ===== RÉSULTAT ===== -->
+    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="color: #1a3a5c; margin: 0; font-size: 16px;">📄 Aperçu</h3>
+        <button *ngIf="result" (click)="reset()" 
+                style="background: none; border: none; color: #6b7a8a; cursor: pointer; font-size: 13px;">
+          ✕ Effacer
+        </button>
+      </div>
+
+      <!-- Chargement -->
+      <div *ngIf="loading" style="text-align: center; padding: 60px;">
+        <div style="width: 40px; height: 40px; border: 4px solid #e8f0f7; border-top-color: #e07b2a; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;"></div>
+        <p style="color: #6b7a8a;">L'IA réfléchit...</p>
+      </div>
+
+      <!-- Résultat -->
+      <div *ngIf="result && !loading">
+
+        <!-- Statut -->
+        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+          <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;"
+                [style.background]="result.approved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)'"
+                [style.color]="result.approved ? '#22c55e' : '#f59e0b'">
+            {{ result.status }}
+          </span>
+          <span style="color: #6b7a8a; font-size: 12px;">
+            {{ getLanguageLabel(result.language) }} • {{ result.scenario }}
+          </span>
+          <span style="color: #6b7a8a; font-size: 11px; margin-left: auto;">
+            {{ result.generatedAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+        <!-- ✅ WEEK 6 : Onglets -->
+        <div style="display: flex; gap: 4px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">
+          <button (click)="setActiveTab('email')" 
+                  [style.background]="isActiveTab('email') ? '#e07b2a' : 'transparent'"
+                  [style.color]="isActiveTab('email') ? 'white' : '#6b7a8a'"
+                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
+            📧 Email
+          </button>
+          <button (click)="setActiveTab('landing')" 
+                  [style.background]="isActiveTab('landing') ? '#e07b2a' : 'transparent'"
+                  [style.color]="isActiveTab('landing') ? 'white' : '#6b7a8a'"
+                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
+            🌐 Landing
+          </button>
+          <button (click)="setActiveTab('redflags')" 
+                  [style.background]="isActiveTab('redflags') ? '#e07b2a' : 'transparent'"
+                  [style.color]="isActiveTab('redflags') ? 'white' : '#6b7a8a'"
+                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
+            🚩 Red Flags
+          </button>
+          <button (click)="setActiveTab('preview')" 
+                  [style.background]="isActiveTab('preview') ? '#e07b2a' : 'transparent'"
+                  [style.color]="isActiveTab('preview') ? 'white' : '#6b7a8a'"
+                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
+            👁️ Aperçu
+          </button>
+        </div>
+
+        <!-- Email Tab -->
+        <div *ngIf="isActiveTab('email')">
+          <div style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #e07b2a;">
+            <div style="color: #6b7a8a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Sujet</div>
+            <div style="color: #1a3a5c; font-weight: 600; font-size: 15px;">{{ result.subject }}</div>
+          </div>
+
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
+            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+              Corps HTML
+            </div>
+            <div style="padding: 16px; max-height: 200px; overflow-y: auto; font-size: 14px;" [innerHTML]="result.bodyHtml">
+            </div>
+          </div>
+
+          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
+            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+              Texte brut
+            </div>
+            <div style="padding: 16px; max-height: 100px; overflow-y: auto; font-size: 13px; color: #333; white-space: pre-wrap; font-family: monospace;">
+              {{ result.bodyText }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Landing Page Tab -->
+        <div *ngIf="isActiveTab('landing')">
+          <div *ngIf="result.landingPageHtml" 
+               style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; max-height: 500px; overflow-y: auto; background: white;">
+            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+              🌐 Landing Page + Awareness
+            </div>
+            <iframe [srcdoc]="result.landingPageHtml" 
+                    style="width: 100%; height: 450px; border: none; background: white;">
+            </iframe>
+          </div>
+          <div *ngIf="!result.landingPageHtml" style="text-align: center; padding: 40px; color: #6b7a8a;">
+            <p>Aucune landing page générée</p>
+          </div>
+        </div>
+
+        <!-- Red Flags Tab -->
+        <div *ngIf="isActiveTab('redflags')">
+          <div *ngIf="redFlags.length > 0">
+            <div style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;">
+              <p style="margin: 0; color: #92400e; font-weight: 600;">
+                🎓 Voici les 4 signes qui auraient dû vous alerter :
+              </p>
+            </div>
+            <div *ngFor="let flag of redFlags" 
+                 style="background: white; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid;"
+                 [style.border-left-color]="getSeverityColor(flag.severity)">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span>{{ getSeverityIcon(flag.severity) }}</span>
+                <span style="font-weight: 700; color: #1a3a5c;">{{ flag.title }}</span>
+                <span style="font-size: 10px; padding: 2px 8px; border-radius: 12px; background: #f0f0f0; color: #555; text-transform: uppercase;">
+                  {{ flag.severity }}
+                </span>
+              </div>
+              <p style="color: #555; font-size: 13px; margin: 6px 0 4px 0;">{{ flag.description }}</p>
+              <div style="color: #22c55e; font-size: 12px; font-weight: 600;">
+                ✅ {{ flag.howToDetect }}
+              </div>
+            </div>
+          </div>
+          <div *ngIf="redFlags.length === 0" style="text-align: center; padding: 40px; color: #6b7a8a;">
+            <p>Aucun red flag disponible</p>
+          </div>
+        </div>
+
+        <!-- Preview Tab -->
+        <div *ngIf="isActiveTab('preview')">
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+            <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px 16px; text-align: center;">
+              <span style="font-size: 14px;">📧 Email généré</span>
+              <div style="font-weight: 600; color: #1a3a5c;">{{ result.subject }}</div>
+            </div>
+            <div style="background: #f0f4f8; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; text-align: center;">
+              <span style="font-size: 14px;">🌐 Landing Page</span>
+              <div *ngIf="result.landingPageHtml" style="color: #22c55e; font-weight: 600;">✅ Générée</div>
+              <div *ngIf="!result.landingPageHtml" style="color: #dc2626; font-weight: 600;">❌ Non générée</div>
+            </div>
+            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; text-align: center;">
+              <span style="font-size: 14px;">🚩 Red Flags</span>
+              <div style="font-weight: 600; color: #1a3a5c;">{{ redFlags.length }} / 4 identifiés</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display: flex; gap: 12px; margin-top: 16px;">
+          <button *ngIf="isAdmin() && !result.approved" 
+                  (click)="approve()"
+                  style="flex: 1; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+            ✅ Approuver
+          </button>
+          <button *ngIf="isAdmin() && !result.approved" 
+                  (click)="reject()"
+                  style="flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+            ❌ Rejeter
+          </button>
+          <button *ngIf="result.approved" 
+                  style="flex: 1; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: default; font-size: 14px; font-weight: 600;">
+            ✅ Approuvé
+          </button>
+        </div>
+
+        <div *ngIf="result.approvedBy" 
+             style="margin-top: 12px; color: #6b7a8a; font-size: 12px; text-align: center;">
+          Approuvé par : {{ result.approvedBy }}
+        </div>
+
+      </div>
+
+      <!-- Aucun résultat -->
+      <div *ngIf="!result && !loading" style="text-align: center; padding: 60px; color: #6b7a8a;">
+        <div style="font-size: 48px; margin-bottom: 16px;">✍️</div>
+        <p>Saisissez un scénario et cliquez sur "Générer"</p>
+        <p style="font-size: 12px; margin-top: 8px;">📧 Email + 🌐 Landing Page + 🚩 Red Flags</p>
+      </div>
+
+    </div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</div>

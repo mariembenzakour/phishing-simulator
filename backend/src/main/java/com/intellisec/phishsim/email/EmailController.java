@@ -39,35 +39,16 @@ public class EmailController {
             return ResponseEntity.badRequest().body("❌ La campagne doit être autorisée avant d'être envoyée");
         }
 
-        EmailTemplate template;
+        // ✅ Récupérer le template si associé
+        EmailTemplate template = null;
         if (campaign.getTemplateId() != null) {
             template = emailRepository.findById(campaign.getTemplateId()).orElse(null);
-        } else {
-            template = null;
         }
 
-        if (template == null) {
-            template = new EmailTemplate();
-            template.setName("Template par défaut - " + campaign.getName());
-            template.setSubject("Test de phishing - " + campaign.getName());
-            template.setBodyHtml(
-                    "<h1>Phishing Simulation</h1>" +
-                            "<p>Bonjour {{firstName}},</p>" +
-                            "<p>Ceci est un test de simulation de phishing.</p>" +
-                            "<p>Votre mot de passe a expiré. Veuillez le renouveler immédiatement :</p>" +
-                            "<p><a href='TRACKING_LINK'>Cliquez ici pour vous connecter</a></p>" +
-                            "<p>L'équipe Intellisecsollutions</p>"
-            );
-            template.setBodyText("Phishing Simulation. Bonjour. Ceci est un test.");
-            template.setIsHtml(true);
-            template.setStatus("APPROVED");
-            template = emailRepository.save(template);
+        // ✅ Le template par défaut est géré dans EmailService
+        // Plus de code en dur ici ! Le contenu IA est prioritaire.
 
-            campaign.setTemplateId(template.getId());
-            campaignService.update(campaignId, campaign);
-        }
-
-        if (!"APPROVED".equals(template.getStatus())) {
+        if (template != null && !"APPROVED".equals(template.getStatus())) {
             return ResponseEntity.badRequest().body("❌ Le template doit être approuvé avant envoi");
         }
 
@@ -78,7 +59,6 @@ public class EmailController {
         return ResponseEntity.ok("✅ Campagne envoyée avec succès !");
     }
 
-    // ✅ NOUVEAU : Récupérer les statistiques de délivrabilité
     @GetMapping("/stats/{campaignId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Map<String, Object>> getDeliverabilityStats(@PathVariable UUID campaignId) {
@@ -100,7 +80,6 @@ public class EmailController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ NOUVEAU : Récupérer les statistiques globales
     @GetMapping("/stats/global")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<Map<String, Object>> getGlobalStats() {

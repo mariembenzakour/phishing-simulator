@@ -15,10 +15,14 @@ import { authGuard } from './shared/guards/auth.guard';
 import { GlobalDashboardComponent } from './dashboard/global-dashboard/global-dashboard.component';
 import { CampaignDetailComponent } from './dashboard/campaign-detail/campaign-detail.component';
 import { UserReportComponent } from './dashboard/user-report/user-report.component';
-// ✅ AJOUTÉ : Import du composant Trends
 import { TrendsComponent } from './dashboard/trends/trends.component';
 
+// ✅ IMPORT DES COMPOSANTS IA (Week 5)
+import { AiGenerationComponent } from './ai/ai-generation.component';
+import { AiDraftsComponent } from './ai/ai-drafts.component';
+
 export const routes: Routes = [
+  // ── AUTHENTIFICATION ──────────────────────────
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
@@ -31,19 +35,19 @@ export const routes: Routes = [
     path: 'campaigns', 
     component: CampaignListComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER', 'SUPER_ADMIN'] } 
   },
   { 
     path: 'campaigns/create', 
     component: CampaignCreateComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'SUPER_ADMIN'] } 
   },
   { 
     path: 'campaigns/edit/:id', 
     component: CampaignCreateComponent,
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'SUPER_ADMIN'] } 
   },
 
   // ── GROUPES ──────────────────────────────────
@@ -51,13 +55,13 @@ export const routes: Routes = [
     path: 'groups', 
     component: GroupListComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER', 'SUPER_ADMIN'] } 
   },
   { 
     path: 'groups/create', 
     component: GroupCreateComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'SUPER_ADMIN'] } 
   },
 
   // ── CIBLES ───────────────────────────────────
@@ -65,13 +69,13 @@ export const routes: Routes = [
     path: 'targets', 
     component: TargetListComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'VIEWER', 'SUPER_ADMIN'] } 
   },
   { 
     path: 'targets/create', 
     component: TargetCreateComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['ADMIN', 'OPERATOR'] } 
+    data: { roles: ['ADMIN', 'OPERATOR', 'SUPER_ADMIN'] } 
   },
 
   // ── OPÉRATEURS ──────────────────────────────
@@ -87,28 +91,41 @@ export const routes: Routes = [
     path: 'dashboard', 
     component: GlobalDashboardComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER'] } 
   },
   { 
     path: 'dashboard/campaign/:id', 
     component: CampaignDetailComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER'] } 
   },
   { 
     path: 'dashboard/users', 
     component: UserReportComponent, 
     canActivate: [authGuard], 
-    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER'] } 
   },
-  // ✅ AJOUTÉ : Route pour les tendances
   { 
     path: 'dashboard/trends', 
     component: TrendsComponent, 
     canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER'] } 
+  },
+
+  // ── IA (Week 5) ──────────────────────────────
+  { 
+    path: 'ai/generate', 
+    component: AiGenerationComponent, 
+    canActivate: [authGuard], 
+    data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
+  },
+  { 
+    path: 'ai/drafts', 
+    component: AiDraftsComponent, 
+    canActivate: [authGuard], 
     data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
   },
 
-  // Redirection 404
+  // ── REDIRECTION 404 ──────────────────────────
   { path: '**', redirectTo: 'login' }
 ];

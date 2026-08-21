@@ -1,5 +1,8 @@
 package com.intellisec.phishsim.campaign;
 
+import com.intellisec.phishsim.ai.AiGenerationLog;
+import com.intellisec.phishsim.ai.AiGenerationLogRepository;
+import com.intellisec.phishsim.audit.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +16,8 @@ import java.util.UUID;
 public class CampaignService {
 
     private final CampaignRepository campaignRepository;
+    private final AuditLogService auditLogService;
+    private final AiGenerationLogRepository aiGenerationLogRepository;  // ✅ AJOUTÉ
 
     // ── GET ALL ──────────────────────────────────────
     public List<Campaign> getAll() {
@@ -28,35 +33,81 @@ public class CampaignService {
     // ── CREATE ───────────────────────────────────────
     public Campaign create(Campaign campaign) {
         campaign.setCreatedAt(LocalDateTime.now());
+
+        // ✅ Si un draft IA est associé, charger automatiquement le contenu
+        if (campaign.getAiGenerationId() != null) {
+            loadAiContent(campaign);
+        }
+
         if (campaign.getScheduledAt() != null) {
             campaign.setStatus("SCHEDULED");
         } else {
             campaign.setStatus("DRAFT");
         }
-        return campaignRepository.save(campaign);
+
+        Campaign saved = campaignRepository.save(campaign);
+
+        auditLogService.logCampaignGeneration(
+                "CAMPAIGN_CREATE",
+                saved.getId(),
+                saved.getName(),
+                "Campagne créée en statut: " + saved.getStatus()
+        );
+
+        return saved;
     }
 
     // ✅ NOUVELLE MÉTHODE UPDATE
     public Campaign update(UUID id, Campaign campaignData) {
         Campaign campaign = getById(id);
 
-        // Mettre à jour les champs de base
         campaign.setName(campaignData.getName());
         campaign.setTemplateId(campaignData.getTemplateId());
         campaign.setTargetGroupId(campaignData.getTargetGroupId());
         campaign.setSenderEmail(campaignData.getSenderEmail());
         campaign.setScheduledAt(campaignData.getScheduledAt());
-
-        // ✅ Mettre à jour les nouveaux champs email
         campaign.setSenderProfile(campaignData.getSenderProfile());
         campaign.setDryRun(campaignData.getDryRun());
         campaign.setDryRunEmail(campaignData.getDryRunEmail());
         campaign.setThrottleSeconds(campaignData.getThrottleSeconds());
 
-        // Ne pas modifier le statut via cette méthode
-        // (utiliser authorize, pause, resume pour changer le statut)
+        // ✅ Si un nouveau draft IA est associé, charger le contenu
+        if (campaignData.getAiGenerationId() != null &&
+                !campaignData.getAiGenerationId().equals(campaign.getAiGenerationId())) {
+            campaign.setAiGenerationId(campaignData.getAiGenerationId());
+            loadAiContent(campaign);
+        }
 
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+
+        auditLogService.logCampaignGeneration(
+                "CAMPAIGN_UPDATE",
+                saved.getId(),
+                saved.getName(),
+                "Campagne mise à jour"
+        );
+
+        return saved;
+    }
+
+    /**
+     * ✅ Charge automatiquement le contenu d'un draft IA approuvé
+     */
+    private void loadAiContent(Campaign campaign) {
+        if (campaign.getAiGenerationId() == null) {
+            return;
+        }
+
+        AiGenerationLog aiLog = aiGenerationLogRepository.findById(campaign.getAiGenerationId())
+                .orElseThrow(() -> new RuntimeException("Draft IA non trouvé"));
+
+        if (!aiLog.getApproved()) {
+            throw new RuntimeException("Le draft IA n'est pas encore approuvé. Veuillez l'approuver avant de créer la campagne.");
+        }
+
+        campaign.setCustomSubject(aiLog.getGeneratedSubject());
+        campaign.setCustomBodyHtml(aiLog.getGeneratedBody());
+        campaign.setCustomBodyText(aiLog.getBodyText());
     }
 
     // ── CLONE ────────────────────────────────────────
@@ -72,9 +123,25 @@ public class CampaignService {
         clone.setDryRun(original.getDryRun());
         clone.setDryRunEmail(original.getDryRunEmail());
         clone.setThrottleSeconds(original.getThrottleSeconds());
+
+        // ✅ Cloner aussi le contenu IA
+        clone.setAiGenerationId(original.getAiGenerationId());
+        clone.setCustomSubject(original.getCustomSubject());
+        clone.setCustomBodyHtml(original.getCustomBodyHtml());
+        clone.setCustomBodyText(original.getCustomBodyText());
+
         clone.setStatus("DRAFT");
         clone.setCreatedAt(LocalDateTime.now());
-        return campaignRepository.save(clone);
+        Campaign saved = campaignRepository.save(clone);
+
+        auditLogService.logCampaignGeneration(
+                "CAMPAIGN_CLONE",
+                saved.getId(),
+                saved.getName(),
+                "Cloné depuis: " + original.getId()
+        );
+
+        return saved;
     }
 
     // ── AUTHORIZE ────────────────────────────────────
@@ -85,7 +152,15 @@ public class CampaignService {
         }
         campaign.setStatus("AUTHORIZED");
         campaign.setAuthorizedBy(operatorId);
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+
+        auditLogService.logAction(
+                "CAMPAIGN_AUTHORIZE",
+                saved.getId(),
+                "Campagne autorisée par: " + operatorId
+        );
+
+        return saved;
     }
 
     // ── PAUSE ────────────────────────────────────────
@@ -95,7 +170,15 @@ public class CampaignService {
             throw new RuntimeException("Only RUNNING campaigns can be paused");
         }
         campaign.setStatus("PAUSED");
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+
+        auditLogService.logAction(
+                "CAMPAIGN_PAUSE",
+                saved.getId(),
+                "Campagne mise en pause"
+        );
+
+        return saved;
     }
 
     // ── RESUME ───────────────────────────────────────
@@ -105,7 +188,15 @@ public class CampaignService {
             throw new RuntimeException("Only PAUSED campaigns can be resumed");
         }
         campaign.setStatus("RUNNING");
-        return campaignRepository.save(campaign);
+        Campaign saved = campaignRepository.save(campaign);
+
+        auditLogService.logAction(
+                "CAMPAIGN_RESUME",
+                saved.getId(),
+                "Campagne reprise"
+        );
+
+        return saved;
     }
 
     // ── DELETE ───────────────────────────────────────
@@ -114,6 +205,13 @@ public class CampaignService {
         if (campaign.getStatus().equals("RUNNING")) {
             throw new RuntimeException("Cannot delete a RUNNING campaign");
         }
+
+        auditLogService.logAction(
+                "CAMPAIGN_DELETE",
+                id,
+                "Campagne supprimée: " + campaign.getName()
+        );
+
         campaignRepository.deleteById(id);
     }
 
@@ -125,6 +223,12 @@ public class CampaignService {
         for (Campaign campaign : scheduled) {
             campaign.setStatus("RUNNING");
             campaignRepository.save(campaign);
+
+            auditLogService.logAction(
+                    "CAMPAIGN_AUTO_START",
+                    campaign.getId(),
+                    "Campagne démarrée automatiquement (scheduled)"
+            );
         }
     }
 }

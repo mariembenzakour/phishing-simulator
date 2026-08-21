@@ -45,4 +45,17 @@ public class Campaign {
 
     @Column(name = "throttle_seconds")
     private Integer throttleSeconds = 5;
+
+    // ✅ AJOUTÉ : Champs pour le contenu IA (automatisé)
+    @Column(name = "ai_generation_id")
+    private UUID aiGenerationId;
+
+    @Column(name = "custom_subject", columnDefinition = "TEXT")
+    private String customSubject;
+
+    @Column(name = "custom_body_html", columnDefinition = "TEXT")
+    private String customBodyHtml;
+
+    @Column(name = "custom_body_text", columnDefinition = "TEXT")
+    private String customBodyText;
 }

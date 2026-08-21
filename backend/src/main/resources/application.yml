@@ -26,19 +26,18 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # ✅ CONFIGURATION BREVO (remplace Mailpit)
+  # ✅ CONFIGURATION MAILPIT (pour les tests)
   mail:
-    host: smtp-relay.brevo.com
-    port: 587
-    username: b5634a001@smtp-brevo.com
-    password: bskvVFy2WBVQX8S
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
     properties:
       mail:
         smtp:
-          auth: true
+          auth: false
           starttls:
-            enable: true
-            required: true
+            enable: false
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
@@ -53,13 +52,13 @@ app:
     password: phishsim-encryption-key-2026
     salt: phishsim-salt-2026
 
-  # ✅ Configuration des URLs
-  base-url: https://indoor-val-delivery-remark.trycloudflare.com
+  # ✅ Configuration des URLs (Cloudflare)
+  base-url:  https://wing-fundamentals-moore-complicated.trycloudflare.com
   frontend-url: http://localhost:4200
 
-  # ✅ Configuration de l'expéditeur Brevo
+  # ✅ Configuration de l'expéditeur (pour Mailpit, n'importe quelle adresse fonctionne)
   email:
-    sender: b5634a001@smtp-brevo.com
+    sender: test@intellisec.com
     sender-name: PhishSim Test
 
 # ✅ Configuration Actuator
@@ -73,3 +72,14 @@ management:
     health:
       show-details: always
       show-components: always
+
+# ✅ Configuration Gemini
+ai:
+  gemini:
+    api:
+      key: ${GEMINI_API_KEY}
+    model: gemini-3.6-flash  # ✅ Recommandé (plus stable que 3.6)
+  generation:
+    max-tokens: 8192
+    temperature: 0.7
+  default-language: fr

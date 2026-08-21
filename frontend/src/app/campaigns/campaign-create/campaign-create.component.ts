@@ -7,6 +7,7 @@ import { CampaignService } from '../../shared/services/campaign.service';
 import { TargetGroupService } from '../../shared/services/target-group.service';
 import { SenderProfileService } from '../../shared/services/sender-profile.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { AiService, AiGenerationLog } from '../../shared/services/ai.service';
 
 @Component({
   selector: 'app-campaign-create',
@@ -28,11 +29,17 @@ export class CampaignCreateComponent implements OnInit {
     dryRun: false,
     dryRunEmail: '',
     throttleSeconds: 5,
-    status: 'DRAFT'
+    status: 'DRAFT',
+    aiGenerationId: '',
+    customSubject: '',
+    customBodyHtml: '',
+    customBodyText: ''
   };
 
   groups: any[] = [];
   senderProfiles: any[] = [];
+  aiDrafts: AiGenerationLog[] = [];
+  loadingAiDrafts = false;
   error = '';
   success = '';
   loading = false;
@@ -41,13 +48,13 @@ export class CampaignCreateComponent implements OnInit {
     private campaignService: CampaignService,
     private groupService: TargetGroupService,
     private senderProfileService: SenderProfileService,
-    public router: Router,  // ✅ CHANGÉ : private → public
+    private aiService: AiService,
+    public router: Router,
     private route: ActivatedRoute,
     public authService: AuthService
   ) {}
 
   ngOnInit() {
-    // Charger les groupes et profils
     this.groupService.getAll().subscribe({
       next: (data) => {
         this.groups = data;
@@ -61,12 +68,73 @@ export class CampaignCreateComponent implements OnInit {
       error: () => { console.error('Erreur chargement profils'); }
     });
 
-    // Vérifier si on est en mode édition
+    this.loadAiDrafts();
+
     const id = this.route.snapshot.params['id'];
     if (id) {
       this.isEditMode = true;
       this.campaignId = id;
       this.loadCampaign(id);
+    }
+  }
+
+  /**
+   * ✅ Charge les drafts IA approuvés (utilisables dans les campagnes)
+   * Utilise l'endpoint /api/ai/approved pour récupérer uniquement les drafts approuvés
+   */
+  loadAiDrafts() {
+    this.loadingAiDrafts = true;
+    
+    // ✅ Appel au nouvel endpoint /api/ai/approved
+    this.aiService.getApprovedDrafts().subscribe({
+      next: (data) => {
+        console.log('📋 Drafts approuvés reçus:', data);
+        this.aiDrafts = data.drafts || [];
+        console.log('✅ Drafts disponibles:', this.aiDrafts);
+        this.loadingAiDrafts = false;
+      },
+      error: (err) => {
+        this.loadingAiDrafts = false;
+        console.error('❌ Erreur chargement drafts IA:', err);
+        // Fallback: essayer avec l'ancien endpoint et filtrer
+        this.loadAiDraftsFallback();
+      }
+    });
+  }
+
+  /**
+   * ✅ Fallback : charger tous les drafts et filtrer les approuvés
+   */
+  private loadAiDraftsFallback() {
+    this.aiService.getDrafts().subscribe({
+      next: (data) => {
+        console.log('📋 Fallback - Drafts reçus:', data);
+        this.aiDrafts = data.drafts.filter(d => d.approved === true);
+        console.log('✅ Drafts approuvés (fallback):', this.aiDrafts);
+        this.loadingAiDrafts = false;
+      },
+      error: (err) => {
+        this.loadingAiDrafts = false;
+        console.error('❌ Erreur fallback:', err);
+      }
+    });
+  }
+
+  onAiDraftChange() {
+    if (!this.form.aiGenerationId) {
+      this.form.customSubject = '';
+      this.form.customBodyHtml = '';
+      this.form.customBodyText = '';
+      return;
+    }
+
+    const selected = this.aiDrafts.find(d => d.id === this.form.aiGenerationId);
+    if (selected) {
+      this.form.customSubject = selected.generatedSubject;
+      this.form.customBodyHtml = selected.generatedBody;
+      this.form.customBodyText = selected.bodyText;
+      this.success = '✅ Contenu IA chargé automatiquement !';
+      setTimeout(() => { this.success = ''; }, 3000);
     }
   }
 
@@ -83,7 +151,11 @@ export class CampaignCreateComponent implements OnInit {
           dryRun: data.dryRun || false,
           dryRunEmail: data.dryRunEmail || '',
           throttleSeconds: data.throttleSeconds || 5,
-          status: data.status || 'DRAFT'
+          status: data.status || 'DRAFT',
+          aiGenerationId: data.aiGenerationId || '',
+          customSubject: data.customSubject || '',
+          customBodyHtml: data.customBodyHtml || '',
+          customBodyText: data.customBodyText || ''
         };
         this.loading = false;
       },
@@ -105,7 +177,7 @@ export class CampaignCreateComponent implements OnInit {
       return;
     }
 
-    const payload = {
+    const payload: any = {
       name: this.form.name,
       senderEmail: this.form.senderEmail,
       senderProfileId: this.form.senderProfileId || null,
@@ -114,11 +186,14 @@ export class CampaignCreateComponent implements OnInit {
       dryRun: this.form.dryRun,
       dryRunEmail: this.form.dryRunEmail || null,
       throttleSeconds: this.form.throttleSeconds || 5,
-      status: this.form.status
+      status: this.form.status,
+      aiGenerationId: this.form.aiGenerationId || null,
+      customSubject: this.form.customSubject || null,
+      customBodyHtml: this.form.customBodyHtml || null,
+      customBodyText: this.form.customBodyText || null
     };
 
     if (this.isEditMode) {
-      // ✅ MODE ÉDITION
       this.campaignService.update(this.campaignId, payload).subscribe({
         next: () => {
           this.success = 'Campagne mise à jour avec succès !';
@@ -129,7 +204,6 @@ export class CampaignCreateComponent implements OnInit {
         }
       });
     } else {
-      // ✅ MODE CRÉATION
       this.campaignService.create(payload).subscribe({
         next: () => {
           this.success = 'Campagne créée avec succès !';

@@ -145,7 +145,7 @@ export class UserReportComponent implements OnInit {
 
   getEventIcon(type: string): string {
     const map: Record<string, string> = {
-      'OPEN': '👁️',
+      'OPEN': '',
       'CLICK': '🖱️',
       'SUBMIT': '📝'
     };

@@ -19,12 +19,88 @@
 
       <div *ngIf="!loading">
 
+        <!-- NOM DE LA CAMPAGNE -->
         <div style="margin-bottom: 20px;">
           <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOM DE LA CAMPAGNE *</label>
           <input type="text" [(ngModel)]="form.name" placeholder="Ex: Test phishing RH Juillet 2026"
                  style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
         </div>
 
+        <!-- CONTENU IA -->
+        <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px dashed #8b5cf6;">
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+            <span style="font-size: 18px;">🤖</span>
+            <span style="color: #1a3a5c; font-weight: 700; font-size: 14px;">Contenu généré par l'IA</span>
+            <span style="font-size: 11px; color: #6b7a8a; background: #e8f0f7; padding: 2px 10px; border-radius: 12px;">Optionnel</span>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">
+              DRAFT IA APPROUVÉ
+            </label>
+            <select [(ngModel)]="form.aiGenerationId" (change)="onAiDraftChange()"
+                    style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+              <option value="">-- Aucun (utiliser le template par défaut) --</option>
+              <option *ngFor="let draft of aiDrafts" [value]="draft.id">
+                {{ draft.generatedSubject || draft.scenario }} ({{ draft.language }})
+              </option>
+            </select>
+            <div *ngIf="aiDrafts.length === 0 && !loadingAiDrafts" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
+              Aucun draft IA approuvé. Générez et approuvez un email dans la section "IA".
+            </div>
+            <div *ngIf="loadingAiDrafts" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
+              Chargement des drafts...
+            </div>
+          </div>
+
+          <div *ngIf="form.customSubject" style="font-size: 13px; color: #1a3a5c; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+            <div><strong>Sujet :</strong> {{ form.customSubject }}</div>
+            <div style="font-size: 12px; color: #6b7a8a; margin-top: 4px; max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
+              <strong>Contenu :</strong> <span [innerHTML]="form.customBodyHtml | slice:0:150"></span>...
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SUJET PERSONNALISÉ -->
+        <div style="margin-bottom: 20px;">
+          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
+            SUJET DE L'EMAIL
+            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - laissé vide pour utiliser le template)</span>
+          </label>
+          <input type="text" [(ngModel)]="form.customSubject" placeholder="Ex: Action requise : Securisez votre compte"
+                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
+        </div>
+
+        <!-- CORPS HTML (optionnel) -->
+        <div style="margin-bottom: 20px;">
+          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
+            CORPS HTML DE L'EMAIL
+            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - laissé vide pour utiliser le template)</span>
+          </label>
+          <textarea [(ngModel)]="form.customBodyHtml" rows="6"
+                    placeholder="Ex: <p>Bonjour, Votre mot de passe a expire...</p>"
+                    style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: monospace;">
+          </textarea>
+          <div style="font-size: 11px; color: #8899aa; margin-top: 4px;">
+            Utilisez les placeholders firstName et lastName pour personnaliser.
+          </div>
+        </div>
+
+        <!-- CORPS TEXTE (optionnel) -->
+        <div style="margin-bottom: 20px;">
+          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
+            CORPS TEXTE DE L'EMAIL
+            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - pour les clients sans HTML)</span>
+          </label>
+          <textarea [(ngModel)]="form.customBodyText" rows="3"
+                    placeholder="Ex: Bonjour, Votre mot de passe a expire..."
+                    style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: monospace;">
+          </textarea>
+        </div>
+
+        <!-- LE RESTE EST INCHANGÉ -->
         <div style="margin-bottom: 20px;">
           <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL EXPÉDITEUR *</label>
           <input type="email" [(ngModel)]="form.senderEmail" placeholder="it-support&#64;fake-company.com"
