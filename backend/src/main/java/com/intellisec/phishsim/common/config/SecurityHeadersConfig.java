@@ -21,7 +21,7 @@ public class SecurityHeadersConfig extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // ✅ HSTS - Actif pour HTTPS
+        // ✅ HSTS
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
         // ✅ Empêche le MIME sniffing
@@ -30,17 +30,17 @@ public class SecurityHeadersConfig extends OncePerRequestFilter {
         // ✅ Empêche le clickjacking
         response.setHeader("X-Frame-Options", "DENY");
 
-        // ✅ Contrôle la politique de referrer
+        // ✅ Referrer Policy
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
-        // ✅ CSP - Permettre les ressources externes
+        // ✅ CSP - Autorise Google Fonts
         response.setHeader("Content-Security-Policy-Report-Only",
-                "default-src 'self' https://*.trycloudflare.com; " +
+                "default-src 'self' https://*.trycloudflare.com https://*.cloudflare.com; " +
                         "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:4200; " +
-                        "style-src 'self' 'unsafe-inline'; " +
-                        "img-src 'self' data: http://localhost:8086; " +
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+                        "font-src 'self' data: https://fonts.gstatic.com; " +
+                        "img-src 'self' data: http://localhost:8086 https://*.trycloudflare.com; " +
                         "connect-src 'self' http://localhost:8086 http://localhost:4200 https://*.trycloudflare.com; " +
-                        "font-src 'self' data:; " +
                         "frame-ancestors 'none'; " +
                         "form-action 'self'");
 
@@ -49,7 +49,6 @@ public class SecurityHeadersConfig extends OncePerRequestFilter {
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Expires", "0");
 
-        // ✅ Server header
         response.setHeader("Server", "Intellisec-PhishSim");
         response.setHeader("X-Powered-By", "Intellisec");
 

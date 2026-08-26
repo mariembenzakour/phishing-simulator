@@ -36,6 +36,10 @@ public class AiGenerationLog {
     @Column(columnDefinition = "TEXT")
     private String landingPageHtml;
 
+    // ✅ NOUVEAU : Champ séparé pour l'awareness page
+    @Column(columnDefinition = "TEXT")
+    private String awarenessPageHtml;
+
     @Column(columnDefinition = "TEXT")
     private String redFlags;
 

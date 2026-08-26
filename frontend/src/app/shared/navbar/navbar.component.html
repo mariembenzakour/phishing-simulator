@@ -79,6 +79,14 @@
         </a>
       </li>
 
+      <!-- Audit Log (Admin seulement) -->
+<li *ngIf="authService.isAdmin() || authService.isSuperAdmin()">
+  <a routerLink="/audit" routerLinkActive="active">
+    <span class="nav-icon">📋</span>
+    <span class="nav-label" *ngIf="!isCollapsed">Audit</span>
+  </a>
+</li>
+
     </ul>
   </nav>
 

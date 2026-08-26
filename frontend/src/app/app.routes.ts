@@ -20,6 +20,7 @@ import { TrendsComponent } from './dashboard/trends/trends.component';
 // ✅ IMPORT DES COMPOSANTS IA (Week 5)
 import { AiGenerationComponent } from './ai/ai-generation.component';
 import { AiDraftsComponent } from './ai/ai-drafts.component';
+import { AuditLogComponent } from './audit/audit-log.component';
 
 export const routes: Routes = [
   // ── AUTHENTIFICATION ──────────────────────────
@@ -125,6 +126,13 @@ export const routes: Routes = [
     canActivate: [authGuard], 
     data: { roles: ['SUPER_ADMIN', 'ADMIN', 'OPERATOR'] } 
   },
+
+  {
+  path: 'audit',
+  component: AuditLogComponent,
+  canActivate: [authGuard],
+  data: { roles: ['SUPER_ADMIN', 'ADMIN'] }
+},
 
   // ── REDIRECTION 404 ──────────────────────────
   { path: '**', redirectTo: 'login' }

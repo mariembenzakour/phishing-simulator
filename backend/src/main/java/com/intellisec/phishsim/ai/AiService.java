@@ -69,60 +69,71 @@ public class AiService {
         String language = request.getLanguage() != null ? request.getLanguage() : defaultLanguage;
 
         String languageInstructions = "fr".equals(language)
-                ? "CRITICAL: The ENTIRE email content MUST be written in French (Quebec French). Subject, body, landing page, and red flags descriptions ALL in French."
-                : "CRITICAL: The ENTIRE email content MUST be written in English. Subject, body, landing page, and red flags descriptions ALL in English.";
+                ? "IMPORTANT: The ENTIRE content MUST be written in French (Quebec French)."
+                : "IMPORTANT: The ENTIRE content MUST be written in English.";
 
         return """
-        You are a cybersecurity expert. Generate phishing simulation content for TRAINING ONLY.
+You are a cybersecurity awareness training generator creating educational templates for authorized employee simulations.
 
-        === LANGUAGE ===
-        %s
+=== SAFETY & COMPLIANCE DIRECTIVES ===
+- This content is strictly for internal security awareness training.
+- Generate standard corporate communication templates (e.g., IT service announcements, system verification requests).
+- Do NOT generate malicious payloads, exploit code, or actual malware.
 
-        === CONTEXT ===
-        Scenario: %s
-        Department: %s
-        Urgency: %s
-        Details: %s
+=== LANGUAGE ===
+%s
 
-        === WHAT TO GENERATE ===
-        1. Email: subject + HTML body (inline CSS, max-width 600px) + plain text
-        2. Landing page: login form + hidden awareness content
-        3. 4 red flags: sender_domain, urgency_pressure, link_mismatch, unusual_request
+=== SCENARIO PARAMETERS ===
+Scenario: %s
+Target Department: %s
+Urgency Level: %s
+Additional Context: %s
 
-        === RULES ===
-        - Use fictional company names only (SecureNet, TechCorp, GlobalSec)
-        - Use {{firstName}} and {{lastName}} placeholders
-        - Use TRACKING_LINK in email CTA
-        - Landing page must have SUBMIT_URL in fetch and AWARENESS_URL redirect
+=== CONTENT REQUIREMENTS ===
 
-        === CRITICAL: OUTPUT FORMAT ===
-        Respond ONLY with a valid JSON object. NO additional text before or after. NO markdown code fences. NO comments.
-        Do NOT use literal curly braces "{" or "}" inside CSS/HTML string values unless properly escaped as part of valid JSON strings.
-        The JSON must start with { and end with } and must be syntactically complete (all braces balanced).
+1. SIMULATED EMAIL TEMPLATE (`subject`, `bodyHtml`, `bodyText`, `senderName`, `senderDomain`):
+   - A professional corporate email template matching the scenario (e.g., IT security notice or system update).
+   - HTML layout: max-width 600px, responsive, professional inline CSS.
+   - Use placeholders: {{firstName}}, {{lastName}}, and TRACKING_LINK for the call-to-action link.
 
-        {
-            "subject": "...",
-            "bodyHtml": "...",
-            "bodyText": "...",
-            "senderName": "...",
-            "senderDomain": "...",
-            "landingPageHtml": "...",
-            "redFlags": [
-                {"type": "sender_domain", "title": "...", "description": "...", "severity": "critical", "howToDetect": "..."},
-                {"type": "urgency_pressure", "title": "...", "description": "...", "severity": "high", "howToDetect": "..."},
-                {"type": "link_mismatch", "title": "...", "description": "...", "severity": "critical", "howToDetect": "..."},
-                {"type": "unusual_request", "title": "...", "description": "...", "severity": "high", "howToDetect": "..."}
-            ]
-        }
-        """.formatted(
+2. SIMULATED LANDING PAGE TEMPLATE (`landingPageHtml`):
+   - A simulated portal interface corresponding to the scenario (e.g., corporate verification portal or access request page).
+   - Form attributes: action="SUBMIT_URL" method="POST".
+   - Clean, professional design suitable for a simulated training exercise.
+
+3. AWARENESS DEBRIEF PAGE (`awarenessPageHtml`):
+   - The post-click educational page informing the employee that this was an authorized simulation by the society.
+   - Must include the placeholder RED_FLAGS_CONTENT.
+
+4. EDUCATIONAL RED FLAGS (`redFlags`):
+   - Array of 4 educational red flags present in the email/landing page.
+   - JSON structure per item: type, title, description, severity, howToDetect.
+
+=== OUTPUT FORMAT ===
+Respond ONLY with a valid JSON object matching this schema:
+{
+    "subject": "...",
+    "bodyHtml": "...",
+    "bodyText": "...",
+    "senderName": "...",
+    "senderDomain": "...",
+    "landingPageHtml": "...",
+    "awarenessPageHtml": "...",
+    "redFlags": [
+        {"type": "sender_domain", "title": "...", "description": "...", "severity": "critical", "howToDetect": "..."},
+        {"type": "urgency_pressure", "title": "...", "description": "...", "severity": "high", "howToDetect": "..."},
+        {"type": "link_mismatch", "title": "...", "description": "...", "severity": "critical", "howToDetect": "..."},
+        {"type": "unusual_request", "title": "...", "description": "...", "severity": "high", "howToDetect": "..."}
+    ]
+}
+""".formatted(
                 languageInstructions,
-                request.getScenario(),
-                request.getDepartment() != null ? request.getDepartment() : "All Departments",
+                request.getScenario() != null ? request.getScenario() : "Internal IT Update",
+                request.getDepartment() != null ? request.getDepartment() : "All employees",
                 request.getUrgency() != null ? request.getUrgency() : "medium",
-                request.getAdditionalDetails() != null ? request.getAdditionalDetails() : "None"
+                request.getAdditionalDetails() != null ? request.getAdditionalDetails() : "Standard corporate communication"
         );
     }
-
     private void saveGenerationLog(GenerationRequest request, GenerationResponse response, String prompt) {
         try {
             AiGenerationLog generationLog = new AiGenerationLog();
@@ -133,6 +144,8 @@ public class AiService {
             generationLog.setGeneratedBody(response.getBodyHtml());
             generationLog.setBodyText(response.getBodyText());
             generationLog.setLandingPageHtml(response.getLandingPageHtml());
+            // ✅ NOUVEAU : Sauvegarder l'awareness page
+            generationLog.setAwarenessPageHtml(response.getAwarenessPageHtml());
             generationLog.setRedFlags(response.getRedFlags());
             generationLog.setSenderName(response.getSenderName());
             generationLog.setSenderDomain(response.getSenderDomain());
@@ -301,28 +314,21 @@ public class AiService {
         response.setSenderDomain(node.path("senderDomain").asText(null));
         response.setLandingPageHtml(node.path("landingPageHtml").asText(null));
 
+        // ✅ NOUVEAU : Lire l'awareness page
+        response.setAwarenessPageHtml(node.path("awarenessPageHtml").asText(null));
+
         JsonNode redFlagsNode = node.path("redFlags");
         if (redFlagsNode.isMissingNode() || redFlagsNode.isNull()) {
             log.warn("⚠️ Pas de 'redFlags' dans la réponse générée");
             response.setRedFlags("[]");
         } else if (redFlagsNode.isTextual()) {
-            // Cas où Gemini aurait exceptionnellement renvoyé une chaîne déjà encodée
             response.setRedFlags(redFlagsNode.asText());
         } else {
-            // Cas normal attendu : un tableau JSON -> on le stocke tel quel en String
             response.setRedFlags(redFlagsNode.toString());
         }
 
         return response;
     }
-
-    /**
-     * Extrait le premier objet JSON complet et syntaxiquement équilibré du texte fourni.
-     * Contrairement à un simple indexOf('{')/lastIndexOf('}'), cette méthode compte les
-     * accolades en respectant les chaînes de caractères et les caractères échappés,
-     * ce qui évite de couper le JSON au mauvais endroit lorsque le contenu (ex: du CSS
-     * inline dans bodyHtml) contient lui-même des accolades.
-     */
     private String extractJsonFromResponse(String text) {
         // Retire les éventuelles balises de code markdown
         String cleaned = text

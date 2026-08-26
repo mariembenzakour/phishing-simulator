@@ -1,0 +1,141 @@
+<app-navbar></app-navbar>
+
+<div class="audit-container">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>📋 Audit Log</h1>
+      <p>Historique complet et immuable de toutes les actions</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refresh()">
+        <span class="spinner" *ngIf="loading"></span>
+        <span *ngIf="!loading">🔄 Rafraîchir</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Integrity Banner -->
+  <div class="integrity-banner" *ngIf="integrity" [class.valid]="integrity.valid" [class.invalid]="!integrity.valid">
+    <div class="integrity-icon">{{ getIntegrityIcon() }}</div>
+    <div>
+      <div class="integrity-title">{{ integrity.message }}</div>
+      <div class="integrity-details">
+        {{ integrity.totalLogs }} logs vérifiés
+        <span *ngIf="integrity.valid">✓</span>
+        <span *ngIf="!integrity.valid">⚠️ {{ integrity.checked }}/{{ integrity.totalLogs }} valides</span>
+      </div>
+    </div>
+    <button class="btn-verify" (click)="verifyIntegrity()" [disabled]="verifying">
+      {{ verifying ? '⏳ Vérification...' : '🔍 Vérifier' }}
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.totalLogs || 0 }}</div>
+      <div class="stat-label">📊 Total logs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.totalSends || 0 }}</div>
+      <div class="stat-label">📧 Emails envoyés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.sendsLast24h || 0 }}</div>
+      <div class="stat-label">🕐 Dernières 24h</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ stats.sendsLast7Days || 0 }}</div>
+      <div class="stat-label">📅 7 derniers jours</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>Action</label>
+      <select [formControl]="filterAction" (change)="applyFilters()">
+        <option value="">Toutes</option>
+        <option *ngFor="let action of actions" [value]="action.value">{{ action.label }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Acteur</label>
+      <input [formControl]="filterActor" (input)="applyFilters()" placeholder="Email...">
+    </div>
+
+    <div class="filter-group">
+      <label>Recherche</label>
+      <input [formControl]="filterSearch" (input)="applyFilters()" placeholder="Rechercher...">
+    </div>
+
+    <button class="btn-clear" (click)="clearFilters()">✕ Effacer</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-container">
+    <div *ngIf="loading" class="loading-state">
+      <div class="loader"></div>
+      <p>Chargement des logs...</p>
+    </div>
+
+    <div *ngIf="!loading && filteredLogs.length === 0" class="empty-state">
+      <span class="empty-icon">📭</span>
+      <p>Aucun log trouvé</p>
+      <p class="empty-sub">Aucune action n'a encore été enregistrée dans l'audit log.</p>
+    </div>
+
+    <table *ngIf="!loading && filteredLogs.length > 0">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>ACTION</th>
+          <th>ACTEUR</th>
+          <th>CIBLE</th>
+          <th>DÉTAILS</th>
+          <th>HASH</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of filteredLogs">
+          <td class="date-cell">{{ formatDate(log.createdAt) }}</td>
+          <td>
+            <span class="action-badge" [style.background]="getActionColor(log.action)">
+              {{ getActionIcon(log.action) }} {{ getActionLabel(log.action) }}
+            </span>
+          </td>
+          <td class="actor-cell">{{ log.actor }}</td>
+          <td class="target-cell">
+            {{ log.target ? (log.target | slice:0:8) + '...' : '—' }}
+          </td>
+          <td class="details-cell" [title]="log.details">
+            {{ getDetailsSummary(log.details) }}
+          </td>
+          <td class="hash-cell" [title]="log.hash">
+            {{ getHashShort(log.hash) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="table-footer" *ngIf="!loading && filteredLogs.length > 0">
+      <span>{{ filteredLogs.length }} logs affichés sur {{ logs.length }}</span>
+    </div>
+  </div>
+
+  <!-- Recent Sends -->
+  <ng-container *ngIf="stats?.recentSends as recentSends">
+    <div class="recent-sends" *ngIf="recentSends.length > 0">
+      <h3>📧 Derniers envois</h3>
+      <div class="send-list">
+        <div class="send-item" *ngFor="let send of recentSends">
+          <span class="send-date">{{ formatDate(send.createdAt) }}</span>
+          <span class="send-actor">{{ send.actor }}</span>
+          <span class="send-details">{{ getDetailsSummary(send.details) }}</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

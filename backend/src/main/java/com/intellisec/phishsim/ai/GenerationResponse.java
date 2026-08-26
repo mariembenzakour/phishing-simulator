@@ -11,7 +11,8 @@ public class GenerationResponse {
     private String senderName;
     private String senderDomain;
     private String landingPageHtml;
-    private String redFlags;          // JSON string
+    private String awarenessPageHtml;  // ✅ NOUVEAU
+    private String redFlags;
     private String language;
     private String scenario;
     private String status;
