@@ -9,7 +9,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-global-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './global-dashboard.component.html'
+  templateUrl: './global-dashboard.component.html',
+  styleUrls: ['./global-dashboard.component.scss']
 })
 export class GlobalDashboardComponent implements OnInit {
 

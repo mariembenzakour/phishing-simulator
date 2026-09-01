@@ -1,152 +1,169 @@
-<div style="min-height: 100vh; background: #0a1628; display: flex;">
-
-  <!-- Partie gauche — Branding (Fond légèrement éclairci) -->
-  <div style="flex: 1; background: linear-gradient(135deg, #1a2a4a 0%, #2a4a6a 100%); display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden;">
-
-    <!-- Background pattern -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(0deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px);"></div>
-
-    <!-- Logo -->
-    <div style="margin-bottom: 48px; position: relative;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 48px; height: 48px; background: #e07b2a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🛡️</div>
-        <div>
-          <div style="color: white; font-size: 24px; font-weight: 800; letter-spacing: 1px;">INTELLI<span style="color: #e07b2a;">SEC</span></div>
-          <div style="color: #8899aa; font-size: 11px; letter-spacing: 2px;">SOLUTIONS</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tagline -->
-    <div style="position: relative;">
-      <p style="color: #e07b2a; font-size: 13px; letter-spacing: 2px; margin: 0 0 16px 0; text-transform: uppercase;">Sécurisez aujourd'hui, prospérez demain</p>
-      <h1 style="color: white; font-size: 42px; font-weight: 800; margin: 0 0 24px 0; line-height: 1.2;">
-        Rejoignez<br>
-        <span style="color: #e07b2a;">l'équipe</span><br>
-        Intellisec
-      </h1>
-      <p style="color: #8899aa; font-size: 15px; line-height: 1.6; margin: 0; max-width: 400px;">
-        Créez votre compte opérateur pour accéder à la plateforme de simulation de phishing assistée par IA.
-      </p>
-    </div>
-
-    <!-- Info box -->
-    <div style="margin-top: 48px; background: rgba(224,123,42,0.15); border: 1px solid rgba(224,123,42,0.3); border-radius: 8px; padding: 16px; position: relative;">
-      <p style="color: #e07b2a; font-size: 13px; font-weight: 600; margin: 0 0 8px 0;">🔒 Accès restreint</p>
-      <p style="color: #8899aa; font-size: 13px; margin: 0;">
-        Réservé aux employés Intellisec.<br>
-        Email &#64;intellisecsolutions.com requis.
-      </p>
-    </div>
+<div class="intellisec-auth-layout">
+  
+  <!-- Section Gauche : Même arrière-plan bg-code.jpg que le Login -->
+  <div class="code-panel">
+    <div class="dark-vignette"></div>
   </div>
 
-  <!-- Partie droite — Register Form (inchangée) -->
-  <div style="width: 560px; background: #0f1f35; display: flex; align-items: center; justify-content: center; padding: 40px 48px; overflow-y: auto;">
-    <div style="width: 100%;">
-
-      <h2 style="color: white; font-size: 28px; font-weight: 700; margin: 0 0 8px 0;">Créer un compte</h2>
-      <p style="color: #8899aa; margin: 0 0 32px 0; font-size: 14px;">Remplissez les informations ci-dessous</p>
-
-      <!-- Nom & Prénom -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-        <div>
-          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">PRÉNOM *</label>
-          <input type="text" [(ngModel)]="form.firstName" placeholder="Mariem"
-                 [style.border-color]="errors.firstName ? '#dc2626' : '#1e3a5c'"
-                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-          <span *ngIf="errors.firstName" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.firstName }}</span>
-        </div>
-        <div>
-          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOM *</label>
-          <input type="text" [(ngModel)]="form.lastName" placeholder="Ben Zakour"
-                 [style.border-color]="errors.lastName ? '#dc2626' : '#1e3a5c'"
-                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-          <span *ngIf="errors.lastName" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.lastName }}</span>
-        </div>
+  <!-- Section Droite : Formulaire d'inscription -->
+  <div class="form-panel">
+    <div class="form-box">
+      
+      <!-- Logo Officiel Intellisec -->
+      <div class="form-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" class="intellisec-svg-logo-small">
+          <g transform="translate(10, 20)">
+            <path d="M 12,24 L 12,10 M 12,10 A 3,3 0 1,1 12,4 A 3,3 0 1,1 12,10" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 46,24 L 46,2 M 46,2 A 3,3 0 1,1 46,-4 A 3,3 0 1,1 46,2" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 68,24 L 68,12 M 68,12 A 3,3 0 1,1 68,6 A 3,3 0 1,1 68,12" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 85,24 L 85,4 M 85,4 A 3,3 0 1,1 85,-2 A 3,3 0 1,1 85,4" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            
+            <text x="0" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="34" fill="#E07B2A">INTELLI</text>
+            <text x="140" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="34" fill="#0B1B3D">SEC</text>
+            <text x="2" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="600" font-size="11" fill="#0B1B3D" letter-spacing="8.5">SOLUTIONS</text>
+          </g>
+        </svg>
       </div>
 
-      <!-- Date & Téléphone -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-        <div>
-          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">DATE DE NAISSANCE *</label>
-          <input type="date" [(ngModel)]="form.birthDate"
-                 [style.border-color]="errors.birthDate ? '#dc2626' : '#1e3a5c'"
-                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none; color-scheme: dark;">
-          <span *ngIf="errors.birthDate" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.birthDate }}</span>
-        </div>
-        <div>
-          <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">TÉLÉPHONE *</label>
-          <input type="tel" [(ngModel)]="form.phone" placeholder="+216 XX XXX XXX"
-                 [style.border-color]="errors.phone ? '#dc2626' : '#1e3a5c'"
-                 style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-          <span *ngIf="errors.phone" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.phone }}</span>
-        </div>
+      <div class="form-header">
+        <h2 class="auth-title">Créer un compte</h2>
+        <p class="auth-subtitle">Remplissez les informations ci-dessous pour créer votre espace</p>
       </div>
 
-      <!-- Email -->
-      <div style="margin-bottom: 20px;">
-        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL PROFESSIONNEL *</label>
-        <input type="email" [(ngModel)]="form.email" placeholder="prenom.nom&#64;intellisecsolutions.com"
-               [style.border-color]="errors.email ? '#dc2626' : '#1e3a5c'"
-               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-        <span *ngIf="errors.email" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.email }}</span>
-      </div>
+      <form class="register-form" (ngSubmit)="register()">
+        
+        <!-- Prénom & Nom -->
+        <div class="field-grid">
+          <div class="field-container">
+            <label for="firstName" class="field-label">PRÉNOM *</label>
+            <input 
+              id="firstName"
+              type="text" 
+              [(ngModel)]="form.firstName" 
+              name="firstName"
+              placeholder="Mariem"
+              class="intellisec-input"
+              [class.input-error]="errors.firstName">
+            <span *ngIf="errors.firstName" class="field-error-text">{{ errors.firstName }}</span>
+          </div>
 
-      <!-- Password -->
-      <div style="margin-bottom: 20px;">
-        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">MOT DE PASSE *</label>
-        <input type="password" [(ngModel)]="form.password" placeholder="••••••••"
-               [style.border-color]="errors.password ? '#dc2626' : '#1e3a5c'"
-               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-        <span *ngIf="errors.password" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.password }}</span>
-        <div style="font-size: 11px; color: #556677; margin-top: 6px;">
-          Min. 8 caractères • Majuscule • Minuscule • Chiffre • Symbole
-        </div>
-      </div>
-
-      <!-- Confirm Password -->
-      <div style="margin-bottom: 20px;">
-        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">CONFIRMER LE MOT DE PASSE *</label>
-        <input type="password" [(ngModel)]="form.confirmPassword" placeholder="••••••••"
-               [style.border-color]="errors.confirmPassword ? '#dc2626' : '#1e3a5c'"
-               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
-        <span *ngIf="errors.confirmPassword" style="color: #f87171; font-size: 11px; margin-top: 4px; display: block;">{{ errors.confirmPassword }}</span>
-      </div>
-
-      <!-- RÔLE -->
-      <div style="margin-bottom: 28px; background: #162032; border-radius: 8px; padding: 12px 16px; border: 1px solid #1e3a5c;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 18px;">👤</span>
-          <div>
-            <span style="color: #8899aa; font-size: 12px; font-weight: 600; letter-spacing: 1px;">RÔLE</span>
-            <div style="color: #4ade80; font-size: 14px; font-weight: 600;">VIEWER (par défaut)</div>
-            <div style="font-size: 11px; color: #556677; margin-top: 2px;">
-              Pour accéder à plus de fonctionnalités, contactez un administrateur.
-            </div>
+          <div class="field-container">
+            <label for="lastName" class="field-label">NOM *</label>
+            <input 
+              id="lastName"
+              type="text" 
+              [(ngModel)]="form.lastName" 
+              name="lastName"
+              placeholder="Ben Zakour"
+              class="intellisec-input"
+              [class.input-error]="errors.lastName">
+            <span *ngIf="errors.lastName" class="field-error-text">{{ errors.lastName }}</span>
           </div>
         </div>
-      </div>
 
-      <!-- Messages -->
-      <div *ngIf="errors.general"
-           style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-        ⚠️ {{ errors.general }}
-      </div>
-      <div *ngIf="success"
-           style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-        ✅ {{ success }}
-      </div>
+        <!-- Date de Naissance & Téléphone -->
+        <div class="field-grid">
+          <div class="field-container">
+            <label for="birthDate" class="field-label">DATE DE NAISSANCE *</label>
+            <input 
+              id="birthDate"
+              type="date" 
+              [(ngModel)]="form.birthDate" 
+              name="birthDate"
+              class="intellisec-input"
+              [class.input-error]="errors.birthDate">
+            <span *ngIf="errors.birthDate" class="field-error-text">{{ errors.birthDate }}</span>
+          </div>
 
-      <!-- Submit -->
-      <button (click)="register()"
-              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; letter-spacing: 0.5px;">
-        CRÉER MON COMPTE →
-      </button>
+          <div class="field-container">
+            <label for="phone" class="field-label">TÉLÉPHONE *</label>
+            <input 
+              id="phone"
+              type="tel" 
+              [(ngModel)]="form.phone" 
+              name="phone"
+              placeholder="+216 XX XXX XXX"
+              class="intellisec-input"
+              [class.input-error]="errors.phone">
+            <span *ngIf="errors.phone" class="field-error-text">{{ errors.phone }}</span>
+          </div>
+        </div>
 
-      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #8899aa;">
-        Déjà un compte ?
-        <a routerLink="/login" style="color: #e07b2a; font-weight: 600; text-decoration: none;">Se connecter</a>
-      </p>
+        <!-- Email -->
+        <div class="field-container">
+          <label for="email" class="field-label">EMAIL PROFESSIONNEL *</label>
+          <input 
+            id="email"
+            type="email" 
+            [(ngModel)]="form.email" 
+            name="email"
+            placeholder="prenom.nom@intellisec.com"
+            class="intellisec-input"
+            [class.input-error]="errors.email">
+          <span *ngIf="errors.email" class="field-error-text">{{ errors.email }}</span>
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="field-container">
+          <label for="password" class="field-label">MOT DE PASSE *</label>
+          <input 
+            id="password"
+            type="password" 
+            [(ngModel)]="form.password" 
+            name="password"
+            placeholder="••••••••"
+            class="intellisec-input"
+            [class.input-error]="errors.password">
+          <span *ngIf="errors.password" class="field-error-text">{{ errors.password }}</span>
+          <span class="field-hint">Min. 8 caractères • Majuscule • Minuscule • Chiffre • Symbole</span>
+        </div>
+
+        <!-- Confirmation Mot de passe -->
+        <div class="field-container">
+          <label for="confirmPassword" class="field-label">CONFIRMER LE MOT DE PASSE *</label>
+          <input 
+            id="confirmPassword"
+            type="password" 
+            [(ngModel)]="form.confirmPassword" 
+            name="confirmPassword"
+            placeholder="••••••••"
+            class="intellisec-input"
+            [class.input-error]="errors.confirmPassword">
+          <span *ngIf="errors.confirmPassword" class="field-error-text">{{ errors.confirmPassword }}</span>
+        </div>
+
+        <!-- Badge Rôle par défaut -->
+        <div class="role-badge-box">
+          <span class="role-icon">👤</span>
+          <div class="role-info">
+            <span class="role-label">RÔLE ATTRIBUÉ</span>
+            <div class="role-value">VIEWER (par défaut)</div>
+            <p class="role-desc">Pour accéder à plus de fonctionnalités, contactez un administrateur.</p>
+          </div>
+        </div>
+
+        <!-- Alertes Erreur & Succès -->
+        <div *ngIf="errors.general" class="error-alert">
+          <span class="error-badge">ERREUR</span>
+          <span class="error-text">{{ errors.general }}</span>
+        </div>
+
+        <div *ngIf="success" class="success-alert">
+          <span class="success-badge">SUCCÈS</span>
+          <span class="success-text">{{ success }}</span>
+        </div>
+
+        <!-- Bouton Soumettre -->
+        <button type="submit" class="btn-primary">
+          CRÉER MON COMPTE →
+        </button>
+
+      </form>
+
+      <div class="form-footer">
+        <span class="footer-prompt">Déjà un compte ?</span>
+        <a routerLink="/login" class="footer-link">Se connecter</a>
+      </div>
 
     </div>
   </div>

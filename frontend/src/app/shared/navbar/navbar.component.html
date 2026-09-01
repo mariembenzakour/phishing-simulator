@@ -1,118 +1,190 @@
-<!-- Sidebar -->
-<div class="sidebar" [class.collapsed]="isCollapsed">
+<!-- Sidebar Navigation -->
+<aside class="sidebar" [class.collapsed]="isCollapsed">
 
-  <!-- Logo -->
+  <!-- En-tête / Logo Officiel Intellisec -->
   <div class="sidebar-header">
-    <div class="logo-container" (click)="toggleSidebar()">
-      <div class="logo-icon">
-        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="36" height="36" rx="8" fill="#e07b2a"/>
-          <path d="M18 6L10 13V19C10 24 13 28 18 30C23 28 26 24 26 19V13L18 6Z" stroke="white" stroke-width="1.8" fill="none"/>
-          <path d="M13.5 18L16.5 21L22.5 15" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="18" cy="18" r="1.5" fill="white" opacity="0.3"/>
-        </svg>
-      </div>
-      <div class="logo-text" *ngIf="!isCollapsed">
-        <span>INTELLI<span>SEC</span></span>
-        <small>SOLUTIONS</small>
-      </div>
+    <div class="logo-container" (click)="toggleSidebar()" title="Réduire / Agrandir le menu">
+      
+      <!-- Logo Officiel Complet (Mode Déplié) -->
+      <svg *ngIf="!isCollapsed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" class="intellisec-svg-logo-sidebar">
+        <g transform="translate(10, 20)">
+          <path d="M 12,24 L 12,10 M 12,10 A 3,3 0 1,1 12,4 A 3,3 0 1,1 12,10" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+          <path d="M 46,24 L 46,2 M 46,2 A 3,3 0 1,1 46,-4 A 3,3 0 1,1 46,2" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+          <path d="M 68,24 L 68,12 M 68,12 A 3,3 0 1,1 68,6 A 3,3 0 1,1 68,12" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+          <path d="M 85,24 L 85,4 M 85,4 A 3,3 0 1,1 85,-2 A 3,3 0 1,1 85,4" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+          
+          <text x="0" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="34" fill="#E07B2A">INTELLI</text>
+          <text x="140" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF">SEC</text>
+          <text x="2" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="600" font-size="11" fill="#8A99AD" letter-spacing="8.5">SOLUTIONS</text>
+        </g>
+      </svg>
+
+      <!-- Logo Officiel Réduit (Mode Replié) -->
+      <svg *ngIf="isCollapsed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80" class="intellisec-svg-logo-icon">
+        <g transform="translate(5, 10)">
+          <path d="M 12,24 L 12,10 M 12,10 A 3,3 0 1,1 12,4 A 3,3 0 1,1 12,10" stroke="#E07B2A" stroke-width="3" fill="none"/>
+          <path d="M 46,24 L 46,2 M 46,2 A 3,3 0 1,1 46,-4 A 3,3 0 1,1 46,2" stroke="#E07B2A" stroke-width="3" fill="none"/>
+          <path d="M 68,24 L 68,12 M 68,12 A 3,3 0 1,1 68,6 A 3,3 0 1,1 68,12" stroke="#E07B2A" stroke-width="3" fill="none"/>
+          <path d="M 85,24 L 85,4 M 85,4 A 3,3 0 1,1 85,-2 A 3,3 0 1,1 85,4" stroke="#E07B2A" stroke-width="3" fill="none"/>
+          <text x="12" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="40" fill="#E07B2A">I</text>
+          <text x="48" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="40" fill="#FFFFFF">S</text>
+        </g>
+      </svg>
+
     </div>
   </div>
 
-  <!-- Navigation -->
+  <!-- Menu de Navigation Principal -->
   <nav class="sidebar-nav">
-    <ul>
+    <ul class="nav-list">
 
-      <!-- Dashboard -->
-      <li>
-        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-          <span class="nav-icon">📊</span>
-          <span class="nav-label" *ngIf="!isCollapsed">Dashboard</span>
+      <!-- Dashboard - Tout le monde -->
+      <li class="nav-item">
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1"/>
+              <rect x="14" y="3" width="7" height="5" rx="1"/>
+              <rect x="14" y="12" width="7" height="9" rx="1"/>
+              <rect x="3" y="16" width="7" height="5" rx="1"/>
+            </svg>
+          </span>
+          <span class="nav-label" *ngIf="!isCollapsed">Tableau de bord</span>
         </a>
       </li>
 
-      <!-- Tendances -->
-      <li>
-        <a routerLink="/dashboard/trends" routerLinkActive="active">
-          <span class="nav-icon">📈</span>
+      <!-- Tendances - Tout le monde -->
+      <li class="nav-item">
+        <a routerLink="/dashboard/trends" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+              <polyline points="17 6 23 6 23 12"/>
+            </svg>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">Tendances</span>
         </a>
       </li>
 
-      <!-- Campagnes -->
-      <li>
-        <a routerLink="/campaigns" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-          <span class="nav-icon">📣</span>
+      <!-- Campagnes - Tout le monde (VIEWER en lecture seule) -->
+      <li class="nav-item">
+        <a routerLink="/campaigns" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">Campagnes</span>
         </a>
       </li>
 
-      <!-- Groupes -->
-      <li>
-        <a routerLink="/groups" routerLinkActive="active">
-          <span class="nav-icon">👥</span>
+      <!-- Groupes - Tout le monde (VIEWER en lecture seule) -->
+      <li class="nav-item">
+        <a routerLink="/groups" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">Groupes</span>
         </a>
       </li>
 
-      <!-- Cibles -->
-      <li>
-        <a routerLink="/targets" routerLinkActive="active">
-          <span class="nav-icon">🎯</span>
+      <!-- Cibles - Tout le monde (VIEWER en lecture seule) -->
+      <li class="nav-item">
+        <a routerLink="/targets" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="12" r="6"/>
+              <circle cx="12" cy="12" r="2"/>
+            </svg>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">Cibles</span>
         </a>
       </li>
 
-      <!-- ✅ IA (Week 5) : visible pour ADMIN, OPERATOR, SUPER_ADMIN -->
-      <li *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR', 'SUPER_ADMIN'])">
-        <a routerLink="/ai/generate" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-          <span class="nav-icon">🤖</span>
-          <span class="nav-label" *ngIf="!isCollapsed">IA</span>
+      <!-- Module IA - VIEWER n'a PAS accès -->
+      <li class="nav-item" *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR', 'SUPER_ADMIN'])">
+        <a routerLink="/ai/generate" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+          <span class="nav-label" *ngIf="!isCollapsed">Intelligence Artificielle</span>
         </a>
       </li>
 
-      <!-- Opérateurs (Admin seulement) -->
-      <li *ngIf="authService.isAdmin() || authService.isSuperAdmin()">
-        <a routerLink="/operators/create" routerLinkActive="active">
-          <span class="nav-icon">👑</span>
+      <!-- Opérateurs - VIEWER n'a PAS accès -->
+      <li class="nav-item" *ngIf="authService.isAdmin()">
+        <a routerLink="/operators/create" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+              <polyline points="16 11 18 13 22 9"/>
+            </svg>
+          </span>
           <span class="nav-label" *ngIf="!isCollapsed">Opérateurs</span>
         </a>
       </li>
 
-      <!-- Audit Log (Admin seulement) -->
-<li *ngIf="authService.isAdmin() || authService.isSuperAdmin()">
-  <a routerLink="/audit" routerLinkActive="active">
-    <span class="nav-icon">📋</span>
-    <span class="nav-label" *ngIf="!isCollapsed">Audit</span>
-  </a>
-</li>
+      <!-- ✅ Journal d'Audit - VIEWER a accès en lecture seule -->
+      <li class="nav-item" *ngIf="authService.isLoggedIn()">
+        <a routerLink="/audit" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+          </span>
+          <span class="nav-label" *ngIf="!isCollapsed">Audit & Logs</span>
+        </a>
+      </li>
 
     </ul>
   </nav>
 
-  <!-- Footer de la sidebar -->
+  <!-- Pied de Sidebar / Profil & Déconnexion -->
   <div class="sidebar-footer">
     <!-- Profil utilisateur -->
-    <div class="user-profile">
+    <div class="user-profile" [title]="authService.getUserInfo()?.email || 'Profil utilisateur'">
       <div class="user-avatar">
         {{ authService.getUserInfo()?.email?.charAt(0)?.toUpperCase() || 'U' }}
       </div>
       <div class="user-info" *ngIf="!isCollapsed">
         <div class="user-name">{{ authService.getUserInfo()?.email || 'Utilisateur' }}</div>
-        <div class="user-role" [style.color]="
-          authService.isSuperAdmin() ? '#e07b2a' : 
-          authService.isAdmin() ? '#e07b2a' : 
-          authService.isOperator() ? '#60a5fa' : '#4ade80'">
-          {{ authService.isSuperAdmin() ? '⭐ SUPER_ADMIN' : authService.isAdmin() ? 'ADMIN' : authService.isOperator() ? 'OPERATOR' : 'VIEWER' }}
+        <div class="user-role" [ngClass]="{
+          'role-superadmin': authService.isSuperAdmin(),
+          'role-admin': authService.isAdmin() && !authService.isSuperAdmin(),
+          'role-operator': authService.isOperator(),
+          'role-viewer': authService.isViewer()
+        }">
+          {{ authService.isSuperAdmin() ? 'SUPER ADMIN' : authService.isAdmin() ? 'ADMIN' : authService.isOperator() ? 'OPERATOR' : 'VIEWER' }}
         </div>
       </div>
     </div>
 
     <!-- Déconnexion -->
-    <button class="logout-btn" (click)="logout()" title="Déconnexion">
-      <span class="nav-icon">🚪</span>
+    <button class="logout-btn" (click)="logout()" title="Déconnexion de la plateforme">
+      <span class="nav-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </span>
       <span class="nav-label" *ngIf="!isCollapsed">Déconnexion</span>
     </button>
   </div>
 
-</div>
+</aside>

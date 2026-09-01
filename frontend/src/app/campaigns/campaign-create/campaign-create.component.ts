@@ -13,7 +13,8 @@ import { AiService, AiGenerationLog } from '../../shared/services/ai.service';
   selector: 'app-campaign-create',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
-  templateUrl: './campaign-create.component.html'
+  templateUrl: './campaign-create.component.html',
+  styleUrl: './campaign-create.component.scss'
 })
 export class CampaignCreateComponent implements OnInit {
 
@@ -78,44 +79,27 @@ export class CampaignCreateComponent implements OnInit {
     }
   }
 
-  /**
-   * ✅ Charge les drafts IA approuvés (utilisables dans les campagnes)
-   * Utilise l'endpoint /api/ai/approved pour récupérer uniquement les drafts approuvés
-   */
   loadAiDrafts() {
     this.loadingAiDrafts = true;
-    
-    // ✅ Appel au nouvel endpoint /api/ai/approved
     this.aiService.getApprovedDrafts().subscribe({
       next: (data) => {
-        console.log('📋 Drafts approuvés reçus:', data);
         this.aiDrafts = data.drafts || [];
-        console.log('✅ Drafts disponibles:', this.aiDrafts);
         this.loadingAiDrafts = false;
       },
-      error: (err) => {
-        this.loadingAiDrafts = false;
-        console.error('❌ Erreur chargement drafts IA:', err);
-        // Fallback: essayer avec l'ancien endpoint et filtrer
+      error: () => {
         this.loadAiDraftsFallback();
       }
     });
   }
 
-  /**
-   * ✅ Fallback : charger tous les drafts et filtrer les approuvés
-   */
   private loadAiDraftsFallback() {
     this.aiService.getDrafts().subscribe({
       next: (data) => {
-        console.log('📋 Fallback - Drafts reçus:', data);
         this.aiDrafts = data.drafts.filter(d => d.approved === true);
-        console.log('✅ Drafts approuvés (fallback):', this.aiDrafts);
         this.loadingAiDrafts = false;
       },
-      error: (err) => {
+      error: () => {
         this.loadingAiDrafts = false;
-        console.error('❌ Erreur fallback:', err);
       }
     });
   }
@@ -133,7 +117,7 @@ export class CampaignCreateComponent implements OnInit {
       this.form.customSubject = selected.generatedSubject;
       this.form.customBodyHtml = selected.generatedBody;
       this.form.customBodyText = selected.bodyText;
-      this.success = '✅ Contenu IA chargé automatiquement !';
+      this.success = 'Contenu IA appliqué automatiquement à la campagne.';
       setTimeout(() => { this.success = ''; }, 3000);
     }
   }
@@ -168,12 +152,12 @@ export class CampaignCreateComponent implements OnInit {
 
   create() {
     if (!this.form.name || !this.form.senderEmail || !this.form.targetGroupId) {
-      this.error = 'Le nom, l\'email expéditeur et le groupe sont obligatoires';
+      this.error = 'Le nom de la campagne, l\'email expéditeur et le groupe de cibles sont obligatoires.';
       return;
     }
 
     if (this.form.dryRun && !this.form.dryRunEmail) {
-      this.error = 'Veuillez renseigner un email de test pour le mode Dry Run';
+      this.error = 'Veuillez préciser un email de test pour le mode Dry Run.';
       return;
     }
 
@@ -196,31 +180,31 @@ export class CampaignCreateComponent implements OnInit {
     if (this.isEditMode) {
       this.campaignService.update(this.campaignId, payload).subscribe({
         next: () => {
-          this.success = 'Campagne mise à jour avec succès !';
-          setTimeout(() => this.router.navigate(['/campaigns']), 1500);
+          this.success = 'Campagne mise à jour avec succès.';
+          setTimeout(() => this.router.navigate(['/campaigns']), 1200);
         },
         error: (err: any) => {
-          this.error = err.error?.message || 'Erreur lors de la mise à jour';
+          this.error = err.error?.message || 'Erreur lors de la mise à jour de la campagne.';
         }
       });
     } else {
       this.campaignService.create(payload).subscribe({
         next: () => {
-          this.success = 'Campagne créée avec succès !';
-          setTimeout(() => this.router.navigate(['/campaigns']), 1500);
+          this.success = 'Campagne créée avec succès.';
+          setTimeout(() => this.router.navigate(['/campaigns']), 1200);
         },
         error: () => {
-          this.error = 'Erreur lors de la création';
+          this.error = 'Erreur lors de la création de la campagne.';
         }
       });
     }
   }
 
   getTitle(): string {
-    return this.isEditMode ? '✏️ Modifier la campagne' : '➕ Nouvelle campagne';
+    return this.isEditMode ? 'Modifier la campagne' : 'Nouvelle campagne';
   }
 
   getButtonText(): string {
-    return this.isEditMode ? '💾 Mettre à jour' : '🚀 CRÉER LA CAMPAGNE';
+    return this.isEditMode ? 'Mettre à jour la campagne' : 'Créer la campagne';
   }
 }

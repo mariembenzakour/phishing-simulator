@@ -8,7 +8,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
 
@@ -21,15 +22,13 @@ export class LoginComponent {
   login() {
     this.authService.login(this.email, this.password).subscribe({
       next: (res) => {
-        // ✅ Sauvegarder l'email
+        // Sauvegarder l'email
         this.authService.saveTempEmail(this.email);
         
-        // ✅ Vérifier si MFA est configuré
+        // Vérifier si MFA est configuré
         if (res.mfaConfigured) {
-          // ✅ MFA déjà configuré → aller directement à /mfa
           this.router.navigate(['/mfa']);
         } else {
-          // ✅ MFA PAS configuré → aller à /setup-mfa pour configurer
           this.router.navigate(['/setup-mfa']);
         }
       },

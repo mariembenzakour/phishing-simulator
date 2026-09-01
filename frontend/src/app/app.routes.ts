@@ -131,7 +131,7 @@ export const routes: Routes = [
   path: 'audit',
   component: AuditLogComponent,
   canActivate: [authGuard],
-  data: { roles: ['SUPER_ADMIN', 'ADMIN'] }
+  data: { roles: ['SUPER_ADMIN', 'ADMIN', 'VIEWER'] }
 },
 
   // ── REDIRECTION 404 ──────────────────────────

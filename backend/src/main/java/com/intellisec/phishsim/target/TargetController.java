@@ -22,10 +22,22 @@ public class TargetController {
         return ResponseEntity.ok(targetService.getByGroup(groupId));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
+    public ResponseEntity<Target> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(targetService.getById(id));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Target> create(@RequestBody Target target) {
         return ResponseEntity.ok(targetService.save(target));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<Target> update(@PathVariable UUID id, @RequestBody Target target) {
+        return ResponseEntity.ok(targetService.update(id, target));
     }
 
     @DeleteMapping("/{id}")
@@ -42,9 +54,9 @@ public class TargetController {
             @RequestParam("groupId") UUID groupId) {
         try {
             targetService.importCsv(file, groupId);
-            return ResponseEntity.ok("✅ Import réussi !");
+            return ResponseEntity.ok("Import réussi !");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("❌ Erreur : " + e.getMessage());
+            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
         }
     }
 }

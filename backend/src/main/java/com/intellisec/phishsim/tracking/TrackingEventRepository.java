@@ -17,12 +17,17 @@ public interface TrackingEventRepository extends JpaRepository<TrackingEvent, UU
 
     List<TrackingEvent> findByEventType(String eventType);
 
-    // ✅ AJOUTÉ : Supprimer les événements avant une date
+    // ✅ Supprimer les événements avant une date
     @Modifying
     @Query("DELETE FROM TrackingEvent te WHERE te.occurredAt < :cutoff")
     long deleteByOccurredAtBefore(@Param("cutoff") LocalDateTime cutoff);
 
-    // ✅ AJOUTÉ : Compter les événements avant une date (pour monitoring)
+    // ✅ Supprimer tous les TrackingEvent d'un send_event (pour suppression de campagne)
+    @Modifying
+    @Query("DELETE FROM TrackingEvent te WHERE te.sendEventId = :sendEventId")
+    void deleteBySendEventId(@Param("sendEventId") UUID sendEventId);
+
+    // ✅ Compter les événements avant une date
     @Query("SELECT COUNT(te) FROM TrackingEvent te WHERE te.occurredAt < :cutoff")
     long countByOccurredAtBefore(@Param("cutoff") LocalDateTime cutoff);
 

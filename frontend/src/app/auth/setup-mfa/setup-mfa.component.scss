@@ -1,0 +1,237 @@
+$intellisec-orange: #e07b2a;
+$intellisec-navy: #0b1b3d;
+
+$text-dark: #1b1c1d;
+$text-sub: #505050;
+$input-bg: #ffffff;
+$link-blue: #0067b8;
+
+.intellisec-auth-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  overflow: hidden;
+}
+
+/* ── PANNEAU GAUCHE ── */
+.code-panel {
+  flex: 1;
+  background-color: #090e17;
+  background-image: url('../../../assets/bg-code.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+}
+
+.dark-vignette {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 14, 23, 0.15);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── PANNEAU DROIT ── */
+.form-panel {
+  width: 480px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  flex-shrink: 0;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 5;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.form-logo {
+  width: 190px;
+  margin: 0 auto 28px auto;
+}
+
+.intellisec-svg-logo-small {
+  width: 100%;
+  height: auto;
+}
+
+.form-header {
+  margin-bottom: 24px;
+
+  .auth-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 6px 0;
+  }
+
+  .auth-subtitle {
+    font-size: 13px;
+    color: $text-sub;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.setup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── ZONE QR CODE ── */
+.qr-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.qr-card {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  .qr-image {
+    width: 180px;
+    height: 180px;
+    display: block;
+  }
+}
+
+/* Zone de chargement */
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.loading-box {
+  width: 180px;
+  height: 180px;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+
+  .loading-text {
+    font-size: 13px;
+    color: #718096;
+  }
+}
+
+/* ── ALERTES ── */
+.warning-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 2px;
+  text-align: left;
+
+  .warning-icon {
+    font-size: 14px;
+  }
+
+  .warning-text {
+    font-size: 12px;
+    color: #b78103;
+    margin: 0;
+
+    strong {
+      color: #8c6202;
+    }
+  }
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 2px;
+
+  .error-badge {
+    font-size: 9px;
+    font-weight: 800;
+    background-color: #e53e3e;
+    color: #ffffff;
+    padding: 2px 5px;
+    border-radius: 2px;
+  }
+
+  .error-text {
+    font-size: 12px;
+    color: #c53030;
+    font-weight: 500;
+  }
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background-color: $intellisec-navy;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: lighten($intellisec-navy, 8%);
+  }
+}
+
+.form-footer {
+  margin-top: 24px;
+  font-size: 13px;
+
+  .footer-link {
+    color: $link-blue;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .intellisec-auth-layout {
+    flex-direction: column;
+  }
+
+  .code-panel {
+    min-height: 160px;
+    padding: 24px;
+  }
+
+  .form-panel {
+    width: 100%;
+    padding: 32px 24px;
+    box-shadow: none;
+  }
+}

@@ -1,0 +1,224 @@
+$intellisec-orange: #e07b2a;
+$intellisec-navy: #0b1b3d;
+
+$text-dark: #1b1c1d;
+$text-sub: #505050;
+$input-bg: #ffffff;
+$link-blue: #0067b8;
+
+.intellisec-auth-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #ffffff;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  overflow: hidden;
+}
+
+/* ── PANNEAU GAUCHE (Image identique au Login & Register) ── */
+.code-panel {
+  flex: 1;
+  background-color: #090e17;
+  background-image: url('../../../assets/bg-code.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px;
+}
+
+.dark-vignette {
+  position: absolute;
+  inset: 0;
+  background: rgba(9, 14, 23, 0.15);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── PANNEAU DROIT ── */
+.form-panel {
+  width: 480px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  flex-shrink: 0;
+  box-shadow: -4px 0 25px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 5;
+}
+
+.form-box {
+  width: 100%;
+  max-width: 360px;
+}
+
+.form-logo {
+  width: 190px;
+  margin-bottom: 28px;
+}
+
+.intellisec-svg-logo-small {
+  width: 100%;
+  height: auto;
+}
+
+.form-header {
+  margin-bottom: 32px;
+
+  .auth-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 6px 0;
+  }
+
+  .auth-subtitle {
+    font-size: 14px;
+    color: $text-sub;
+    margin: 0;
+    line-height: 1.4;
+  }
+}
+
+.mfa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+
+  .field-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: $text-sub;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+/* Saisie du code MFA spécifique (Grands caractères centrés) */
+.intellisec-input {
+  width: 100%;
+  padding: 12px;
+  background-color: $input-bg;
+  border: 1px solid #666666;
+  border-radius: 2px;
+  color: $text-dark;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #cbd5e1;
+    letter-spacing: 12px;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $intellisec-orange;
+    box-shadow: 0 0 0 2px rgba(224, 123, 42, 0.2);
+  }
+}
+
+.mfa-code-input {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 12px;
+  padding-left: 20px; /* Aligne visuellement les 6 chiffres */
+}
+
+/* Alerte Erreur */
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background-color: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 2px;
+
+  .error-badge {
+    font-size: 9px;
+    font-weight: 800;
+    background-color: #e53e3e;
+    color: #ffffff;
+    padding: 2px 5px;
+    border-radius: 2px;
+  }
+
+  .error-text {
+    font-size: 13px;
+    color: #c53030;
+    font-weight: 500;
+  }
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background-color: $intellisec-navy;
+  color: #ffffff;
+  border: none;
+  border-radius: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: lighten($intellisec-navy, 8%);
+  }
+}
+
+.form-footer {
+  margin-top: 32px;
+  font-size: 13px;
+  color: $text-sub;
+  text-align: center;
+
+  .footer-link {
+    color: $link-blue;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .intellisec-auth-layout {
+    flex-direction: column;
+  }
+
+  .code-panel {
+    min-height: 180px;
+    padding: 24px;
+  }
+
+  .form-panel {
+    width: 100%;
+    padding: 32px 24px;
+    box-shadow: none;
+  }
+}

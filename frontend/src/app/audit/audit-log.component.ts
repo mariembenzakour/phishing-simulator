@@ -27,17 +27,17 @@ export class AuditLogComponent implements OnInit {
   filterSearch = new FormControl('');
 
   actions = [
-    { value: 'CAMPAIGN_CREATE', label: '📝 Création campagne' },
-    { value: 'CAMPAIGN_UPDATE', label: '✏️ Mise à jour campagne' },
-    { value: 'CAMPAIGN_AUTHORIZE', label: '✅ Autorisation campagne' },
-    { value: 'CAMPAIGN_PAUSE', label: '⏸️ Pause campagne' },
-    { value: 'CAMPAIGN_RESUME', label: '▶️ Reprise campagne' },
-    { value: 'CAMPAIGN_DELETE', label: '🗑️ Suppression campagne' },
-    { value: 'CAMPAIGN_CLONE', label: '📋 Clonage campagne' },
-    { value: 'CAMPAIGN_AUTO_START', label: '⏰ Démarrage auto' },
-    { value: 'CAMPAIGN_SEND', label: '📧 Envoi campagne' },
-    { value: 'USER_CREATE', label: '👤 Création opérateur' },
-    { value: 'USER_DELETE', label: '🚫 Suppression opérateur' }
+    { value: 'CAMPAIGN_CREATE', label: 'Création campagne' },
+    { value: 'CAMPAIGN_UPDATE', label: 'Mise à jour campagne' },
+    { value: 'CAMPAIGN_AUTHORIZE', label: 'Autorisation campagne' },
+    { value: 'CAMPAIGN_PAUSE', label: 'Pause campagne' },
+    { value: 'CAMPAIGN_RESUME', label: 'Reprise campagne' },
+    { value: 'CAMPAIGN_DELETE', label: 'Suppression campagne' },
+    { value: 'CAMPAIGN_CLONE', label: 'Clonage campagne' },
+    { value: 'CAMPAIGN_AUTO_START', label: 'Démarrage auto' },
+    { value: 'CAMPAIGN_SEND', label: 'Envoi campagne' },
+    { value: 'USER_CREATE', label: 'Création opérateur' },
+    { value: 'USER_DELETE', label: 'Suppression opérateur' }
   ];
 
   constructor(
@@ -94,7 +94,7 @@ export class AuditLogComponent implements OnInit {
         this.verifying = false;
         this.integrity = {
           valid: false,
-          message: '❌ Erreur lors de la vérification',
+          message: 'Erreur lors de la vérification',
           totalLogs: 0,
           checked: 0
         };
@@ -145,36 +145,23 @@ export class AuditLogComponent implements OnInit {
 
   getActionColor(action: string): string {
     const colors: Record<string, string> = {
-      'CAMPAIGN_CREATE': '#22c55e',
-      'CAMPAIGN_UPDATE': '#3b82f6',
-      'CAMPAIGN_AUTHORIZE': '#8b5cf6',
-      'CAMPAIGN_PAUSE': '#f59e0b',
-      'CAMPAIGN_RESUME': '#22c55e',
+      'CAMPAIGN_CREATE': '#059669',
+      'CAMPAIGN_UPDATE': '#2563eb',
+      'CAMPAIGN_AUTHORIZE': '#7c3aed',
+      'CAMPAIGN_PAUSE': '#d97706',
+      'CAMPAIGN_RESUME': '#059669',
       'CAMPAIGN_DELETE': '#dc2626',
-      'CAMPAIGN_CLONE': '#8b5cf6',
-      'CAMPAIGN_AUTO_START': '#3b82f6',
-      'CAMPAIGN_SEND': '#e07b2a',
-      'USER_CREATE': '#22c55e',
+      'CAMPAIGN_CLONE': '#7c3aed',
+      'CAMPAIGN_AUTO_START': '#2563eb',
+      'CAMPAIGN_SEND': '#0284c7',
+      'USER_CREATE': '#059669',
       'USER_DELETE': '#dc2626'
     };
-    return colors[action] || '#6b7280';
+    return colors[action] || '#64748b';
   }
 
   getActionIcon(action: string): string {
-    const icons: Record<string, string> = {
-      'CAMPAIGN_CREATE': '➕',
-      'CAMPAIGN_UPDATE': '✏️',
-      'CAMPAIGN_AUTHORIZE': '✅',
-      'CAMPAIGN_PAUSE': '⏸️',
-      'CAMPAIGN_RESUME': '▶️',
-      'CAMPAIGN_DELETE': '🗑️',
-      'CAMPAIGN_CLONE': '📋',
-      'CAMPAIGN_AUTO_START': '⏰',
-      'CAMPAIGN_SEND': '📧',
-      'USER_CREATE': '👤',
-      'USER_DELETE': '🚫'
-    };
-    return icons[action] || '📌';
+    return ''; // Les icônes SVG sont directement intégrées dans le HTML selon l'action
   }
 
   getActionLabel(action: string): string {
@@ -208,12 +195,12 @@ export class AuditLogComponent implements OnInit {
   }
 
   getIntegrityColor(): string {
-    if (this.integrity === null) return '#6b7280';
-    return this.integrity.valid ? '#22c55e' : '#dc2626';
+    if (this.integrity === null) return '#64748b';
+    return this.integrity.valid ? '#059669' : '#dc2626';
   }
 
   getIntegrityIcon(): string {
     if (this.integrity === null) return '⏳';
-    return this.integrity.valid ? '✅' : '⚠️';
+    return this.integrity.valid ? '✓' : '⚠';
   }
 }

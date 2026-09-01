@@ -3,9 +3,14 @@ package com.intellisec.phishsim.campaign;
 import com.intellisec.phishsim.ai.AiGenerationLog;
 import com.intellisec.phishsim.ai.AiGenerationLogRepository;
 import com.intellisec.phishsim.audit.AuditLogService;
+import com.intellisec.phishsim.tracking.SendEvent;
+import com.intellisec.phishsim.tracking.SendEventRepository;
+import com.intellisec.phishsim.tracking.TrackingEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,11 +18,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignService {
 
     private final CampaignRepository campaignRepository;
     private final AuditLogService auditLogService;
-    private final AiGenerationLogRepository aiGenerationLogRepository;  // ✅ AJOUTÉ
+    private final AiGenerationLogRepository aiGenerationLogRepository;
+    private final SendEventRepository sendEventRepository;        // ✅ AJOUTÉ
+    private final TrackingEventRepository trackingEventRepository; // ✅ AJOUTÉ
 
     // ── GET ALL ──────────────────────────────────────
     public List<Campaign> getAll() {
@@ -31,10 +39,10 @@ public class CampaignService {
     }
 
     // ── CREATE ───────────────────────────────────────
+    @Transactional
     public Campaign create(Campaign campaign) {
         campaign.setCreatedAt(LocalDateTime.now());
 
-        // ✅ Si un draft IA est associé, charger automatiquement le contenu
         if (campaign.getAiGenerationId() != null) {
             loadAiContent(campaign);
         }
@@ -57,7 +65,8 @@ public class CampaignService {
         return saved;
     }
 
-    // ✅ NOUVELLE MÉTHODE UPDATE
+    // ── UPDATE ───────────────────────────────────────
+    @Transactional
     public Campaign update(UUID id, Campaign campaignData) {
         Campaign campaign = getById(id);
 
@@ -71,7 +80,6 @@ public class CampaignService {
         campaign.setDryRunEmail(campaignData.getDryRunEmail());
         campaign.setThrottleSeconds(campaignData.getThrottleSeconds());
 
-        // ✅ Si un nouveau draft IA est associé, charger le contenu
         if (campaignData.getAiGenerationId() != null &&
                 !campaignData.getAiGenerationId().equals(campaign.getAiGenerationId())) {
             campaign.setAiGenerationId(campaignData.getAiGenerationId());
@@ -90,9 +98,6 @@ public class CampaignService {
         return saved;
     }
 
-    /**
-     * ✅ Charge automatiquement le contenu d'un draft IA approuvé
-     */
     private void loadAiContent(Campaign campaign) {
         if (campaign.getAiGenerationId() == null) {
             return;
@@ -111,6 +116,7 @@ public class CampaignService {
     }
 
     // ── CLONE ────────────────────────────────────────
+    @Transactional
     public Campaign clone(UUID id) {
         Campaign original = getById(id);
         Campaign clone = new Campaign();
@@ -124,7 +130,6 @@ public class CampaignService {
         clone.setDryRunEmail(original.getDryRunEmail());
         clone.setThrottleSeconds(original.getThrottleSeconds());
 
-        // ✅ Cloner aussi le contenu IA
         clone.setAiGenerationId(original.getAiGenerationId());
         clone.setCustomSubject(original.getCustomSubject());
         clone.setCustomBodyHtml(original.getCustomBodyHtml());
@@ -145,6 +150,7 @@ public class CampaignService {
     }
 
     // ── AUTHORIZE ────────────────────────────────────
+    @Transactional
     public Campaign authorize(UUID id, UUID operatorId) {
         Campaign campaign = getById(id);
         if (!campaign.getStatus().equals("DRAFT") && !campaign.getStatus().equals("SCHEDULED")) {
@@ -164,6 +170,7 @@ public class CampaignService {
     }
 
     // ── PAUSE ────────────────────────────────────────
+    @Transactional
     public Campaign pause(UUID id) {
         Campaign campaign = getById(id);
         if (!campaign.getStatus().equals("RUNNING")) {
@@ -182,6 +189,7 @@ public class CampaignService {
     }
 
     // ── RESUME ───────────────────────────────────────
+    @Transactional
     public Campaign resume(UUID id) {
         Campaign campaign = getById(id);
         if (!campaign.getStatus().equals("PAUSED")) {
@@ -200,10 +208,22 @@ public class CampaignService {
     }
 
     // ── DELETE ───────────────────────────────────────
+    @Transactional
     public void delete(UUID id) {
         Campaign campaign = getById(id);
+
         if (campaign.getStatus().equals("RUNNING")) {
             throw new RuntimeException("Cannot delete a RUNNING campaign");
+        }
+
+        // ✅ Supprimer les dépendances : send_events et tracking_events
+        List<SendEvent> sendEvents = sendEventRepository.findByCampaignId(id);
+        if (!sendEvents.isEmpty()) {
+            for (SendEvent se : sendEvents) {
+                trackingEventRepository.deleteBySendEventId(se.getId());
+            }
+            sendEventRepository.deleteAll(sendEvents);
+            log.info("🗑️ Supprimés: {} send_events et leurs tracking_events", sendEvents.size());
         }
 
         auditLogService.logAction(
@@ -213,6 +233,7 @@ public class CampaignService {
         );
 
         campaignRepository.deleteById(id);
+        log.info("✅ Campagne '{}' supprimée avec succès", campaign.getName());
     }
 
     // ── SCHEDULER ────────────────────────────────────

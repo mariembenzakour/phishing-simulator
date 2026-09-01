@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
   selector: 'app-setup-mfa',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './setup-mfa.component.html'
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './setup-mfa.component.html',
+  styleUrl: './setup-mfa.component.scss'
 })
 export class SetupMfaComponent implements OnInit {
 

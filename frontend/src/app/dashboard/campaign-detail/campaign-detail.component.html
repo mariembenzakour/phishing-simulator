@@ -1,239 +1,280 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+<div class="detail-container">
 
-  <!-- ============================================ -->
-  <!-- HEADER -->
-  <!-- ============================================ -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+  <!-- En-tête -->
+  <div class="detail-header">
     <div>
-      <a routerLink="/dashboard" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour au tableau de bord</a>
-      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 8px 0 4px 0;">📊 {{ data.campaignName || 'Détails de la campagne' }}</h1>
-      <p style="color: #6b7a8a; font-size: 14px;">
-        Statut : <span [style.color]="getStatusColor(data.status)">{{ data.status || 'Inconnu' }}</span>
-        <span style="margin-left: 16px;">📅 {{ data.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-      </p>
+      <a routerLink="/dashboard" class="back-link">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Retour au tableau de bord
+      </a>
+      <h1 class="page-title">{{ data.campaignName || 'Détails de la campagne' }}</h1>
+      <div class="header-meta">
+        <span class="status-chip" [style.backgroundColor]="getStatusColor(data.status) + '20'" [style.color]="getStatusColor(data.status)">
+          ● {{ data.status || 'Inconnu' }}
+        </span>
+        <span class="meta-date">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          Créée le {{ data.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
     </div>
-    <button (click)="loadCampaignDetail()" 
-            style="background: #e07b2a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-      🔄 Rafraîchir
+    <button class="btn btn-outline" (click)="loadCampaignDetail()">
+      <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+      Rafraîchir
     </button>
   </div>
 
-  <!-- ============================================ -->
-  <!-- LOADING & ERROR -->
-  <!-- ============================================ -->
-  <div *ngIf="loading" style="text-align: center; padding: 60px;">
-    <p style="color: #6b7a8a;">Chargement...</p>
+  <!-- Etats Chargement / Erreur -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loader"></div>
+    <p>Chargement des statistiques de la campagne...</p>
   </div>
 
-  <div *ngIf="error" 
-       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-    ⚠️ {{ error }}
+  <div *ngIf="error" class="alert alert-error">
+    <svg class="icon-md text-red" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    <span>{{ error }}</span>
   </div>
 
-  <!-- ============================================ -->
-  <!-- CONTENU PRINCIPAL -->
-  <!-- ============================================ -->
+  <!-- Contenu Principal -->
   <div *ngIf="!loading && !error">
 
-    <!-- ========================================== -->
-    <!-- 1. CARTES KPI (4 cartes) -->
-    <!-- ========================================== -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
-      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.total || 0 }}</div>
-        <div style="color: #6b7a8a; font-size: 12px;">📧 Envoyés</div>
-      </div>
-      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.opens || 0 }}</div>
-        <div style="color: #6b7a8a; font-size: 12px;">👁️ Ouverts</div>
-      </div>
-      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.clicks || 0 }}</div>
-        <div style="color: #6b7a8a; font-size: 12px;">🖱️ Clics</div>
-      </div>
-      <div style="background: white; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="font-size: 28px; font-weight: 800; color: #1a3a5c;">{{ stats.submits || 0 }}</div>
-        <div style="color: #6b7a8a; font-size: 12px;">📝 Soumissions</div>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 2. TAUX (3 cartes) -->
-    <!-- ========================================== -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 32px;">
-      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="color: #6b7a8a; font-size: 12px;">Taux d'ouverture</div>
-        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.openRate | number:'1.1-1' }}%</div>
-      </div>
-      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="color: #6b7a8a; font-size: 12px;">Taux de clics</div>
-        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.clickRate | number:'1.1-1' }}%</div>
-      </div>
-      <div style="background: white; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-        <div style="color: #6b7a8a; font-size: 12px;">Taux de soumission</div>
-        <div style="font-size: 24px; font-weight: 800; color: #1a3a5c;">{{ stats.submitRate | number:'1.1-1' }}%</div>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 3. FONNEL DE CONVERSION -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
-      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📊 Entonnoir de conversion</h3>
-      <div *ngFor="let item of [
-        { label: '📧 Emails envoyés', value: stats.total || 0 },
-        { label: '👁️ Ouverts', value: stats.opens || 0 },
-        { label: '🖱️ Clics', value: stats.clicks || 0 },
-        { label: '📝 Soumissions', value: stats.submits || 0 }
-      ]">
-        <div style="display: flex; justify-content: space-between; color: #6b7a8a; font-size: 14px; margin-bottom: 4px;">
-          <span>{{ item.label }}</span>
-          <span>{{ item.value }} ({{ getFunnelPercent(item.value) | number:'1.1-1' }}%)</span>
-        </div>
-        <div style="width: 100%; height: 8px; background: #e8f0f7; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
-          <div [style.width]="getFunnelPercent(item.value) + '%'" 
-               [style.background]="item.value === (stats.total || 0) ? '#1a3a5c' : item.value >= (stats.opens || 0) ? '#22c55e' : item.value >= (stats.clicks || 0) ? '#8b5cf6' : '#f59e0b'"
-               style="height: 100%; border-radius: 4px; transition: width 0.5s;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 4. TIME-TO-CLICK GLOBAL -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="color: #1a3a5c; margin: 0;">⏱️ Temps moyen avant clic</h3>
-        <span style="font-size: 20px; font-weight: 800;" 
-              [style.color]="getTimeToClickColor(timeToClick?.averageSeconds || 0)">
-          {{ timeToClick?.formatted || 'N/A' }}
-        </span>
+    <!-- Bandeau Synthetique des Metriques Principal -->
+    <div class="summary-card">
+      <div class="summary-metric">
+        <span class="metric-label">Envoyés</span>
+        <span class="metric-val">{{ stats.total || 0 }}</span>
+        <span class="metric-sub">100% du ciblage</span>
       </div>
       
-      <div *ngIf="timeToClick && timeToClick.totalClicks > 0" 
-           style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
-        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
-          <div style="color: #6b7a8a; font-size: 10px;">📊 Total clics</div>
-          <div style="color: #1a3a5c; font-weight: 700;">{{ timeToClick.totalClicks }}</div>
-        </div>
-        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
-          <div style="color: #6b7a8a; font-size: 10px;">⚡ Plus rapide</div>
-          <div style="color: #22c55e; font-weight: 700;">{{ formatTimeToClick(timeToClick.minSeconds) }}</div>
-        </div>
-        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
-          <div style="color: #6b7a8a; font-size: 10px;">🐢 Plus lent</div>
-          <div style="color: #dc2626; font-weight: 700;">{{ formatTimeToClick(timeToClick.maxSeconds) }}</div>
-        </div>
-        <div style="text-align: center; background: #f8fafc; padding: 8px; border-radius: 6px;">
-          <div style="color: #6b7a8a; font-size: 10px;">📐 Médiane</div>
-          <div style="color: #1a3a5c; font-weight: 700;">{{ formatTimeToClick(timeToClick.medianSeconds) }}</div>
-        </div>
+      <div class="summary-divider"></div>
+
+      <div class="summary-metric">
+        <span class="metric-label">Ouvertures</span>
+        <span class="metric-val">{{ stats.opens || 0 }}</span>
+        <span class="metric-sub text-blue">{{ stats.openRate | number:'1.1-1' }}% de taux</span>
       </div>
 
-      <!-- Distribution des temps -->
-      <div *ngIf="timeToClick && timeToClick.totalClicks > 0">
-        <div style="color: #6b7a8a; font-size: 12px; margin-bottom: 8px;">📊 Distribution des temps de clic</div>
-        <div style="display: flex; gap: 4px; height: 20px; border-radius: 4px; overflow: hidden;">
-          <div *ngFor="let key of getDistributionKeys()" 
-               [style.width]="getDistributionValue(key) + '%'" 
-               [style.background]="getDistributionColor(key)"
-               [title]="key + ': ' + (getDistributionValue(key) | number:'1.1-1') + '%'"
-               style="height: 100%; transition: width 0.5s; min-width: 4px;">
-          </div>
+      <div class="summary-divider"></div>
+
+      <div class="summary-metric">
+        <span class="metric-label">Clics</span>
+        <span class="metric-val">{{ stats.clicks || 0 }}</span>
+        <span class="metric-sub text-purple">{{ stats.clickRate | number:'1.1-1' }}% de taux</span>
+      </div>
+
+      <div class="summary-divider"></div>
+
+      <div class="summary-metric">
+        <span class="metric-label">Soumissions</span>
+        <span class="metric-val">{{ stats.submits || 0 }}</span>
+        <span class="metric-sub text-primary">{{ stats.submitRate | number:'1.1-1' }}% de taux</span>
+      </div>
+    </div>
+
+    <!-- Barres d'onglets pour structurer les détails -->
+    <div class="tab-navigation">
+      <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setTab('overview')">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        Vue d'ensemble
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'time'" (click)="setTab('time')">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        Réactivité & Temporel
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'users'" (click)="setTab('users')">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        Clics par Utilisateur ({{ usersTimeToClick.length }})
+      </button>
+    </div>
+
+    <!-- Onglet 1: Vue d'ensemble -->
+    <div *ngIf="activeTab === 'overview'" class="dashboard-grid-2col">
+      
+      <!-- Entonnoir de conversion -->
+      <div class="card">
+        <div class="card-header">
+          <h2>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+            Entonnoir de conversion
+          </h2>
+          <span class="card-subtitle">Progression globale des cibles</span>
         </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
-          <div *ngFor="let key of getDistributionKeys()" 
-               style="display: flex; align-items: center; gap: 4px; font-size: 10px; color: #6b7a8a;">
-            <span [style.color]="getDistributionColor(key)" style="font-size: 14px;">●</span>
-            {{ key }} : {{ getDistributionValue(key) | number:'1.1-1' }}%
+        <div class="card-body">
+          <div class="funnel-container">
+            <div *ngFor="let item of [
+              { label: 'Envoyés', value: stats.total || 0, color: 'var(--color-navy)', icon: 'mail' },
+              { label: 'Ouverts', value: stats.opens || 0, color: '#2563eb', icon: 'eye' },
+              { label: 'Clics', value: stats.clicks || 0, color: '#7c3aed', icon: 'click' },
+              { label: 'Soumissions', value: stats.submits || 0, color: 'var(--color-primary)', icon: 'file' }
+            ]" class="funnel-item">
+              <div class="funnel-header">
+                <span class="funnel-label flex-align">
+                  <svg *ngIf="item.icon === 'mail'" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  <svg *ngIf="item.icon === 'eye'" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <svg *ngIf="item.icon === 'click'" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path><path d="M13 13l6 6"></path></svg>
+                  <svg *ngIf="item.icon === 'file'" class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                  {{ item.label }}
+                </span>
+                <span class="funnel-val font-bold">{{ item.value }} ({{ getFunnelPercent(item.value) | number:'1.1-1' }}%)</span>
+              </div>
+              <div class="funnel-track">
+                <div class="funnel-fill"
+                     [style.width.%]="getFunnelPercent(item.value)"
+                     [style.background]="item.color">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div *ngIf="!timeToClick || timeToClick.totalClicks === 0" 
-           style="text-align: center; padding: 20px; color: #6b7a8a;">
-        ⏳ Aucun clic enregistré pour cette campagne
+      <!-- Résumé Réactivité -->
+      <div class="card">
+        <div class="card-header">
+          <h2>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Synthèse de la réactivité
+          </h2>
+          <span class="card-subtitle">Délai moyen d'interaction</span>
+        </div>
+        <div class="card-body">
+          <div class="time-hero">
+            <span class="time-hero-label">Temps moyen avant premier clic</span>
+            <span class="time-hero-value" [style.color]="getTimeToClickColor(timeToClick?.averageSeconds || 0)">
+              {{ timeToClick?.formatted || 'N/A' }}
+            </span>
+          </div>
+
+          <div class="time-stats-grid">
+            <div class="time-stat">
+              <span class="stat-label">Plus rapide</span>
+              <span class="stat-value text-green">{{ formatTimeToClick(timeToClick?.minSeconds) }}</span>
+            </div>
+            <div class="time-stat">
+              <span class="stat-label">Médiane</span>
+              <span class="stat-value">{{ formatTimeToClick(timeToClick?.medianSeconds) }}</span>
+            </div>
+            <div class="time-stat">
+              <span class="stat-label">Plus lent</span>
+              <span class="stat-value text-red">{{ formatTimeToClick(timeToClick?.maxSeconds) }}</span>
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
 
-    <!-- ========================================== -->
-    <!-- 5. TIME-TO-CLICK PAR UTILISATEUR -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 24px;">
-      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">👤 Temps de clic par utilisateur</h3>
+    <!-- Onglet 2: Réactivité & Temporel -->
+    <div *ngIf="activeTab === 'time'" class="dashboard-grid-2col">
       
-      <div *ngIf="usersTimeToClick.length > 0">
-        <div style="overflow-x: auto;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-            <thead>
-              <tr style="background: #f8fafc; border-bottom: 2px solid #e8f0f7;">
-                <th style="padding: 10px 12px; text-align: left; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Utilisateur</th>
-                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Temps moyen</th>
-                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Clics</th>
-                <th style="padding: 10px 12px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase;">Performance</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let user of usersTimeToClick.slice(0, 10)" 
-                  style="border-bottom: 1px solid #e8f0f7;">
-                <td style="padding: 10px 12px; color: #1a3a5c; font-weight: 500;">
-                  Utilisateur #{{ user.targetId?.substring(0, 8) || 'N/A' }}
-                </td>
-                <td style="padding: 10px 12px; text-align: center; font-weight: 700;" 
-                    [style.color]="getTimeToClickColor(user.averageSeconds)">
-                  {{ user.formatted || 'N/A' }}
-                </td>
-                <td style="padding: 10px 12px; text-align: center; color: #6b7a8a;">
-                  {{ user.totalClicks || 0 }}
-                </td>
-                <td style="padding: 10px 12px; text-align: center;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="flex: 1; height: 4px; background: #e8f0f7; border-radius: 2px; overflow: hidden; min-width: 50px;">
-                      <div [style.width]="(user.averageSeconds / (timeToClick?.maxSeconds || 1)) * 100 + '%'" 
-                           [style.background]="getTimeToClickColor(user.averageSeconds)"
-                           style="height: 100%; border-radius: 2px; transition: width 0.5s;">
-                      </div>
+      <!-- Distribution temporelle -->
+      <div class="card">
+        <div class="card-header">
+          <h2>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Distribution des temps de clic
+          </h2>
+          <span class="card-subtitle">{{ timeToClick?.totalClicks || 0 }} clics analysés</span>
+        </div>
+        <div class="card-body">
+          <div *ngIf="timeToClick && timeToClick.totalClicks > 0">
+            <div class="distribution-bar">
+              <div *ngFor="let key of getDistributionKeys()"
+                   [style.width.%]="getDistributionValue(key)"
+                   [style.background]="getDistributionColor(key)"
+                   [title]="key + ': ' + (getDistributionValue(key) | number:'1.1-1') + '%'"
+                   class="dist-segment">
+              </div>
+            </div>
+            <div class="distribution-legend">
+              <div *ngFor="let key of getDistributionKeys()" class="legend-tag">
+                <span class="dot" [style.background]="getDistributionColor(key)"></span>
+                <span>{{ key }} : <strong>{{ getDistributionValue(key) | number:'1.1-1' }}%</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="!timeToClick || timeToClick.totalClicks === 0" class="empty-state">
+            <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <p>Aucun clic enregistré pour cette campagne</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Histogramme Horaire -->
+      <div class="card">
+        <div class="card-header">
+          <h2>
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Distribution des clics par heure
+          </h2>
+          <span class="card-subtitle">Volume horaire de réaction</span>
+        </div>
+        <div class="card-body">
+          <div *ngIf="getHourlyDistributionKeys().length > 0" class="hourly-chart">
+            <div *ngFor="let hour of getHourlyDistributionKeys()" class="hour-bar-group">
+              <div class="hour-bar-fill"
+                   [style.height.%]="(timeToClick?.hourlyDistribution[hour] / getHourlyMax() * 100)"
+                   [class.active]="timeToClick?.hourlyDistribution[hour] > 0"
+                   [title]="hour + 'h: ' + timeToClick?.hourlyDistribution[hour] + ' clic(s)'">
+              </div>
+              <span class="hour-label">{{ hour }}h</span>
+            </div>
+          </div>
+          <div *ngIf="getHourlyDistributionKeys().length === 0" class="empty-state">
+            <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            <p>Aucune donnée horaire disponible</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Onglet 3: Clics par Utilisateur -->
+    <div *ngIf="activeTab === 'users'" class="card">
+      <div class="card-header">
+        <h2>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Temps de clic par utilisateur
+        </h2>
+        <span class="card-subtitle">Liste détaillée de la réactivité des destinataires</span>
+      </div>
+      <div class="table-container" *ngIf="usersTimeToClick.length > 0">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Utilisateur</th>
+              <th class="text-center">Temps moyen</th>
+              <th class="text-center">Nombre de clics</th>
+              <th>Vitesse de réaction</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of usersTimeToClick">
+              <td class="font-medium">Utilisateur #{{ user.targetId?.substring(0, 8) || 'N/A' }}</td>
+              <td class="text-center font-bold" [style.color]="getTimeToClickColor(user.averageSeconds)">
+                {{ user.formatted || 'N/A' }}
+              </td>
+              <td class="text-center text-slate-500">{{ user.totalClicks || 0 }}</td>
+              <td>
+                <div class="perf-bar-wrap">
+                  <div class="perf-track">
+                    <div class="perf-fill"
+                         [style.width.%]="(user.averageSeconds / (timeToClick?.maxSeconds || 1)) * 100"
+                         [style.background]="getTimeToClickColor(user.averageSeconds)">
                     </div>
-                    <span style="color: #6b7a8a; font-size: 10px; min-width: 30px; text-align: right;">
-                      #{{ usersTimeToClick.indexOf(user) + 1 }}
-                    </span>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div *ngIf="usersTimeToClick.length > 10" 
-             style="text-align: center; color: #6b7a8a; font-size: 12px; padding-top: 8px;">
-          + {{ usersTimeToClick.length - 10 }} autres utilisateurs
-        </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      
-      <div *ngIf="usersTimeToClick.length === 0" 
-           style="text-align: center; padding: 20px; color: #6b7a8a;">
-        👤 Aucun utilisateur n'a cliqué sur cette campagne
-      </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- 6. DISTRIBUTION HORAIRE -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-      <h3 style="color: #1a3a5c; margin: 0 0 16px 0;">📅 Distribution des clics par heure</h3>
-      <div style="display: flex; gap: 4px; align-items: flex-end; height: 120px; padding: 8px 0;">
-        <div *ngFor="let hour of getHourlyDistributionKeys()" 
-             style="display: flex; flex-direction: column; align-items: center; flex: 1;">
-          <div [style.height]="(timeToClick?.hourlyDistribution[hour] / getHourlyMax() * 100) + '%'"
-               [style.background]="timeToClick?.hourlyDistribution[hour] > 0 ? '#e07b2a' : '#e8f0f7'"
-               style="width: 100%; min-height: 4px; border-radius: 4px 4px 0 0; transition: height 0.3s;">
-          </div>
-          <span style="color: #6b7a8a; font-size: 10px; margin-top: 4px;">{{ hour }}h</span>
-        </div>
-      </div>
-      <div style="text-align: center; color: #6b7a8a; font-size: 12px; margin-top: 8px;">
-        {{ timeToClick?.totalClicks || 0 }} clics au total
+      <div *ngIf="usersTimeToClick.length === 0" class="empty-state">
+        <svg class="icon-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="18" y1="8" x2="23" y2="13"></line><line x1="23" y1="8" x2="18" y2="13"></line></svg>
+        <p>Aucun utilisateur n'a encore cliqué</p>
       </div>
     </div>
 

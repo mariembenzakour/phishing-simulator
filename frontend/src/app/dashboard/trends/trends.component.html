@@ -1,309 +1,206 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+<div class="trends-container">
 
-  <!-- ============================================ -->
   <!-- HEADER -->
-  <!-- ============================================ -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-    <div>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="font-size: 32px;">📈</div>
-        <div>
-          <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">Tendances</h1>
-          <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">
-            Évolution des performances sur l'ensemble des campagnes
-          </p>
-        </div>
+  <div class="trends-header">
+    <div class="header-title-group">
+      <div class="header-icon-box">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+      </div>
+      <div>
+        <h1 class="header-title">Analyse des tendances</h1>
+        <p class="header-subtitle">Aperçu synthétique des performances multi-campagnes</p>
       </div>
     </div>
-    <div style="display: flex; gap: 12px; align-items: center;">
-      <span style="background: #e8f0f7; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #1a3a5c;">
-        📊 {{ chartData?.labels?.length || 0 }} campagnes
+
+    <div class="header-actions">
+      <span class="campaign-count-badge">
+        <span class="dot-online"></span>
+        {{ chartData?.labels?.length || 0 }} campagnes analysées
       </span>
-      <button (click)="loadTrends()" 
-              style="background: #e07b2a; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-        <span>🔄</span> Rafraîchir
+      <button (click)="loadTrends()" class="btn-refresh">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+        Actualiser
       </button>
     </div>
   </div>
 
-  <!-- ============================================ -->
   <!-- LOADING & ERROR -->
-  <!-- ============================================ -->
-  <div *ngIf="loading" style="text-align: center; padding: 80px;">
-    <div style="width: 48px; height: 48px; border: 4px solid #e8f0f7; border-top-color: #e07b2a; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;"></div>
-    <p style="color: #6b7a8a;">Chargement des données...</p>
+  <div *ngIf="loading" class="state-container">
+    <div class="spinner"></div>
+    <p>Calcul des métriques en cours...</p>
   </div>
 
-  <div *ngIf="error" 
-       style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #dc2626; padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
-    <span style="font-size: 20px;">⚠️</span>
+  <div *ngIf="error" class="error-banner">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <span>{{ error }}</span>
   </div>
 
-  <!-- ============================================ -->
   <!-- CONTENU PRINCIPAL -->
-  <!-- ============================================ -->
   <div *ngIf="!loading && !error && chartData && chartData.labels.length > 0">
 
-    <!-- ========================================== -->
-    <!-- 1. CARTES RÉSUMÉ (4 KPI) -->
-    <!-- ========================================== -->
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+    <!-- KPI -->
+    <div class="kpi-grid">
 
-      <!-- Carte 1 : Tendance -->
-      <div style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="color: #6b7a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Tendance</div>
-            <div style="font-size: 22px; font-weight: 700; margin-top: 4px;" [style.color]="getLatestTrendColor()">
-              {{ getLatestTrend() }}
-            </div>
-            <div style="color: #6b7a8a; font-size: 13px; margin-top: 2px;">
-              Dernière campagne vs moyenne
-            </div>
-          </div>
-          <div style="font-size: 32px; opacity: 0.6;">
-            {{ getLatestTrend() === '📈 En hausse' ? '🚀' : getLatestTrend() === '📉 En baisse' ? '📉' : '➖' }}
-          </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Tendance globale</span>
+          <span class="trend-badge" [style.color]="getLatestTrendColor()" [style.background-color]="getLatestTrendColor() + '15'">
+            <svg *ngIf="getLatestTrend() === 'En hausse'" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <svg *ngIf="getLatestTrend() === 'En baisse'" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            {{ getLatestTrend() }}
+          </span>
         </div>
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7a8a;">
-            <span>Dernière : <strong>{{ chartData.openRates[chartData.openRates.length - 1] | number:'1.1-1' }}%</strong></span>
-            <span>Moyenne : <strong>{{ chartData.avgOpen | number:'1.1-1' }}%</strong></span>
-          </div>
+        <div class="kpi-value-main">
+          {{ chartData.openRates[chartData.openRates.length - 1] | number:'1.1-1' }}%
+        </div>
+        <div class="kpi-subtext">
+          Dernière campagne (Moy. {{ chartData.avgOpen | number:'1.1-1' }}%)
         </div>
       </div>
 
-      <!-- Carte 2 : Moyenne ouverture -->
-      <div style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="color: #6b7a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Ouverture moyenne</div>
-            <div style="font-size: 22px; font-weight: 700; color: #3b82f6; margin-top: 4px;">
-              {{ chartData.avgOpen | number:'1.1-1' }}%
-            </div>
-            <div style="color: #6b7a8a; font-size: 13px; margin-top: 2px;">
-              {{ chartData.openRates.length }} campagnes
-            </div>
-          </div>
-          <div style="font-size: 32px; opacity: 0.6;">👁️</div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Ouverture moyenne</span>
+          <span class="kpi-metric-tag tag-indigo">Main</span>
         </div>
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7a8a;">
-            <span>Meilleure : <strong style="color: #22c55e;">{{ chartData.maxOpen | number:'1.1-1' }}%</strong></span>
-            <span>Pire : <strong style="color: #dc2626;">{{ chartData.minOpen | number:'1.1-1' }}%</strong></span>
-          </div>
+        <div class="kpi-value-main">
+          {{ chartData.avgOpen | number:'1.1-1' }}%
+        </div>
+        <div class="kpi-subtext">
+          Min {{ chartData.minOpen | number:'1.1-1' }}% • Max {{ chartData.maxOpen | number:'1.1-1' }}%
         </div>
       </div>
 
-      <!-- Carte 3 : Moyenne clics -->
-      <div style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="color: #6b7a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Clics moyens</div>
-            <div style="font-size: 22px; font-weight: 700; color: #8b5cf6; margin-top: 4px;">
-              {{ chartData.avgClick | number:'1.1-1' }}%
-            </div>
-            <div style="color: #6b7a8a; font-size: 13px; margin-top: 2px;">
-              {{ chartData.clickRates.length }} campagnes
-            </div>
-          </div>
-          <div style="font-size: 32px; opacity: 0.6;">🖱️</div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Clics moyens</span>
+          <span class="kpi-metric-tag tag-cyan">Engagement</span>
         </div>
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7a8a;">
-            <span>Meilleure : <strong style="color: #22c55e;">{{ chartData.maxClick | number:'1.1-1' }}%</strong></span>
-            <span>Pire : <strong style="color: #dc2626;">{{ chartData.minClick | number:'1.1-1' }}%</strong></span>
-          </div>
+        <div class="kpi-value-main">
+          {{ chartData.avgClick | number:'1.1-1' }}%
+        </div>
+        <div class="kpi-subtext">
+          Min {{ chartData.minClick | number:'1.1-1' }}% • Max {{ chartData.maxClick | number:'1.1-1' }}%
         </div>
       </div>
 
-      <!-- Carte 4 : Moyenne soumissions -->
-      <div style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <div style="color: #6b7a8a; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Soumissions moyennes</div>
-            <div style="font-size: 22px; font-weight: 700; color: #f59e0b; margin-top: 4px;">
-              {{ chartData.avgSubmit | number:'1.1-1' }}%
-            </div>
-            <div style="color: #6b7a8a; font-size: 13px; margin-top: 2px;">
-              {{ chartData.submitRates.length }} campagnes
-            </div>
-          </div>
-          <div style="font-size: 32px; opacity: 0.6;">📝</div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <span class="kpi-label">Soumissions moy.</span>
+          <span class="kpi-metric-tag tag-violet">Conversion</span>
         </div>
-        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6b7a8a;">
-            <span>Meilleure : <strong style="color: #22c55e;">{{ chartData.maxSubmit | number:'1.1-1' }}%</strong></span>
-            <span>Pire : <strong style="color: #dc2626;">{{ chartData.minSubmit | number:'1.1-1' }}%</strong></span>
-          </div>
+        <div class="kpi-value-main">
+          {{ chartData.avgSubmit | number:'1.1-1' }}%
+        </div>
+        <div class="kpi-subtext">
+          Min {{ chartData.minSubmit | number:'1.1-1' }}% • Max {{ chartData.maxSubmit | number:'1.1-1' }}%
         </div>
       </div>
+
     </div>
 
-    <!-- ========================================== -->
-    <!-- 2. GRAPHIQUE PRINCIPAL -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px;">
-      
-      <!-- En-tête du graphique -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+    <!-- GRAPHIQUE -->
+    <div class="chart-card">
+      <div class="chart-header">
         <div>
-          <h3 style="color: #1a3a5c; margin: 0; font-size: 16px; font-weight: 700;">📊 Évolution des taux</h3>
-          <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 13px;">Comparaison chronologique des performances</p>
-        </div>
-        <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 3px;"></div>
-            <span style="color: #6b7a8a; font-size: 12px;">Ouverture</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 3px;"></div>
-            <span style="color: #6b7a8a; font-size: 12px;">Clic</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></div>
-            <span style="color: #6b7a8a; font-size: 12px;">Soumission</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 12px; height: 3px; background: #22c55e; border-radius: 2px;"></div>
-            <span style="color: #6b7a8a; font-size: 12px;">Moyenne</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Graphique -->
-      <div style="position: relative; padding: 8px 0 24px 0;">
-        <!-- Échelle verticale -->
-        <div style="display: flex; justify-content: space-between; color: #6b7a8a; font-size: 10px; padding: 0 4px 4px 4px; border-bottom: 1px solid #e8f0f7;">
-          <span>{{ getMaxValue() }}%</span>
-          <span>{{ (getMaxValue() * 0.75) | number:'1.0-0' }}%</span>
-          <span>{{ (getMaxValue() * 0.5) | number:'1.0-0' }}%</span>
-          <span>{{ (getMaxValue() * 0.25) | number:'1.0-0' }}%</span>
-          <span>0%</span>
+          <h3 class="card-title">Comparatif des performances</h3>
+          <p class="card-subtitle">Analyse comparative des taux par campagne chronologique</p>
         </div>
         
-        <!-- Barres -->
-        <div style="display: flex; gap: 6px; align-items: flex-end; height: 220px; padding-top: 8px;">
-          <div *ngFor="let label of chartData.labels; let i = index" 
-               style="display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 2px; position: relative;">
-            
-            <!-- Groupe de barres -->
-            <div style="display: flex; gap: 2px; align-items: flex-end; height: calc(100% - 24px); width: 100%; justify-content: center;">
-              
-              <!-- Barre ouverture -->
-              <div [style.height]="getBarHeight(chartData.openRates[i]) + '%'" 
-                   style="width: 22px; background: #3b82f6; border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.5s ease; position: relative; cursor: pointer;"
-                   [title]="'Ouverture: ' + (chartData.openRates[i] | number:'1.1-1') + '%'">
-              </div>
-              
-              <!-- Barre clic -->
-              <div [style.height]="getBarHeight(chartData.clickRates[i]) + '%'" 
-                   style="width: 22px; background: #8b5cf6; border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.5s ease; cursor: pointer;"
-                   [title]="'Clic: ' + (chartData.clickRates[i] | number:'1.1-1') + '%'">
-              </div>
-              
-              <!-- Barre soumission -->
-              <div [style.height]="getBarHeight(chartData.submitRates[i]) + '%'" 
-                   style="width: 22px; background: #f59e0b; border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.5s ease; cursor: pointer;"
-                   [title]="'Soumission: ' + (chartData.submitRates[i] | number:'1.1-1') + '%'">
-              </div>
-            </div>
-            
-            <!-- Ligne de moyenne -->
-            <div style="width: calc(100% + 6px); height: 2px; background: #22c55e; opacity: 0.4; position: absolute; bottom: 26px; left: -3px; border-radius: 1px;"></div>
-            
-            <!-- Label -->
-            <div style="text-align: center; margin-top: 6px;">
-              <span style="color: #6b7a8a; font-size: 9px; font-weight: 500; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
-                {{ label }}
-              </span>
-            </div>
-          </div>
+        <div class="chart-legend">
+          <div class="legend-item"><span class="pill pill-indigo"></span> Ouverture</div>
+          <div class="legend-item"><span class="pill pill-cyan"></span> Clic</div>
+          <div class="legend-item"><span class="pill pill-violet"></span> Soumission</div>
+          <div class="legend-item"><span class="avg-dash"></span> Moyenne globale</div>
         </div>
       </div>
 
-      <!-- Pied de graphique -->
-      <div style="display: flex; justify-content: space-between; color: #6b7a8a; font-size: 11px; margin-top: 8px; padding-top: 12px; border-top: 1px solid #e8f0f7;">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span>📈</span>
-          <span>Dernière campagne : <strong>{{ chartData.openRates[chartData.openRates.length - 1] | number:'1.1-1' }}%</strong></span>
-          <span style="color: #e2e8f0;">|</span>
-          <span>{{ getLatestTrend() }}</span>
+      <div class="chart-wrapper">
+        <div class="chart-grid-lines">
+          <div class="grid-line"><span>{{ getMaxValue() }}%</span></div>
+          <div class="grid-line"><span>{{ (getMaxValue() * 0.75) | number:'1.0-0' }}%</span></div>
+          <div class="grid-line"><span>{{ (getMaxValue() * 0.5) | number:'1.0-0' }}%</span></div>
+          <div class="grid-line"><span>{{ (getMaxValue() * 0.25) | number:'1.0-0' }}%</span></div>
+          <div class="grid-line"><span>0%</span></div>
         </div>
-        <div>
-          ⚡ Meilleure performance : <strong style="color: #22c55e;">{{ chartData.maxOpen | number:'1.1-1' }}%</strong> (ouverture)
+
+        <div class="bars-container">
+          <div *ngFor="let label of chartData.labels; let i = index" class="bar-group-wrapper">
+            
+            <div class="chart-tooltip">
+              <div class="tooltip-title">{{ label }}</div>
+              <div class="tooltip-row">
+                <span class="dot-sm pill-indigo"></span> Ouverture: <strong>{{ chartData.openRates[i] | number:'1.1-1' }}%</strong>
+              </div>
+              <div class="tooltip-row">
+                <span class="dot-sm pill-cyan"></span> Clic: <strong>{{ chartData.clickRates[i] | number:'1.1-1' }}%</strong>
+              </div>
+              <div class="tooltip-row">
+                <span class="dot-sm pill-violet"></span> Soumission: <strong>{{ chartData.submitRates[i] | number:'1.1-1' }}%</strong>
+              </div>
+            </div>
+
+            <div class="bars-group">
+              <div class="bar bar-indigo" [style.height]="getBarHeight(chartData.openRates[i]) + '%'"></div>
+              <div class="bar bar-cyan" [style.height]="getBarHeight(chartData.clickRates[i]) + '%'"></div>
+              <div class="bar bar-violet" [style.height]="getBarHeight(chartData.submitRates[i]) + '%'"></div>
+            </div>
+
+            <div class="avg-line-indicator" [style.bottom]="getBarHeight(chartData.avgOpen) + '%'"></div>
+
+            <div class="bar-label" [title]="label">{{ label }}</div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 3. TABLEAU DES PERFORMANCES -->
-    <!-- ========================================== -->
-    <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;">
-      
-      <div style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="color: #1a3a5c; margin: 0; font-size: 15px; font-weight: 700;">📋 Détail par campagne</h3>
-        </div>
-        <span style="color: #6b7a8a; font-size: 12px;">{{ chartData.labels.length }} campagnes</span>
+    <!-- TABLEAU -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3 class="card-title">Détail analytique</h3>
+        <span class="table-count">{{ chartData.labels.length }} campagnes</span>
       </div>
 
-      <div style="overflow-x: auto; padding: 0 4px;">
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <div class="table-responsive">
+        <table class="data-table">
           <thead>
-            <tr style="background: #f8fafc; border-bottom: 2px solid #e8f0f7;">
-              <th style="padding: 12px 16px; text-align: left; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Campagne</th>
-              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">👁️ Ouverture</th>
-              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🖱️ Clic</th>
-              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📝 Soumission</th>
-              <th style="padding: 12px 16px; text-align: center; color: #1a3a5c; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Performance</th>
+            <tr>
+              <th style="text-align: left;">Nom de la campagne</th>
+              <th style="text-align: right;">Ouverture</th>
+              <th style="text-align: right;">Clics</th>
+              <th style="text-align: right;">Soumissions</th>
+              <th style="width: 220px; text-align: left; padding-left: 32px;">Niveau de performance</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let label of chartData.labels; let i = index" 
-                style="border-bottom: 1px solid #e8f0f7; transition: background 0.2s;"
-                (mouseenter)="hoveredIndex = i" 
-                (mouseleave)="hoveredIndex = null"
-                [style.background]="hoveredIndex === i ? 'rgba(224,123,42,0.04)' : 'transparent'">
+            <tr *ngFor="let label of chartData.labels; let i = index">
               
-              <td style="padding: 12px 16px; color: #1a3a5c; font-weight: 500; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                {{ label }}
-                <span *ngIf="i === chartData.labels.length - 1" 
-                      style="background: #e07b2a; color: white; padding: 1px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; margin-left: 8px;">
-                  DERNIÈRE
-                </span>
-                <span *ngIf="chartData.openRates[i] === chartData.maxOpen && chartData.openRates[i] > 0" 
-                      style="background: #22c55e; color: white; padding: 1px 8px; border-radius: 10px; font-size: 9px; font-weight: 600; margin-left: 8px;">
-                  🏆
-                </span>
+              <td class="cell-name">
+                <span class="campaign-title">{{ label }}</span>
+                <span *ngIf="i === chartData.labels.length - 1" class="badge badge-subtle">RÉCENTE</span>
+                <span *ngIf="chartData.openRates[i] === chartData.maxOpen && chartData.openRates[i] > 0" class="badge badge-accent">TOP</span>
               </td>
               
-              <td style="padding: 12px 16px; text-align: center; font-weight: 600; color: #3b82f6;">
+              <td class="cell-number">
                 {{ chartData.openRates[i] | number:'1.1-1' }}%
               </td>
               
-              <td style="padding: 12px 16px; text-align: center; font-weight: 600; color: #8b5cf6;">
+              <td class="cell-number">
                 {{ chartData.clickRates[i] | number:'1.1-1' }}%
               </td>
               
-              <td style="padding: 12px 16px; text-align: center; font-weight: 600; color: #f59e0b;">
+              <td class="cell-number">
                 {{ chartData.submitRates[i] | number:'1.1-1' }}%
               </td>
               
-              <td style="padding: 12px 16px; text-align: center;">
-                <!-- Barre de performance -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <div style="flex: 1; height: 4px; background: #e8f0f7; border-radius: 2px; overflow: hidden; min-width: 60px;">
-                    <div [style.width]="chartData.openRates[i] / getMaxValue() * 100 + '%'" 
-                         style="height: 100%; background: linear-gradient(90deg, #3b82f6, #22c55e); border-radius: 2px; transition: width 0.5s;">
-                    </div>
+              <td style="padding-left: 32px;">
+                <div class="progress-wrapper">
+                  <div class="progress-bg">
+                    <div class="progress-fill" [style.width]="(chartData.openRates[i] / getMaxValue() * 100) + '%'"></div>
                   </div>
-                  <span style="color: #6b7a8a; font-size: 11px; min-width: 30px; text-align: right;">
-                    {{ chartData.openRates[i] | number:'1.0-0' }}%
-                  </span>
+                  <span class="progress-value">{{ chartData.openRates[i] | number:'1.0-0' }}%</span>
                 </div>
               </td>
             </tr>
@@ -314,63 +211,13 @@
 
   </div>
 
-  <!-- ============================================ -->
-  <!-- MESSAGE SI AUCUNE DONNÉE -->
-  <!-- ============================================ -->
-  <div *ngIf="!loading && !error && (!chartData || chartData.labels.length === 0)"
-       style="text-align: center; padding: 80px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
-    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-    <h3 style="color: #1a3a5c; margin: 0 0 8px 0;">Aucune donnée disponible</h3>
-    <p style="color: #6b7a8a; margin: 0;">
-      Commencez par créer et envoyer des campagnes pour voir les tendances apparaître.
-    </p>
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading && !error && (!chartData || chartData.labels.length === 0)" class="empty-state">
+    <div class="empty-icon-box">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    </div>
+    <h3>Aucune donnée disponible</h3>
+    <p>Aucune campagne avec des données de suivi n'a été trouvée.</p>
   </div>
 
 </div>
-
-<!-- ============================================ -->
-<!-- STYLES GLOBAUX -->
-<!-- ============================================ -->
-<style>
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  
-  /* Tooltip pour les barres */
-  .trends-tooltip {
-    position: absolute;
-    background: #1a3a5c;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 500;
-    opacity: 0;
-    transition: opacity 0.2s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  
-  /* Animation d'entrée */
-  .trends-card {
-    animation: fadeInUp 0.4s ease forwards;
-    opacity: 0;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Délais d'animation pour les cartes */
-  .trends-card:nth-child(1) { animation-delay: 0.05s; }
-  .trends-card:nth-child(2) { animation-delay: 0.10s; }
-  .trends-card:nth-child(3) { animation-delay: 0.15s; }
-  .trends-card:nth-child(4) { animation-delay: 0.20s; }
-</style>

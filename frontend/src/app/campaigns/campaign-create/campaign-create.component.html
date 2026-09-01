@@ -1,193 +1,186 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px; display: flex; justify-content: center;">
-  <div style="width: 100%; max-width: 700px;">
+<div class="page-wrapper">
+  <div class="form-layout">
 
-    <div style="margin-bottom: 32px;">
-      <a routerLink="/campaigns" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour aux campagnes</a>
-      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 16px 0 4px 0;">{{ getTitle() }}</h1>
-      <p style="color: #6b7a8a; margin: 0; font-size: 14px;">
-        {{ isEditMode ? 'Modifiez les paramètres de votre campagne' : 'Créez une campagne de simulation de phishing' }}
+    <!-- En-tête -->
+    <div class="form-header">
+      <a routerLink="/campaigns" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Retour aux campagnes
+      </a>
+      <h1 class="form-title">{{ getTitle() }}</h1>
+      <p class="form-subtitle">
+        {{ isEditMode ? 'Modifiez les paramètres de votre campagne existante' : 'Configurez une nouvelle campagne de simulation de phishing' }}
       </p>
     </div>
 
-    <div style="background: white; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <!-- Carte Principale du Formulaire -->
+    <div class="form-card">
 
-      <div *ngIf="loading" style="text-align: center; padding: 20px;">
-        <p style="color: #6b7a8a;">Chargement...</p>
+      <div *ngIf="loading" class="form-loading">
+        <div class="spinner"></div>
+        <p>Chargement des paramètres...</p>
       </div>
 
       <div *ngIf="!loading">
 
-        <!-- NOM DE LA CAMPAGNE -->
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOM DE LA CAMPAGNE *</label>
-          <input type="text" [(ngModel)]="form.name" placeholder="Ex: Test phishing RH Juillet 2026"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
+        <!-- SECTION 1: NOM -->
+        <div class="form-group">
+          <label class="form-label">NOM DE LA CAMPAGNE <span class="required">*</span></label>
+          <input type="text" [(ngModel)]="form.name" placeholder="Ex: Campagne RH — Sensibilisation Q3" class="form-input">
         </div>
 
-        <!-- CONTENU IA -->
-        <div style="background: #f8fafc; border-radius: 8px; padding: 16px; margin-bottom: 20px; border: 1px dashed #8b5cf6;">
-
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-            <span style="font-size: 18px;">🤖</span>
-            <span style="color: #1a3a5c; font-weight: 700; font-size: 14px;">Contenu généré par l'IA</span>
-            <span style="font-size: 11px; color: #6b7a8a; background: #e8f0f7; padding: 2px 10px; border-radius: 12px;">Optionnel</span>
+        <!-- SECTION 2: BLOC INTELLIGENCE ARTIFICIELLE -->
+        <div class="ai-box">
+          <div class="ai-box-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <span class="ai-title">Contenu généré par IA</span>
+            <span class="optional-badge">Optionnel</span>
           </div>
 
-          <div style="margin-bottom: 12px;">
-            <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">
-              DRAFT IA APPROUVÉ
-            </label>
-            <select [(ngModel)]="form.aiGenerationId" (change)="onAiDraftChange()"
-                    style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
-              <option value="">-- Aucun (utiliser le template par défaut) --</option>
+          <div class="form-group">
+            <label class="form-label-sub">SÉLECTIONNER UN DRAFT IA APPROUVÉ</label>
+            <select [(ngModel)]="form.aiGenerationId" (change)="onAiDraftChange()" class="form-select">
+              <option value="">-- Aucun (Saisie manuelle / Template par défaut) --</option>
               <option *ngFor="let draft of aiDrafts" [value]="draft.id">
                 {{ draft.generatedSubject || draft.scenario }} ({{ draft.language }})
               </option>
             </select>
-            <div *ngIf="aiDrafts.length === 0 && !loadingAiDrafts" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
-              Aucun draft IA approuvé. Générez et approuvez un email dans la section "IA".
+
+            <div *ngIf="aiDrafts.length === 0 && !loadingAiDrafts" class="field-hint">
+              Aucun modèle IA approuvé disponible. Vous pouvez en générer un depuis le module IA.
             </div>
-            <div *ngIf="loadingAiDrafts" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
-              Chargement des drafts...
+            <div *ngIf="loadingAiDrafts" class="field-hint">
+              Chargement des modèles IA...
             </div>
           </div>
 
-          <div *ngIf="form.customSubject" style="font-size: 13px; color: #1a3a5c; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
-            <div><strong>Sujet :</strong> {{ form.customSubject }}</div>
-            <div style="font-size: 12px; color: #6b7a8a; margin-top: 4px; max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
-              <strong>Contenu :</strong> <span [innerHTML]="form.customBodyHtml | slice:0:150"></span>...
+          <!-- Aperçu rapide du Draft IA -->
+          <div *ngIf="form.customSubject" class="ai-preview-card">
+            <div class="preview-row"><strong>Sujet :</strong> {{ form.customSubject }}</div>
+            <div class="preview-row preview-body">
+              <strong>Aperçu :</strong> <span [innerHTML]="form.customBodyHtml | slice:0:140"></span>...
             </div>
           </div>
-
         </div>
 
-        <!-- SUJET PERSONNALISÉ -->
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
+        <!-- SECTION 3: SUJET & CORPS -->
+        <div class="form-group">
+          <label class="form-label">
             SUJET DE L'EMAIL
-            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - laissé vide pour utiliser le template)</span>
+            <span class="label-hint">(optionnel — laissé vide pour utiliser la valeur standard)</span>
           </label>
-          <input type="text" [(ngModel)]="form.customSubject" placeholder="Ex: Action requise : Securisez votre compte"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
+          <input type="text" [(ngModel)]="form.customSubject" placeholder="Ex: Action requise : Mettre à jour vos identifiants" class="form-input">
         </div>
 
-        <!-- CORPS HTML (optionnel) -->
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
+        <div class="form-group">
+          <label class="form-label">
             CORPS HTML DE L'EMAIL
-            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - laissé vide pour utiliser le template)</span>
+            <span class="label-hint">(optionnel)</span>
           </label>
-          <textarea [(ngModel)]="form.customBodyHtml" rows="6"
-                    placeholder="Ex: <p>Bonjour, Votre mot de passe a expire...</p>"
-                    style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: monospace;">
-          </textarea>
-          <div style="font-size: 11px; color: #8899aa; margin-top: 4px;">
-            Utilisez les placeholders firstName et lastName pour personnaliser.
+          <textarea [(ngModel)]="form.customBodyHtml" rows="5" [placeholder]="'<p>Bonjour {firstName}, votre session a expiré...</p>'" class="form-textarea code-font"></textarea>
+          <div class="field-hint">Variables disponibles pour la personnalisation : {{ '{' }}firstName{{ '}' }}, {{ '{' }}lastName{{ '}' }}</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            CORPS TEXTE BRUT DE L'EMAIL
+            <span class="label-hint">(optionnel — pour clients de messagerie sans HTML)</span>
+          </label>
+          <textarea [(ngModel)]="form.customBodyText" rows="3" [placeholder]="'Bonjour {firstName}, votre session a expiré...'" class="form-textarea code-font"></textarea>
+        </div>
+
+        <!-- SECTION 4: DESTINATAIRES ET EXPÉDITEUR -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">EMAIL EXPÉDITEUR <span class="required">*</span></label>
+            <input type="email" [(ngModel)]="form.senderEmail" placeholder="support-securite@votre-entreprise.com" class="form-input">
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">PROFIL EXPÉDITEUR <span class="label-hint">(optionnel)</span></label>
+            <select [(ngModel)]="form.senderProfileId" class="form-select">
+              <option value="">-- Utiliser l'email ci-contre --</option>
+              <option *ngFor="let profile of senderProfiles" [value]="profile.id">
+                {{ profile.name }} ({{ profile.fromEmail }})
+              </option>
+            </select>
           </div>
         </div>
 
-        <!-- CORPS TEXTE (optionnel) -->
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">
-            CORPS TEXTE DE L'EMAIL
-            <span style="font-weight: 400; color: #6b7a8a; font-size: 11px;">(optionnel - pour les clients sans HTML)</span>
-          </label>
-          <textarea [(ngModel)]="form.customBodyText" rows="3"
-                    placeholder="Ex: Bonjour, Votre mot de passe a expire..."
-                    style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: monospace;">
-          </textarea>
-        </div>
-
-        <!-- LE RESTE EST INCHANGÉ -->
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL EXPÉDITEUR *</label>
-          <input type="email" [(ngModel)]="form.senderEmail" placeholder="it-support&#64;fake-company.com"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">PROFIL EXPÉDITEUR (optionnel)</label>
-          <select [(ngModel)]="form.senderProfileId"
-                  style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
-            <option value="">-- Aucun (utiliser l'email ci-dessus) --</option>
-            <option *ngFor="let profile of senderProfiles" [value]="profile.id">
-              {{ profile.name }} ({{ profile.fromEmail }})
-            </option>
-          </select>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">GROUPE DE CIBLES *</label>
-          <select [(ngModel)]="form.targetGroupId"
-                  style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
-            <option value="" disabled>-- Sélectionner un groupe --</option>
+        <div class="form-group">
+          <label class="form-label">GROUPE DE CIBLES <span class="required">*</span></label>
+          <select [(ngModel)]="form.targetGroupId" class="form-select">
+            <option value="" disabled>-- Sélectionner un groupe de destinataires --</option>
             <option *ngFor="let group of groups" [value]="group.id">{{ group.name }}</option>
           </select>
-          <div *ngIf="groups.length === 0"
-               style="background: rgba(224,123,42,0.1); border: 1px solid rgba(224,123,42,0.2); border-radius: 6px; padding: 10px 14px; margin-top: 8px;">
-            <p style="color: #e07b2a; font-size: 13px; margin: 0;">
-              Aucun groupe disponible.
-              <a routerLink="/groups/create" style="color: #e07b2a; font-weight: 700; text-decoration: underline;">Créer un groupe →</a>
-            </p>
+          <div *ngIf="groups.length === 0" class="warning-box inline-margin">
+            <span>Aucun groupe de cibles disponible.</span>
+            <a routerLink="/groups/create" class="link-bold">Créer un groupe →</a>
           </div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">DATE DE LANCEMENT (optionnel)</label>
-          <input type="datetime-local" [(ngModel)]="form.scheduledAt"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
+        <!-- SECTION 5: PLANIFICATION & PARAMÈTRES -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">DATE ET HEURE DE LANCEMENT</label>
+            <input type="datetime-local" [(ngModel)]="form.scheduledAt" class="form-input">
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">INTERVALLE ENTRE ENVOIS (SECONDES)</label>
+            <input type="number" [(ngModel)]="form.throttleSeconds" min="1" max="60" class="form-input">
+          </div>
         </div>
 
-        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
-          <input type="checkbox" [(ngModel)]="form.dryRun" id="dryRun"
-                 style="width: 18px; height: 18px; accent-color: #e07b2a;">
-          <label for="dryRun" style="color: #1a3a5c; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
-            🔬 Mode Dry Run (test sur un seul email)
+        <!-- DRY RUN TOGGLE -->
+        <div class="checkbox-box">
+          <label class="checkbox-container">
+            <input type="checkbox" [(ngModel)]="form.dryRun" id="dryRun">
+            <span class="checkmark"></span>
+            <span class="checkbox-label">Mode Dry Run (Exécution de test restreinte à une seule adresse)</span>
           </label>
         </div>
 
-        <div style="margin-bottom: 20px;" *ngIf="form.dryRun">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">EMAIL DE TEST (Dry Run) *</label>
-          <input type="email" [(ngModel)]="form.dryRunEmail" placeholder="test@intellisec.com"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
-          <div style="font-size: 11px; color: #8899aa; margin-top: 4px;">
-            L'email doit appartenir au groupe sélectionné.
-          </div>
+        <div *ngIf="form.dryRun" class="form-group margin-top-sub">
+          <label class="form-label">EMAIL DE TEST (DRY RUN) <span class="required">*</span></label>
+          <input type="email" [(ngModel)]="form.dryRunEmail" placeholder="test-securite@intellisec.com" class="form-input">
+          <div class="field-hint">Cet email doit figurer dans le groupe de cibles sélectionné.</div>
         </div>
 
-        <div style="margin-bottom: 28px;">
-          <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">INTERVALLE ENTRE LES ENVOIS (secondes)</label>
-          <input type="number" [(ngModel)]="form.throttleSeconds" min="1" max="60"
-                 style="width: 100%; padding: 12px 16px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; box-sizing: border-box; outline: none;">
+        <!-- AVERTISSEMENT AUTORISATION -->
+        <div class="info-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Conformément à la politique d'audit, la campagne devra être approuvée par un <strong>ADMIN</strong> avant de déclencher tout envoi.</span>
         </div>
 
-        <div style="background: rgba(224,123,42,0.1); border: 1px solid rgba(224,123,42,0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 24px;">
-          <p style="color: #e07b2a; font-size: 13px; margin: 0;">
-            ⚠️ La campagne devra être <strong>autorisée par un ADMIN</strong> avant tout envoi.
-          </p>
+        <!-- MESSAGES FEEDBACK -->
+        <div *ngIf="error" class="alert alert-danger">
+          <span>{{ error }}</span>
+        </div>
+        <div *ngIf="success" class="alert alert-success">
+          <span>{{ success }}</span>
         </div>
 
-        <div *ngIf="error"
-             style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
-          ⚠️ {{ error }}
-        </div>
-        <div *ngIf="success"
-             style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
-          ✅ {{ success }}
-        </div>
-
-        <div style="display: flex; gap: 12px;">
+        <!-- ACTIONS -->
+        <div class="form-actions">
           <button (click)="create()"
                   [disabled]="groups.length === 0"
-                  [style.opacity]="groups.length === 0 ? '0.5' : '1'"
-                  [style.background]="groups.length === 0 ? '#ccc' : '#e07b2a'"
-                  style="flex: 1; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700;">
+                  class="btn-submit">
             {{ getButtonText() }}
           </button>
-          <button (click)="router.navigate(['/campaigns'])"
-                  style="padding: 14px 24px; background: #e8f0f7; color: #1a3a5c; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">
+          <button (click)="router.navigate(['/campaigns'])" class="btn-cancel">
             Annuler
           </button>
         </div>

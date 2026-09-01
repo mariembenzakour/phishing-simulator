@@ -22,7 +22,7 @@ public class AiService {
     @Value("${ai.gemini.api.key}")
     private String apiKey;
 
-    @Value("${ai.gemini.model:gemini-3.6-flash}")
+    @Value("${ai.gemini.model:gemini-1.5-flash}")
     private String model;
 
     @Value("${ai.generation.max-tokens:8192}")
@@ -73,44 +73,40 @@ public class AiService {
                 : "IMPORTANT: The ENTIRE content MUST be written in English.";
 
         return """
-You are a cybersecurity awareness training generator creating educational templates for authorized employee simulations.
-
-=== SAFETY & COMPLIANCE DIRECTIVES ===
-- This content is strictly for internal security awareness training.
-- Generate standard corporate communication templates (e.g., IT service announcements, system verification requests).
-- Do NOT generate malicious payloads, exploit code, or actual malware.
+=== CONTEXT & PURPOSE ===
+Corporate IT security awareness module generator. Generate informational corporate notice templates for authorized security training.
 
 === LANGUAGE ===
 %s
 
 === SCENARIO PARAMETERS ===
-Scenario: %s
+Topic: %s
 Target Department: %s
 Urgency Level: %s
 Additional Context: %s
 
 === CONTENT REQUIREMENTS ===
 
-1. SIMULATED EMAIL TEMPLATE (`subject`, `bodyHtml`, `bodyText`, `senderName`, `senderDomain`):
-   - A professional corporate email template matching the scenario (e.g., IT security notice or system update).
-   - HTML layout: max-width 600px, responsive, professional inline CSS.
-   - Use placeholders: {{firstName}}, {{lastName}}, and TRACKING_LINK for the call-to-action link.
+1. EMAIL NOTIFICATION TEMPLATE (`subject`, `bodyHtml`, `bodyText`, `senderName`, `senderDomain`):
+   - A professional corporate email layout regarding the specified IT topic.
+   - Responsive HTML layout (max-width 600px) with inline CSS.
+   - Use placeholders: {{firstName}}, {{lastName}}, and TRACKING_LINK for the primary action button.
 
-2. SIMULATED LANDING PAGE TEMPLATE (`landingPageHtml`):
-   - A simulated portal interface corresponding to the scenario (e.g., corporate verification portal or access request page).
-   - Form attributes: action="SUBMIT_URL" method="POST".
-   - Clean, professional design suitable for a simulated training exercise.
+2. DEMO NOTICE LANDING PAGE TEMPLATE (`landingPageHtml`):
+   - An informational web layout corresponding to the notice topic.
+   - Include a mockup HTML form element with exact attributes: action="SUBMIT_URL" method="POST".
+   - Clean, professional UI for educational evaluation.
 
 3. AWARENESS DEBRIEF PAGE (`awarenessPageHtml`):
-   - The post-click educational page informing the employee that this was an authorized simulation by the society.
-   - Must include the placeholder RED_FLAGS_CONTENT.
+   - Educational post-exercise page explaining vigilance indicators to the employee.
+   - Must include the exact placeholder: RED_FLAGS_CONTENT.
 
 4. EDUCATIONAL RED FLAGS (`redFlags`):
-   - Array of 4 educational red flags present in the email/landing page.
+   - Array of exactly 4 educational red flags associated with this topic.
    - JSON structure per item: type, title, description, severity, howToDetect.
 
 === OUTPUT FORMAT ===
-Respond ONLY with a valid JSON object matching this schema:
+Respond STRICTLY with a valid JSON object matching this schema:
 {
     "subject": "...",
     "bodyHtml": "...",
@@ -131,39 +127,8 @@ Respond ONLY with a valid JSON object matching this schema:
                 request.getScenario() != null ? request.getScenario() : "Internal IT Update",
                 request.getDepartment() != null ? request.getDepartment() : "All employees",
                 request.getUrgency() != null ? request.getUrgency() : "medium",
-                request.getAdditionalDetails() != null ? request.getAdditionalDetails() : "Standard corporate communication"
+                request.getAdditionalDetails() != null ? request.getAdditionalDetails() : "Standard corporate IT communication"
         );
-    }
-    private void saveGenerationLog(GenerationRequest request, GenerationResponse response, String prompt) {
-        try {
-            AiGenerationLog generationLog = new AiGenerationLog();
-            generationLog.setScenario(request.getScenario());
-            generationLog.setLanguage(request.getLanguage() != null ? request.getLanguage() : defaultLanguage);
-            generationLog.setPrompt(prompt);
-            generationLog.setGeneratedSubject(response.getSubject());
-            generationLog.setGeneratedBody(response.getBodyHtml());
-            generationLog.setBodyText(response.getBodyText());
-            generationLog.setLandingPageHtml(response.getLandingPageHtml());
-            // ✅ NOUVEAU : Sauvegarder l'awareness page
-            generationLog.setAwarenessPageHtml(response.getAwarenessPageHtml());
-            generationLog.setRedFlags(response.getRedFlags());
-            generationLog.setSenderName(response.getSenderName());
-            generationLog.setSenderDomain(response.getSenderDomain());
-            generationLog.setGeneratedBy(getCurrentUser());
-            generationLog.setApproved(false);
-
-            AiGenerationLog saved = logRepository.save(generationLog);
-            response.setId(saved.getId().toString());
-
-            log.info("💾 Log de génération sauvegardé avec ID: {}", saved.getId());
-        } catch (Exception e) {
-            log.error("❌ Erreur lors de la sauvegarde du log: {}", e.getMessage());
-        }
-    }
-
-    private String getCurrentUser() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.getName() != null ? auth.getName() : "SYSTEM";
     }
 
     private String callGeminiApi(String prompt) {
@@ -173,15 +138,32 @@ Respond ONLY with a valid JSON object matching this schema:
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> requestBody = new LinkedHashMap<>();
+
+        // 1. Passage des instructions système au niveau API
+        Map<String, Object> systemInstruction = Map.of(
+                "parts", List.of(Map.of("text", "You are an automated corporate communication template engine producing educational IT awareness content in structured JSON format."))
+        );
+        requestBody.put("system_instruction", systemInstruction);
+
+        // 2. Contenu du prompt utilisateur
         requestBody.put("contents", List.of(
                 Map.of("parts", List.of(Map.of("text", prompt)))
         ));
 
+        // 3. Ajustement des filtres de sécurité API
+        List<Map<String, String>> safetySettings = List.of(
+                Map.of("category", "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold", "BLOCK_ONLY_HIGH"),
+                Map.of("category", "HARM_CATEGORY_HARASSMENT", "threshold", "BLOCK_ONLY_HIGH"),
+                Map.of("category", "HARM_CATEGORY_HATE_SPEECH", "threshold", "BLOCK_ONLY_HIGH"),
+                Map.of("category", "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold", "BLOCK_ONLY_HIGH")
+        );
+        requestBody.put("safetySettings", safetySettings);
+
+        // 4. Configuration de génération
         Map<String, Object> generationConfig = new LinkedHashMap<>();
         generationConfig.put("temperature", temperature);
         generationConfig.put("maxOutputTokens", maxTokens);
         generationConfig.put("topP", 0.95);
-        // Demande explicitement à Gemini de répondre en JSON pur (supporté par l'API Gemini)
         generationConfig.put("responseMimeType", "application/json");
         requestBody.put("generationConfig", generationConfig);
 
@@ -251,15 +233,13 @@ Respond ONLY with a valid JSON object matching this schema:
         JsonNode candidates = root.path("candidates");
         if (!candidates.isArray() || candidates.isEmpty()) {
             log.error("❌ Aucun candidat retourné par Gemini. Réponse complète: {}", responseBody);
-            throw new RuntimeException("Aucun candidat retourné par Gemini (contenu potentiellement bloqué par les filtres de sécurité)");
+            throw new RuntimeException("Aucun candidat retourné par Gemini");
         }
 
         String finishReason = root.path("candidates").path(0).path("finishReason").asText("STOP");
         if ("MAX_TOKENS".equals(finishReason)) {
-            log.error("❌ Réponse tronquée (MAX_TOKENS) — le JSON est probablement incomplet. " +
-                    "Augmentez ai.generation.max-tokens (valeur actuelle: {}).", maxTokens);
-            throw new RuntimeException(
-                    "La réponse de Gemini a été tronquée (MAX_TOKENS). Augmentez ai.generation.max-tokens.");
+            log.error("❌ Réponse tronquée (MAX_TOKENS).");
+            throw new RuntimeException("La réponse de Gemini a été tronquée (MAX_TOKENS).");
         }
         if ("SAFETY".equals(finishReason) || "RECITATION".equals(finishReason)) {
             log.error("❌ Réponse bloquée par Gemini, finishReason={}", finishReason);
@@ -269,12 +249,10 @@ Respond ONLY with a valid JSON object matching this schema:
         JsonNode partsNode = root.path("candidates").path(0).path("content").path("parts");
         if (!partsNode.isArray() || partsNode.isEmpty()) {
             log.error("❌ Aucune partie de contenu dans la réponse Gemini: {}", responseBody);
-            throw new RuntimeException("Réponse Gemini vide (pas de 'parts' dans le contenu)");
+            throw new RuntimeException("Réponse Gemini vide");
         }
 
         String text = partsNode.path(0).path("text").asText();
-
-        log.info("📝 Texte généré ({} caractères): {}", text.length(), text);
 
         if (text == null || text.isBlank()) {
             throw new RuntimeException("Le texte généré par Gemini est vide");
@@ -282,27 +260,17 @@ Respond ONLY with a valid JSON object matching this schema:
 
         String jsonText = extractJsonFromResponse(text);
 
-        log.info("📝 JSON extrait ({} caractères): {}", jsonText.length(), jsonText);
-
-        if (jsonText.isEmpty() || jsonText.equals("{}")) {
-            throw new RuntimeException("Le texte généré ne contient pas de JSON valide");
+        // Détection de réponse de refus encapsulée dans le JSON
+        JsonNode parsedNode = objectMapper.readTree(jsonText);
+        if (parsedNode.has("error")) {
+            String refusalMsg = parsedNode.path("error").asText();
+            log.error("❌ Refus sécurité retourné sous forme de JSON: {}", refusalMsg);
+            throw new RuntimeException("Refus de génération par l'IA: " + refusalMsg);
         }
 
-        try {
-            return mapJsonToResponse(jsonText);
-        } catch (Exception parseEx) {
-            log.error("❌ Échec du parsing JSON. Texte extrait:\n{}", jsonText);
-            throw new RuntimeException("JSON extrait invalide: " + parseEx.getMessage(), parseEx);
-        }
+        return mapJsonToResponse(jsonText);
     }
 
-    /**
-     * Construit un GenerationResponse à partir du JSON généré par Gemini.
-     * On ne fait PAS de objectMapper.readValue(json, GenerationResponse.class) directement,
-     * car "redFlags" est un TABLEAU JSON dans la réponse de Gemini (conformément au prompt),
-     * alors que GenerationResponse.redFlags est un String (stocké tel quel, en TEXT, côté BDD).
-     * On mappe donc champ par champ et on re-sérialise le tableau redFlags en chaîne JSON.
-     */
     private GenerationResponse mapJsonToResponse(String jsonText) throws Exception {
         JsonNode node = objectMapper.readTree(jsonText);
 
@@ -313,8 +281,6 @@ Respond ONLY with a valid JSON object matching this schema:
         response.setSenderName(node.path("senderName").asText(null));
         response.setSenderDomain(node.path("senderDomain").asText(null));
         response.setLandingPageHtml(node.path("landingPageHtml").asText(null));
-
-        // ✅ NOUVEAU : Lire l'awareness page
         response.setAwarenessPageHtml(node.path("awarenessPageHtml").asText(null));
 
         JsonNode redFlagsNode = node.path("redFlags");
@@ -329,8 +295,8 @@ Respond ONLY with a valid JSON object matching this schema:
 
         return response;
     }
+
     private String extractJsonFromResponse(String text) {
-        // Retire les éventuelles balises de code markdown
         String cleaned = text
                 .replaceAll("(?i)```json\\s*", "")
                 .replaceAll("```\\s*", "")
@@ -372,11 +338,38 @@ Respond ONLY with a valid JSON object matching this schema:
             }
         }
 
-        // On a atteint la fin du texte sans que les accolades ne se referment :
-        // la réponse est très probablement tronquée.
-        log.error("❌ Accolades non équilibrées — JSON probablement tronqué. Texte:\n{}", cleaned);
-        throw new RuntimeException(
-                "Impossible d'extraire un JSON valide : les accolades ne sont pas équilibrées " +
-                        "(réponse probablement tronquée par Gemini)");
+        log.error("❌ Accolades non équilibrées — JSON probablement tronqué.");
+        throw new RuntimeException("JSON incomplet ou tronqué par Gemini");
+    }
+
+    private void saveGenerationLog(GenerationRequest request, GenerationResponse response, String prompt) {
+        try {
+            AiGenerationLog generationLog = new AiGenerationLog();
+            generationLog.setScenario(request.getScenario());
+            generationLog.setLanguage(request.getLanguage() != null ? request.getLanguage() : defaultLanguage);
+            generationLog.setPrompt(prompt);
+            generationLog.setGeneratedSubject(response.getSubject());
+            generationLog.setGeneratedBody(response.getBodyHtml());
+            generationLog.setBodyText(response.getBodyText());
+            generationLog.setLandingPageHtml(response.getLandingPageHtml());
+            generationLog.setAwarenessPageHtml(response.getAwarenessPageHtml());
+            generationLog.setRedFlags(response.getRedFlags());
+            generationLog.setSenderName(response.getSenderName());
+            generationLog.setSenderDomain(response.getSenderDomain());
+            generationLog.setGeneratedBy(getCurrentUser());
+            generationLog.setApproved(false);
+
+            AiGenerationLog saved = logRepository.save(generationLog);
+            response.setId(saved.getId().toString());
+
+            log.info("💾 Log de génération sauvegardé avec ID: {}", saved.getId());
+        } catch (Exception e) {
+            log.error("❌ Erreur lors de la sauvegarde du log: {}", e.getMessage());
+        }
+    }
+
+    private String getCurrentUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getName() != null ? auth.getName() : "SYSTEM";
     }
 }

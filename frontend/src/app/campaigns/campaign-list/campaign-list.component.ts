@@ -11,80 +11,7 @@ import { AuthService } from '../../shared/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent, DatePipe],
   templateUrl: './campaign-list.component.html',
-  styles: [`
-    .action-btn {
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      background: transparent;
-    }
-
-    .action-btn-edit {
-      color: #e07b2a;
-      border-color: rgba(224,123,42,0.2);
-      background: rgba(224,123,42,0.08);
-    }
-    .action-btn-edit:hover {
-      background: rgba(224,123,42,0.2);
-    }
-
-    .action-btn-authorize {
-      color: #22c55e;
-      border-color: rgba(34,197,94,0.2);
-      background: rgba(34,197,94,0.08);
-    }
-    .action-btn-authorize:hover {
-      background: rgba(34,197,94,0.2);
-    }
-
-    .action-btn-send {
-      color: #3b82f6;
-      border-color: rgba(59,130,246,0.2);
-      background: rgba(59,130,246,0.08);
-    }
-    .action-btn-send:hover {
-      background: rgba(59,130,246,0.2);
-    }
-
-    .action-btn-clone {
-      color: #8b5cf6;
-      border-color: rgba(139,92,246,0.2);
-      background: rgba(139,92,246,0.08);
-    }
-    .action-btn-clone:hover {
-      background: rgba(139,92,246,0.2);
-    }
-
-    .action-btn-pause {
-      color: #f59e0b;
-      border-color: rgba(245,158,11,0.2);
-      background: rgba(245,158,11,0.08);
-    }
-    .action-btn-pause:hover {
-      background: rgba(245,158,11,0.2);
-    }
-
-    .action-btn-resume {
-      color: #3b82f6;
-      border-color: rgba(59,130,246,0.2);
-      background: rgba(59,130,246,0.08);
-    }
-    .action-btn-resume:hover {
-      background: rgba(59,130,246,0.2);
-    }
-
-    .action-btn-delete {
-      color: #dc2626;
-      border-color: rgba(239,68,68,0.2);
-      background: rgba(239,68,68,0.08);
-    }
-    .action-btn-delete:hover {
-      background: rgba(239,68,68,0.2);
-    }
-  `]
+  styleUrl: './campaign-list.component.scss'
 })
 export class CampaignListComponent implements OnInit {
 
@@ -111,7 +38,7 @@ export class CampaignListComponent implements OnInit {
     this.loading = true;
     this.campaignService.getAll().subscribe({
       next: (data) => { this.campaigns = data; this.loading = false; },
-      error: () => { this.error = 'Erreur lors du chargement'; this.loading = false; }
+      error: () => { this.error = 'Erreur lors du chargement des campagnes'; this.loading = false; }
     });
   }
 
@@ -137,7 +64,7 @@ export class CampaignListComponent implements OnInit {
         this.error = '';
       },
       error: (err) => {
-        this.error = err.error?.message || 'Erreur lors de l\'autorisation';
+        this.error = err.error?.message || 'Erreur lors de l\'autorisation de la campagne';
       }
     });
   }
@@ -145,7 +72,7 @@ export class CampaignListComponent implements OnInit {
   clone(id: string) {
     this.campaignService.clone(id).subscribe({
       next: () => this.load(),
-      error: () => { this.error = 'Erreur lors du clonage'; }
+      error: () => { this.error = 'Erreur lors du clonage de la campagne'; }
     });
   }
 
@@ -155,7 +82,7 @@ export class CampaignListComponent implements OnInit {
         const index = this.campaigns.findIndex(c => c.id === id);
         if (index !== -1) this.campaigns[index] = updated;
       },
-      error: () => { this.error = 'Erreur lors de la pause'; }
+      error: () => { this.error = 'Erreur lors de la mise en pause de la campagne'; }
     });
   }
 
@@ -165,15 +92,15 @@ export class CampaignListComponent implements OnInit {
         const index = this.campaigns.findIndex(c => c.id === id);
         if (index !== -1) this.campaigns[index] = updated;
       },
-      error: () => { this.error = 'Erreur lors de la reprise'; }
+      error: () => { this.error = 'Erreur lors de la reprise de la campagne'; }
     });
   }
 
   delete(id: string) {
-    if (!confirm('Supprimer cette campagne ?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette campagne ?')) return;
     this.campaignService.delete(id).subscribe({
       next: () => { this.campaigns = this.campaigns.filter(c => c.id !== id); },
-      error: () => { this.error = 'Erreur lors de la suppression'; }
+      error: () => { this.error = 'Erreur lors de la suppression de la campagne'; }
     });
   }
 
@@ -184,11 +111,11 @@ export class CampaignListComponent implements OnInit {
       return;
     }
 
-    let confirmMessage = '⚠️ Envoyer cette campagne ';
+    let confirmMessage = 'Confirmer l\'envoi immédiat de cette campagne ';
     if (campaign.dryRun) {
       confirmMessage += `en mode DRY RUN (uniquement à ${campaign.dryRunEmail || 'l\'adresse de test'}) ?`;
     } else {
-      confirmMessage += `à toutes les cibles sélectionnées (groupe : ${this.getGroupName(campaign.targetGroupId) || 'Non défini'}) ?`;
+      confirmMessage += `à l'ensemble des cibles du groupe "${this.getGroupName(campaign.targetGroupId) || 'sélectionné'}" ?`;
     }
     
     if (!confirm(confirmMessage)) return;
@@ -202,30 +129,8 @@ export class CampaignListComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = typeof err.error === 'string' ? err.error : 'Erreur lors de l\'envoi';
+        this.error = typeof err.error === 'string' ? err.error : 'Erreur lors du lancement de la campagne';
       }
     });
-  }
-
-  getStatusColor(status: string): string {
-    switch(status) {
-      case 'AUTHORIZED': return '#22c55e';
-      case 'RUNNING': return '#3b82f6';
-      case 'PAUSED': return '#f59e0b';
-      case 'SCHEDULED': return '#8b5cf6';
-      case 'COMPLETED': return '#8899aa';
-      default: return '#f59e0b';
-    }
-  }
-
-  getStatusBg(status: string): string {
-    switch(status) {
-      case 'AUTHORIZED': return 'rgba(34,197,94,0.15)';
-      case 'RUNNING': return 'rgba(59,130,246,0.15)';
-      case 'PAUSED': return 'rgba(245,158,11,0.15)';
-      case 'SCHEDULED': return 'rgba(139,92,246,0.15)';
-      case 'COMPLETED': return 'rgba(136,153,170,0.15)';
-      default: return 'rgba(245,158,11,0.15)';
-    }
   }
 }

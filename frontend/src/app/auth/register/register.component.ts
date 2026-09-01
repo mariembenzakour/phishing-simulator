@@ -8,7 +8,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './register.component.html'
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.scss' // 👈 Liaison avec le fichier SCSS
 })
 export class RegisterComponent {
 
@@ -20,7 +21,6 @@ export class RegisterComponent {
     email: '',
     password: '',
     confirmPassword: ''
-    // ✅ PLUS DE ROLE ICI
   };
 
   errors: any = {};
@@ -93,11 +93,10 @@ export class RegisterComponent {
   register() {
     if (!this.validate()) return;
 
-    // ✅ On envoie TOUJOURS VIEWER
     this.authService.register(
       this.form.email,
       this.form.password,
-      'VIEWER',  // ← FORCÉ
+      'VIEWER',
       this.form.firstName,
       this.form.lastName,
       this.form.phone,

@@ -11,7 +11,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-target-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
-  templateUrl: './target-list.component.html'
+  templateUrl: './target-list.component.html',
+  styleUrl: './target-list.component.scss'
 })
 export class TargetListComponent implements OnInit {
 
@@ -23,6 +24,12 @@ export class TargetListComponent implements OnInit {
   uploadMessage = '';
   uploadSuccess = false;
   selectedFile: File | null = null;
+
+  // ✅ Variables pour l'édition
+  editingTarget: any = null;
+  editTarget: any = {};
+  editError = '';
+  editSuccess = '';
 
   constructor(
     public authService: AuthService,
@@ -70,6 +77,54 @@ export class TargetListComponent implements OnInit {
     this.loadTargets(groupId);
   }
 
+  // ✅ Ouvrir le modal d'édition
+  openEditTarget(target: any) {
+    this.editingTarget = target;
+    this.editTarget = {
+      id: target.id,
+      firstName: target.firstName,
+      lastName: target.lastName,
+      email: target.email,
+      groupId: target.groupId
+    };
+    this.editError = '';
+    this.editSuccess = '';
+  }
+
+  // ✅ Fermer le modal
+  closeEditTarget() {
+    this.editingTarget = null;
+    this.editTarget = {};
+    this.editError = '';
+    this.editSuccess = '';
+  }
+
+  // ✅ Sauvegarder les modifications
+  saveEditTarget() {
+    if (!this.editTarget.firstName.trim() || !this.editTarget.lastName.trim() || !this.editTarget.email.trim()) {
+      this.editError = 'Tous les champs sont obligatoires';
+      return;
+    }
+
+    if (!this.editTarget.groupId) {
+      this.editError = 'Veuillez sélectionner un groupe';
+      return;
+    }
+
+    this.targetService.update(this.editingTarget.id, this.editTarget).subscribe({
+      next: () => {
+        this.editSuccess = 'Cible modifiée avec succès !';
+        setTimeout(() => {
+          this.closeEditTarget();
+          this.loadTargets(this.selectedGroupId);
+        }, 1500);
+      },
+      error: (err) => {
+        this.editError = err.error?.message || 'Erreur lors de la modification';
+      }
+    });
+  }
+
   delete(id: string) {
     if (!confirm('Supprimer cette cible ?')) return;
     this.targetService.delete(id).subscribe({
@@ -79,7 +134,6 @@ export class TargetListComponent implements OnInit {
     });
   }
 
-  // ✅ Sélection du fichier
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -88,7 +142,6 @@ export class TargetListComponent implements OnInit {
     }
   }
 
-  // ✅ Upload du CSV avec rechargement automatique
   uploadCsv() {
     if (!this.selectedFile) {
       this.uploadMessage = 'Veuillez sélectionner un fichier CSV';
@@ -113,11 +166,7 @@ export class TargetListComponent implements OnInit {
         this.uploadMessage = response;
         this.uploadSuccess = true;
         this.selectedFile = null;
-        
-        // ✅ Recharger la liste des cibles APRÈS l'import
         this.loadTargets(this.selectedGroupId);
-        
-        // ✅ Réinitialiser le message après 5 secondes
         setTimeout(() => {
           this.uploadMessage = '';
         }, 5000);
@@ -125,7 +174,6 @@ export class TargetListComponent implements OnInit {
       error: (err) => {
         this.uploadMessage = typeof err.error === 'string' ? err.error : 'Erreur lors de l\'import';
         this.uploadSuccess = false;
-        // ✅ Réinitialiser après 5 secondes même en cas d'erreur
         setTimeout(() => {
           this.uploadMessage = '';
         }, 5000);

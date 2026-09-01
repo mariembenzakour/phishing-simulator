@@ -1,178 +1,178 @@
-/* ============================================
-   SIDEBAR STYLES
-   ============================================ */
+$intellisec-navy: #0b1b3d;
+$intellisec-navy-dark: #071226;
+$intellisec-orange: #e07b2a;
+$intellisec-text-muted: #8a99ad;
+$intellisec-hover-bg: rgba(255, 255, 255, 0.05);
 
 .sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: 250px;
   height: 100vh;
-  background: #0f1f35;
-  color: white;
+  background-color: $intellisec-navy;
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 
   &.collapsed {
-    width: 72px;
+    width: 68px;
 
-    .sidebar-header .logo-text {
-      display: none;
+    .sidebar-header {
+      padding: 16px 0;
+      justify-content: center;
+
+      .logo-container {
+        justify-content: center;
+        width: 100%;
+      }
     }
 
-    .sidebar-nav li a .nav-label {
-      display: none;
-    }
-
-    .sidebar-footer .user-info {
-      display: none;
-    }
-
-    .sidebar-footer .logout-btn .nav-label {
-      display: none;
-    }
-
-    .sidebar-footer .user-profile {
+    .nav-link {
       justify-content: center;
       padding: 12px 0;
     }
 
-    .sidebar-footer .logout-btn {
+    .user-profile {
       justify-content: center;
-      padding: 12px 0;
+      padding: 10px 0;
+    }
+
+    .logout-btn {
+      justify-content: center;
+      padding: 10px 0;
     }
   }
 
-  // ── HEADER ──
+  /* ── EN-TÊTE LOGO SVG ── */
   .sidebar-header {
-    padding: 20px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 
     .logo-container {
       display: flex;
       align-items: center;
-      gap: 12px;
       cursor: pointer;
+      user-select: none;
+      width: 100%;
 
-      .logo-icon {
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .intellisec-svg-logo-sidebar {
+        height: 38px;
+        width: auto;
+        max-width: 100%;
       }
 
-      .logo-text {
-        span {
-          font-size: 18px;
-          font-weight: 800;
-          color: white;
-
-          span {
-            color: #e07b2a;
-          }
-        }
-
-        small {
-          display: block;
-          font-size: 10px;
-          color: #8899aa;
-          letter-spacing: 2px;
-          margin-top: -2px;
-        }
+      .intellisec-svg-logo-icon {
+        height: 34px;
+        width: auto;
+        margin: 0 auto;
       }
     }
   }
 
-  // ── NAVIGATION ──
+  /* ── MENU DE NAVIGATION ── */
   .sidebar-nav {
     flex: 1;
-    padding: 12px 0;
+    padding: 16px 0;
     overflow-y: auto;
 
-    ul {
+    .nav-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-      li {
-        a {
+    .nav-item {
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 11px 20px;
+        color: $intellisec-text-muted;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+        border-left: 3px solid transparent;
+
+        .nav-icon {
           display: flex;
           align-items: center;
-          gap: 14px;
-          padding: 12px 20px;
-          color: #8899aa;
-          text-decoration: none;
-          font-size: 14px;
-          font-weight: 500;
-          transition: all 0.2s;
-          border-left: 3px solid transparent;
-          cursor: pointer;
+          justify-content: center;
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+          color: $intellisec-text-muted;
+          transition: color 0.15s ease;
+        }
+
+        .nav-label {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        &:hover {
+          background: $intellisec-hover-bg;
+          color: #ffffff;
 
           .nav-icon {
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-            flex-shrink: 0;
+            color: #ffffff;
           }
+        }
 
-          .nav-label {
-            white-space: nowrap;
-          }
+        &.active {
+          background: rgba(224, 123, 42, 0.12);
+          color: $intellisec-orange;
+          border-left-color: $intellisec-orange;
+          font-weight: 600;
 
-          &:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-          }
-
-          &.active {
-            background: rgba(224, 123, 42, 0.15);
-            color: #e07b2a;
-            border-left-color: #e07b2a;
-
-            .nav-icon {
-              color: #e07b2a;
-            }
+          .nav-icon {
+            color: $intellisec-orange;
           }
         }
       }
     }
   }
 
-  // ── FOOTER ──
+  /* ── PIED DE PAGE ── */
   .sidebar-footer {
-    padding: 16px 16px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background-color: $intellisec-navy-dark;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 
     .user-profile {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: background 0.2s;
-      cursor: pointer;
-
-      &:hover {
-        background: rgba(255, 255, 255, 0.05);
-      }
+      padding: 8px;
+      border-radius: 4px;
 
       .user-avatar {
-        width: 36px;
-        height: 36px;
-        background: #e07b2a;
+        width: 32px;
+        height: 32px;
+        background-color: $intellisec-orange;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 16px;
-        color: white;
+        font-size: 13px;
+        color: #ffffff;
         flex-shrink: 0;
       }
 
@@ -181,19 +181,31 @@
         min-width: 0;
 
         .user-name {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 600;
-          color: white;
+          color: #ffffff;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
         .user-role {
-          font-size: 10px;
-          font-weight: 600;
+          font-size: 9px;
+          font-weight: 700;
           letter-spacing: 0.5px;
-          opacity: 0.8;
+          margin-top: 2px;
+
+          &.role-superadmin, &.role-admin {
+            color: $intellisec-orange;
+          }
+
+          &.role-operator {
+            color: #60a5fa;
+          }
+
+          &.role-viewer {
+            color: #9ca3af;
+          }
         }
       }
     }
@@ -201,49 +213,41 @@
     .logout-btn {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       width: 100%;
-      padding: 10px 16px;
-      margin-top: 8px;
+      padding: 9px 12px;
       background: rgba(220, 38, 38, 0.1);
-      border: none;
-      border-radius: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 4px;
       color: #f87171;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
-
-      &:hover {
-        background: rgba(220, 38, 38, 0.2);
-      }
+      transition: all 0.15s ease;
 
       .nav-icon {
-        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         flex-shrink: 0;
       }
 
-      .nav-label {
-        white-space: nowrap;
+      &:hover {
+        background: rgba(220, 38, 38, 0.2);
+        color: #fca5a5;
       }
     }
   }
 }
 
-/* Scrollbar personnalisée */
+/* Scrollbar discrète */
 .sidebar-nav::-webkit-scrollbar {
   width: 4px;
 }
-
 .sidebar-nav::-webkit-scrollbar-track {
   background: transparent;
 }
-
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
 }

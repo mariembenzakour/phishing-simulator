@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../shared/navbar/navbar.component';
 import { AiService, AiGenerationLog, RedFlag } from '../shared/services/ai.service';
 import { AuthService } from '../shared/services/auth.service';
@@ -8,8 +8,9 @@ import { AuthService } from '../shared/services/auth.service';
 @Component({
   selector: 'app-ai-drafts',
   standalone: true,
-  imports: [CommonModule, NavbarComponent],
-  templateUrl: './ai-drafts.component.html'
+  imports: [CommonModule, NavbarComponent, RouterLink],
+  templateUrl: './ai-drafts.component.html',
+  styleUrls: ['./ai-drafts.component.scss']
 })
 export class AiDraftsComponent implements OnInit {
 
@@ -75,11 +76,11 @@ export class AiDraftsComponent implements OnInit {
   }
 
   getStatusBadge(approved: boolean): string {
-    return approved ? '✅ Approuvé' : '⏳ En attente';
+    return approved ? 'Approuvé' : 'En attente';
   }
 
   getStatusColor(approved: boolean): string {
-    return approved ? '#22c55e' : '#f59e0b';
+    return approved ? '#059669' : '#d97706';
   }
 
   isAdmin(): boolean {
@@ -88,13 +89,12 @@ export class AiDraftsComponent implements OnInit {
 
   getLanguageLabel(lang: string): string {
     const map: Record<string, string> = {
-      'fr': '🇫🇷 Français',
-      'en': '🇬🇧 English'
+      'fr': 'Français',
+      'en': 'English'
     };
     return map[lang] || lang;
   }
 
-  // ✅ WEEK 6 : Parser les red flags
   parseRedFlags(redFlagsJson: string): RedFlag[] {
     try {
       return JSON.parse(redFlagsJson);
@@ -103,14 +103,13 @@ export class AiDraftsComponent implements OnInit {
     }
   }
 
-  // ✅ WEEK 6 : Obtenir l'icône selon la sévérité
   getSeverityIcon(severity: string): string {
     const map: Record<string, string> = {
-      'critical': '🔴',
-      'high': '🟠',
-      'medium': '🟡',
-      'low': '🟢'
+      'critical': '#dc2626',
+      'high': '#ea580c',
+      'medium': '#d97706',
+      'low': '#059669'
     };
-    return map[severity] || '⚪';
+    return map[severity] || '#64748b';
   }
 }

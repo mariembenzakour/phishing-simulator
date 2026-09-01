@@ -13,8 +13,16 @@ export class TargetGroupService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
   create(group: any): Observable<any> {
     return this.http.post(this.apiUrl, group);
+  }
+
+  update(id: string, group: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, group);
   }
 
   delete(id: string): Observable<any> {

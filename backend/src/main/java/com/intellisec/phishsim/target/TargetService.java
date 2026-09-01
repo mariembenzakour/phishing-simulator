@@ -2,6 +2,7 @@ package com.intellisec.phishsim.target;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -21,17 +22,34 @@ public class TargetService {
         return targetRepository.findByGroupId(groupId);
     }
 
+    public Target getById(UUID id) {
+        return targetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Target not found"));
+    }
+
+    @Transactional
     public Target save(Target target) {
         return targetRepository.save(target);
     }
 
-    public void delete(UUID id) {
-        targetRepository.deleteById(id);
+    @Transactional
+    public Target update(UUID id, Target targetData) {
+        Target target = getById(id);
+        target.setEmail(targetData.getEmail());
+        target.setFirstName(targetData.getFirstName());
+        target.setLastName(targetData.getLastName());
+        target.setGroupId(targetData.getGroupId());
+        return targetRepository.save(target);
     }
 
-    // ✅ NOUVELLE METHODE : Import CSV
+    @Transactional
+    public void delete(UUID id) {
+        Target target = getById(id);
+        targetRepository.delete(target);
+    }
+
+    @Transactional
     public void importCsv(MultipartFile file, UUID groupId) throws Exception {
-        // Vérifier que le groupe existe
         if (!targetGroupRepository.existsById(groupId)) {
             throw new RuntimeException("Groupe non trouvé");
         }
@@ -43,26 +61,22 @@ public class TargetService {
             boolean isFirstLine = true;
 
             while ((line = reader.readLine()) != null) {
-                // Ignorer l'en-tête (première ligne)
                 if (isFirstLine) {
                     isFirstLine = false;
                     continue;
                 }
 
-                // Ignorer les lignes vides
                 if (line.trim().isEmpty()) {
                     continue;
                 }
 
                 String[] columns = line.split(",");
 
-                // Format: email,firstName,lastName
                 if (columns.length >= 3) {
                     String email = columns[0].trim();
                     String firstName = columns[1].trim();
                     String lastName = columns[2].trim();
 
-                    // Vérifier que l'email n'est pas vide
                     if (email.isEmpty()) {
                         continue;
                     }
@@ -78,7 +92,8 @@ public class TargetService {
             }
         }
 
-        // Sauvegarder toutes les cibles
-        targetRepository.saveAll(targets);
+        if (!targets.isEmpty()) {
+            targetRepository.saveAll(targets);
+        }
     }
 }

@@ -169,8 +169,9 @@ public class TrackingController {
     // DASHBOARD
     // ============================================================
 
+    // ✅ VIEWER peut voir le dashboard global
     @GetMapping("/dashboard/global")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getGlobalDashboard() {
         List<Campaign> campaigns = trackingService.getAllCampaigns();
         List<SendEvent> allEvents = trackingService.getAllSendEvents();
@@ -216,6 +217,7 @@ public class TrackingController {
         return ResponseEntity.ok(response);
     }
 
+    // ✅ VIEWER peut voir les détails d'une campagne
     @GetMapping("/campaign/{campaignId}/details")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getCampaignDetails(@PathVariable UUID campaignId) {
@@ -236,6 +238,7 @@ public class TrackingController {
     // ✅ TIME-TO-CLICK ENDPOINTS
     // ============================================================
 
+    // ✅ VIEWER peut voir le time-to-click global d'une campagne
     @GetMapping("/campaign/{campaignId}/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getTimeToClick(@PathVariable UUID campaignId) {
@@ -244,6 +247,7 @@ public class TrackingController {
         return ResponseEntity.ok(stats);
     }
 
+    // ❌ VIEWER ne peut pas voir le time-to-click par utilisateur (données sensibles)
     @GetMapping("/user/{targetId}/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Map<String, Object>> getUserTimeToClick(@PathVariable UUID targetId) {
@@ -252,18 +256,21 @@ public class TrackingController {
         return ResponseEntity.ok(stats);
     }
 
+    // ❌ VIEWER ne peut pas voir les statistiques utilisateurs
     @GetMapping("/campaign/{campaignId}/users/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<Map<String, Object>>> getUsersTimeToClick(@PathVariable UUID campaignId) {
         return ResponseEntity.ok(trackingService.getUsersTimeToClick(campaignId));
     }
 
+    // ❌ VIEWER ne peut pas voir les stats utilisateurs
     @GetMapping("/user/stats")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<Map<String, Object>>> getUserStats() {
         return ResponseEntity.ok(trackingService.getUserStats());
     }
 
+    // ❌ VIEWER ne peut pas voir l'historique utilisateur
     @GetMapping("/user/{targetId}/history")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<TrackingEvent>> getUserHistory(@PathVariable UUID targetId) {

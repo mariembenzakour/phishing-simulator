@@ -9,7 +9,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-trends',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './trends.component.html'
+  templateUrl: './trends.component.html',
+  styleUrl: './trends.component.scss'
 })
 export class TrendsComponent implements OnInit {
 
@@ -45,7 +46,6 @@ export class TrendsComponent implements OnInit {
   }
 
   prepareChartData() {
-    // Trier par date
     const sorted = [...this.campaigns]
       .filter(c => c.createdAt)
       .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -60,12 +60,10 @@ export class TrendsComponent implements OnInit {
     const clickRates = sorted.map(c => c.clickRate || 0);
     const submitRates = sorted.map(c => c.submitRate || 0);
 
-    // Moyennes
     const avgOpen = openRates.reduce((a, b) => a + b, 0) / openRates.length;
     const avgClick = clickRates.reduce((a, b) => a + b, 0) / clickRates.length;
     const avgSubmit = submitRates.reduce((a, b) => a + b, 0) / submitRates.length;
 
-    // Max / Min
     const maxOpen = Math.max(...openRates);
     const maxClick = Math.max(...clickRates);
     const maxSubmit = Math.max(...submitRates);
@@ -73,7 +71,6 @@ export class TrendsComponent implements OnInit {
     const minClick = Math.min(...clickRates);
     const minSubmit = Math.min(...submitRates);
 
-    // Valeur max pour l'échelle
     const maxValue = Math.max(
       ...openRates, ...clickRates, ...submitRates, 10
     );
@@ -100,18 +97,18 @@ export class TrendsComponent implements OnInit {
     if (!this.chartData || this.chartData.openRates.length === 0) return 'N/A';
     const latest = this.chartData.openRates[this.chartData.openRates.length - 1];
     const avg = this.chartData.avgOpen;
-    if (latest > avg * 1.05) return '📈 En hausse';
-    if (latest < avg * 0.95) return '📉 En baisse';
-    return '➡️ Stable';
+    if (latest > avg * 1.05) return 'En hausse';
+    if (latest < avg * 0.95) return 'En baisse';
+    return 'Stable';
   }
 
   getLatestTrendColor(): string {
-    if (!this.chartData || this.chartData.openRates.length === 0) return '#6b7280';
+    if (!this.chartData || this.chartData.openRates.length === 0) return '#64748b';
     const latest = this.chartData.openRates[this.chartData.openRates.length - 1];
     const avg = this.chartData.avgOpen;
-    if (latest > avg * 1.05) return '#22c55e';
-    if (latest < avg * 0.95) return '#dc2626';
-    return '#f59e0b';
+    if (latest > avg * 1.05) return '#10b981';
+    if (latest < avg * 0.95) return '#ef4444';
+    return '#64748b';
   }
 
   getMaxValue(): number {

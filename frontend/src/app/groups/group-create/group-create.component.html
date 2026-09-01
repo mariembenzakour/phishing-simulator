@@ -1,26 +1,66 @@
 <app-navbar></app-navbar>
 
-<div style="background: #0a1628; min-height: calc(100vh - 64px); padding: 32px; display: flex; justify-content: center;">
-  <div style="width: 100%; max-width: 500px;">
+<div class="create-container">
+  <div class="create-wrapper">
 
-    <div style="margin-bottom: 32px;">
-      <a routerLink="/groups" style="color: #8899aa; text-decoration: none; font-size: 14px;">← Retour</a>
-      <h1 style="color: white; font-size: 28px; font-weight: 800; margin: 16px 0 4px 0;">Nouveau groupe</h1>
+    <!-- HEADER EN-TÊTE -->
+    <div class="create-header">
+      <a routerLink="/groups" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Retour aux groupes
+      </a>
+      <h1 class="page-title">Nouveau groupe</h1>
+      <p class="page-subtitle">Définissez une nouvelle catégorie pour classifier vos cibles</p>
     </div>
 
-    <div style="background: #0f1f35; border-radius: 12px; padding: 32px; border: 1px solid #1e3a5c;">
-      <div style="margin-bottom: 24px;">
-        <label style="color: #8899aa; font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px; letter-spacing: 1px;">NOM DU GROUPE *</label>
-        <input type="text" [(ngModel)]="name" placeholder="Ex: Équipe RH"
-               style="width: 100%; padding: 12px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+    <!-- CARTE FORMULAIRE -->
+    <div class="form-card">
+      <div class="form-group">
+        <label class="form-label">Nom du groupe <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            [(ngModel)]="name" 
+            placeholder="Ex: Équipe RH, Direction General, IT..." 
+            class="form-input"
+            (keyup.enter)="create()"
+            maxlength="40"
+          >
+          <span class="char-count" *ngIf="name.length > 0">{{ name.length }}/40</span>
+        </div>
       </div>
 
-      <div *ngIf="error" style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">⚠️ {{ error }}</div>
-      <div *ngIf="success" style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #4ade80; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">✅ {{ success }}</div>
+      <!-- MESSAGES D'ALERTE -->
+      <div *ngIf="error" class="banner error-banner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>{{ error }}</span>
+      </div>
 
-      <button (click)="create()" style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700;">
-        CRÉER →
+      <div *ngIf="success" class="banner success-banner">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span>{{ success }}</span>
+      </div>
+
+      <!-- APERÇU EN TEMPS RÉEL (LIVE PREVIEW) -->
+      <div class="preview-section">
+        <span class="preview-title">Aperçu de la carte</span>
+        <div class="preview-card">
+          <div class="preview-avatar">
+            {{ name.trim() ? name.charAt(0).toUpperCase() : '?' }}
+          </div>
+          <div class="preview-info">
+            <span class="preview-name">{{ name.trim() || 'Nom du groupe' }}</span>
+            <span class="preview-sub">0 cible associée</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOUTON D'ACTION -->
+      <button (click)="create()" class="btn-primary" [disabled]="!name.trim()">
+        <span>Créer le groupe</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
       </button>
     </div>
+
   </div>
 </div>

@@ -13,20 +13,26 @@ export class TargetService {
     return this.http.get<any[]>(`${this.apiUrl}/group/${groupId}`);
   }
 
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
   create(target: any): Observable<any> {
     return this.http.post(this.apiUrl, target);
+  }
+
+  update(id: string, target: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, target);
   }
 
   delete(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ NOUVELLE METHODE : Upload CSV
   uploadCsv(file: File, groupId: string): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('groupId', groupId);
-    
     return this.http.post(`${this.apiUrl}/upload`, formData);
   }
 }

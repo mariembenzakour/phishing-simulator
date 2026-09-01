@@ -8,7 +8,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-mfa',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './mfa.component.html'
+  templateUrl: './mfa.component.html',
+  styleUrl: './mfa.component.scss' // 👈 Liaison du fichier SCSS
 })
 export class MfaComponent {
 

@@ -1,139 +1,184 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+<div class="main-wrapper">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-    <div>
-      <a routerLink="/ai/generate" style="color: #6b7a8a; text-decoration: none; font-size: 14px;">← Retour à la génération</a>
-      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 8px 0 4px 0;">📋 Drafts IA</h1>
-      <p style="color: #6b7a8a; font-size: 14px;">{{ total }} draft(s) approuvé(s) disponibles</p>
+  <!-- En-tête de la Page -->
+  <header class="page-header">
+    <div class="header-left">
+      <a routerLink="/ai/generate" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Retour à la génération
+      </a>
+      <div class="header-title-group">
+        <div class="icon-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        </div>
+        <div>
+          <h1 class="page-title">Drafts IA</h1>
+          <p class="page-subtitle">{{ total }} draft(s) disponible(s)</p>
+        </div>
+      </div>
     </div>
-    <button (click)="loadDrafts()" 
-            style="background: #e07b2a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-      🔄 Rafraîchir
+
+    <button (click)="loadDrafts()" class="btn-refresh">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      Rafraîchir
     </button>
+  </header>
+
+  <!-- Notification Erreur -->
+  <div *ngIf="error" class="alert alert-error">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>{{ error }}</span>
   </div>
 
-  <!-- Messages -->
-  <div *ngIf="error" 
-       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-    ⚠️ {{ error }}
-  </div>
-  <div *ngIf="success" 
-       style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-    ✅ {{ success }}
+  <!-- Notification Succès -->
+  <div *ngIf="success" class="alert alert-success">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span>{{ success }}</span>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" style="text-align: center; padding: 60px;">
-    <p style="color: #6b7a8a;">Chargement...</p>
+  <!-- Etat de Chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des brouillons...</p>
   </div>
 
-  <!-- Liste des drafts -->
+  <!-- Liste des Drafts -->
   <div *ngIf="!loading">
 
-    <div *ngIf="drafts.length === 0" 
-         style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
-      <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
-      <p style="color: #6b7a8a; font-size: 16px;">Aucun draft approuvé disponible</p>
-      <a routerLink="/ai/generate" style="color: #e07b2a; text-decoration: none; font-weight: 600;">
-        Créer un nouveau draft →
+    <!-- Etat vide -->
+    <div *ngIf="drafts.length === 0" class="empty-card">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><path d="M22 17.5L19 21l-1.5-1.5"/><polyline points="22 6 12 13 2 6"/></svg>
+      </div>
+      <h3>Aucun draft disponible</h3>
+      <p>Aucun scénario n'est actuellement enregistré dans cette vue.</p>
+      <a routerLink="/ai/generate" class="link-action">
+        Créer un nouveau draft
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
 
-    <div *ngFor="let draft of drafts" 
-         style="background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 16px; cursor: pointer;"
-         (click)="toggleExpand(draft.id)">
+    <!-- Carte de Draft -->
+    <div *ngFor="let draft of drafts" class="draft-card" [class.expanded]="expandedDraftId === draft.id" (click)="toggleExpand(draft.id)">
 
-      <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 12px;">
+      <div class="draft-card-header">
 
-        <!-- Informations du draft -->
-        <div style="flex: 1; min-width: 200px;">
-          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <span style="font-weight: 700; color: #1a3a5c; font-size: 16px;">{{ draft.generatedSubject || draft.scenario }}</span>
-            <span style="padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;"
-                  [style.background]="draft.approved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)'"
-                  [style.color]="draft.approved ? '#22c55e' : '#f59e0b'">
+        <!-- Informations Principales -->
+        <div class="draft-info">
+          <div class="draft-title-row">
+            <h2 class="draft-subject">{{ draft.generatedSubject || draft.scenario }}</h2>
+            <span class="status-badge" [class.status-approved]="draft.approved" [class.status-pending]="!draft.approved">
               {{ getStatusBadge(draft.approved) }}
             </span>
           </div>
-          <div style="display: flex; gap: 16px; color: #6b7a8a; font-size: 13px; margin-top: 4px; flex-wrap: wrap;">
-            <span>📌 {{ draft.scenario }}</span>
-            <span>{{ getLanguageLabel(draft.language) }}</span>
-            <span>👤 {{ draft.generatedBy }}</span>
-            <span>📅 {{ draft.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
-            <span *ngIf="draft.senderDomain" style="color: #8b5cf6;">{{ '@' }}{{ draft.senderDomain }}</span>
+
+          <div class="draft-meta">
+            <span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+              {{ draft.scenario }}
+            </span>
+            <span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              {{ getLanguageLabel(draft.language) }}
+            </span>
+            <span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              {{ draft.generatedBy }}
+            </span>
+            <span class="meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{ draft.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+            <span *ngIf="draft.senderDomain" class="domain-tag">
+              &#64;{{ draft.senderDomain }}
+            </span>
           </div>
-          <!-- WEEK 6 : Red flags summary -->
-          <div *ngIf="draft.redFlags" style="display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap;">
-            <span *ngFor="let flag of parseRedFlags(draft.redFlags)" 
-                  style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #fef3c7; color: #92400e;">
-              {{ getSeverityIcon(flag.severity) }} {{ flag.title }}
+
+          <!-- Résumé des Red Flags -->
+          <div *ngIf="draft.redFlags" class="redflags-summary">
+            <span *ngFor="let flag of parseRedFlags(draft.redFlags)" class="flag-chip">
+              <span class="flag-dot" [style.background-color]="getSeverityIcon(flag.severity)"></span>
+              {{ flag.title }}
             </span>
           </div>
         </div>
 
         <!-- Actions -->
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div class="draft-actions">
           <button *ngIf="isAdmin() && !draft.approved" 
                   (click)="$event.stopPropagation(); approve(draft.id)"
-                  style="background: #22c55e; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
-            ✅ Approuver
+                  class="btn-action btn-approve">
+            Approuver
           </button>
           <button *ngIf="isAdmin() && !draft.approved" 
                   (click)="$event.stopPropagation(); reject(draft.id)"
-                  style="background: #dc2626; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;">
-            ❌ Rejeter
+                  class="btn-action btn-reject">
+            Rejeter
           </button>
-          <span *ngIf="draft.approved" 
-                style="background: rgba(34,197,94,0.15); color: #22c55e; padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;">
-            ✅ Approuvé
+          <span *ngIf="draft.approved" class="approved-pill">
+            Approuvé
           </span>
-          <span style="color: #6b7a8a; font-size: 13px;">
-            <span *ngIf="expandedDraftId === draft.id">▼</span>
-            <span *ngIf="expandedDraftId !== draft.id">▶</span>
+          <span class="expand-icon">
+            <svg *ngIf="expandedDraftId !== draft.id" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            <svg *ngIf="expandedDraftId === draft.id" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
           </span>
         </div>
 
       </div>
 
-      <!-- WEEK 6 : Détails étendus -->
-      <div *ngIf="expandedDraftId === draft.id" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0;">
+      <!-- Détails Étendus -->
+      <div *ngIf="expandedDraftId === draft.id" class="draft-details">
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <!-- Email -->
-          <div style="background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">📧 Email</div>
-            <div style="font-weight: 600; color: #1a3a5c; font-size: 14px; margin-top: 4px;">{{ draft.generatedSubject }}</div>
-            <div style="font-size: 12px; color: #555; max-height: 80px; overflow: hidden; margin-top: 4px;" [innerHTML]="draft.generatedBody | slice:0:200"></div>
+        <div class="details-grid">
+          <!-- Aperçu Email -->
+          <div class="preview-panel">
+            <div class="panel-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>Email</span>
+            </div>
+            <div class="panel-body">
+              <div class="email-subject-preview">{{ draft.generatedSubject }}</div>
+              <div class="email-body-preview" [innerHTML]="draft.generatedBody | slice:0:200"></div>
+            </div>
           </div>
 
-          <!-- Landing Page -->
-          <div style="background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e2e8f0;">
-            <div style="font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🌐 Landing Page</div>
-            <div style="font-size: 13px; color: #1a3a5c; margin-top: 4px;">
-              {{ draft.landingPageHtml ? '✅ Générée' : '❌ Non générée' }}
+          <!-- Aperçu Landing Page -->
+          <div class="preview-panel">
+            <div class="panel-header">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <span>Page d'atterrissage</span>
             </div>
-            <div *ngIf="draft.senderName" style="font-size: 12px; color: #6b7a8a; margin-top: 4px;">
-              {{ draft.senderName }} <span style="color: #8b5cf6;">{{ '@' }}{{ draft.senderDomain }}</span>
+            <div class="panel-body">
+              <div class="landing-status" [class.text-success]="draft.landingPageHtml" [class.text-muted]="!draft.landingPageHtml">
+                {{ draft.landingPageHtml ? 'Page générée' : 'Non générée' }}
+              </div>
+              <div *ngIf="draft.senderName" class="sender-info">
+                Expéditeur : {{ draft.senderName }} <span class="domain-highlight">&#64;{{ draft.senderDomain }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Red Flags -->
-        <div *ngIf="draft.redFlags" style="margin-top: 12px; background: #fef3c7; border-radius: 8px; padding: 12px; border: 1px solid #f59e0b;">
-          <div style="font-size: 11px; color: #92400e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">🚩 Red Flags</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
+        <!-- Section Red Flags -->
+        <div *ngIf="draft.redFlags" class="flags-panel">
+          <div class="panel-header text-amber">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Indicateurs de risque (Red Flags)</span>
+          </div>
+          <div class="flags-grid">
             <div *ngFor="let flag of parseRedFlags(draft.redFlags)" 
-                 style="font-size: 12px; background: white; padding: 6px 10px; border-radius: 4px; border-left: 3px solid;"
-                 [style.border-left-color]="flag.severity === 'critical' ? '#dc2626' : flag.severity === 'high' ? '#f59e0b' : '#f97316'">
-              <span style="font-weight: 600;">{{ flag.title }}</span>
-              <span style="font-size: 10px; color: #6b7a8a; display: block;">{{ flag.howToDetect }}</span>
+                 class="flag-card"
+                 [style.border-left-color]="getSeverityIcon(flag.severity)">
+              <span class="flag-card-title">{{ flag.title }}</span>
+              <span class="flag-card-detect">{{ flag.howToDetect }}</span>
             </div>
           </div>
         </div>
 
       </div>
     </div>
+
   </div>
 </div>

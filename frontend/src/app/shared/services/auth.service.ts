@@ -83,7 +83,6 @@ export class AuthService {
     return userInfo?.role || null;
   }
 
-  // ✅ MODIFICATION : Ajout de l'ID dans getUserInfo
   getUserInfo(): any {
     const token = this.getToken();
     if (!token) return null;
@@ -94,26 +93,26 @@ export class AuthService {
         email: decoded.sub,
         role: decoded.role,
         exp: decoded.exp,
-        id: decoded.id || null   // ✅ ID extrait du token
+        id: decoded.id || null
       };
     } catch {
       return null;
     }
   }
 
-  // ✅ NOUVELLE MÉTHODE : Récupérer l'ID de l'utilisateur
   getUserId(): string | null {
     return this.getUserInfo()?.id || null;
   }
 
   // ============================================
-  // VÉRIFICATIONS DE RÔLE (RBAC)
+  // ✅ VÉRIFICATIONS DE RÔLE (RBAC) - CORRIGÉ
   // ============================================
 
   isSuperAdmin(): boolean {
     return this.getRole() === 'SUPER_ADMIN';
   }
 
+  // ✅ isAdmin() retourne TRUE pour ADMIN et SUPER_ADMIN
   isAdmin(): boolean {
     const role = this.getRole();
     return role === 'ADMIN' || role === 'SUPER_ADMIN';
@@ -135,14 +134,15 @@ export class AuthService {
     return this.isSuperAdmin();
   }
 
-  hasRole(...roles: string[]): boolean {
+  hasRole(role: string): boolean {
     const currentRole = this.getRole();
-    return roles.includes(currentRole || '');
+    return currentRole === role;
   }
 
+  // ✅ SUPER_ADMIN a TOUJOURS accès à tout
   hasAnyRole(roles: string[]): boolean {
     const currentRole = this.getRole();
-    return roles.some(r => r === currentRole);
+    return roles.some(r => r === currentRole) || this.isSuperAdmin();
   }
 
   // ============================================
@@ -150,24 +150,24 @@ export class AuthService {
   // ============================================
 
   isLoggedIn(): boolean {
-  const token = this.getToken();
-  if (!token) return false;
+    const token = this.getToken();
+    if (!token) return false;
 
-  try {
-    const payload = token.split('.')[1];
-    const decoded = JSON.parse(atob(payload));
-    if (decoded.exp) {
-      const now = Math.floor(Date.now() / 1000);
-      if (decoded.exp < now) {
-        this.logout();
-        return false;
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      if (decoded.exp) {
+        const now = Math.floor(Date.now() / 1000);
+        if (decoded.exp < now) {
+          this.logout();
+          return false;
+        }
       }
+      return true;
+    } catch {
+      return false;
     }
-    return true;
-  } catch {
-    return false;
   }
-}
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);

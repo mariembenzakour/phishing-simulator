@@ -1,89 +1,78 @@
-<div style="min-height: 100vh; background: #0a1628; display: flex;">
+<div class="intellisec-login-layout">
   
-  <!-- Partie gauche — Branding (Fond légèrement éclairci) -->
-  <div style="flex: 1; background: linear-gradient(135deg, #1a2a4a 0%, #2a4a6a 100%); display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden;">
-    
-    <!-- Background pattern -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(0deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px);"></div>
-    
-    <!-- Logo -->
-    <div style="margin-bottom: 48px; position: relative;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 48px; height: 48px; background: #e07b2a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🛡️</div>
-        <div>
-          <div style="color: white; font-size: 24px; font-weight: 800; letter-spacing: 1px;">INTELLI<span style="color: #e07b2a;">SEC</span></div>
-          <div style="color: #8899aa; font-size: 11px; letter-spacing: 2px;">SOLUTIONS</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tagline -->
-    <div style="position: relative;">
-      <p style="color: #e07b2a; font-size: 13px; letter-spacing: 2px; margin: 0 0 16px 0; text-transform: uppercase;">Sécurisez aujourd'hui, prospérez demain</p>
-      <h1 style="color: white; font-size: 42px; font-weight: 800; margin: 0 0 24px 0; line-height: 1.2;">
-        Phishing<br>
-        <span style="color: #e07b2a;">Simulation</span><br>
-        Platform
-      </h1>
-      <p style="color: #8899aa; font-size: 15px; line-height: 1.6; margin: 0; max-width: 400px;">
-        Plateforme de formation à la cybersécurité assistée par IA — entraînez vos équipes à détecter les attaques de phishing dans un environnement contrôlé.
-      </p>
-    </div>
-
-    <!-- Stats -->
-    <div style="display: flex; gap: 40px; margin-top: 48px; position: relative;">
-      <div>
-        <div style="color: #e07b2a; font-size: 28px; font-weight: 800;">98%</div>
-        <div style="color: #8899aa; font-size: 12px;">Taux de détection</div>
-      </div>
-      <div>
-        <div style="color: #e07b2a; font-size: 28px; font-weight: 800;">AI</div>
-        <div style="color: #8899aa; font-size: 12px;">Powered</div>
-      </div>
-      <div>
-        <div style="color: #e07b2a; font-size: 28px; font-weight: 800;">24/7</div>
-        <div style="color: #8899aa; font-size: 12px;">Monitoring</div>
-      </div>
-    </div>
+  <!-- Section Gauche : Image bg-code.jpg -->
+  <div class="code-panel">
+    <div class="dark-vignette"></div>
   </div>
 
-  <!-- Partie droite — Login Form (inchangée) -->
-  <div style="width: 480px; background: #0f1f35; display: flex; align-items: center; justify-content: center; padding: 60px 48px;">
-    <div style="width: 100%;">
+  <!-- Section Droite : Formulaire blanc -->
+  <div class="form-panel">
+    <div class="form-box">
       
-      <h2 style="color: white; font-size: 28px; font-weight: 700; margin: 0 0 8px 0;">Connexion</h2>
-      <p style="color: #8899aa; margin: 0 0 40px 0; font-size: 14px;">Accédez à votre espace opérateur</p>
-
-      <!-- Email -->
-      <div style="margin-bottom: 20px;">
-        <label style="color: #8899aa; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">EMAIL PROFESSIONNEL</label>
-        <input type="email" [(ngModel)]="email" placeholder="prenom.nom&#64;intellisecsolutions.com"
-               style="width: 100%; padding: 14px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+      <!-- Logo Officiel Intellisec (Centre du formulaire) -->
+      <div class="form-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" class="intellisec-svg-logo-small">
+          <g transform="translate(10, 20)">
+            <path d="M 12,24 L 12,10 M 12,10 A 3,3 0 1,1 12,4 A 3,3 0 1,1 12,10" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 46,24 L 46,2 M 46,2 A 3,3 0 1,1 46,-4 A 3,3 0 1,1 46,2" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 68,24 L 68,12 M 68,12 A 3,3 0 1,1 68,6 A 3,3 0 1,1 68,12" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 85,24 L 85,4 M 85,4 A 3,3 0 1,1 85,-2 A 3,3 0 1,1 85,4" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            
+            <text x="0" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="34" fill="#E07B2A">INTELLI</text>
+            <text x="140" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="34" fill="#0B1B3D">SEC</text>
+            <text x="2" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="600" font-size="11" fill="#0B1B3D" letter-spacing="8.5">SOLUTIONS</text>
+          </g>
+        </svg>
       </div>
 
-      <!-- Password -->
-      <div style="margin-bottom: 32px;">
-        <label style="color: #8899aa; font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">MOT DE PASSE</label>
-        <input type="password" [(ngModel)]="password" placeholder="••••••••"
-               style="width: 100%; padding: 14px 16px; background: #162032; border: 1px solid #1e3a5c; border-radius: 8px; color: white; font-size: 14px; box-sizing: border-box; outline: none;">
+      <div class="form-header">
+        <h2 class="auth-title">Connexion</h2>
+        <p class="auth-subtitle">Accédez à votre espace opérateur</p>
       </div>
 
-      <!-- Error -->
-      <div *ngIf="error"
-           style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-        ⚠️ {{ error }}
+      <form (ngSubmit)="login()" class="login-form">
+        
+        <div class="field-container">
+          <label for="email" class="field-label">Email professionnel</label>
+          <input 
+            id="email"
+            type="email" 
+            name="email"
+            [(ngModel)]="email" 
+            placeholder="prenom.nom@intellisecsolutions.com"
+            class="intellisec-input"
+            required
+            autocomplete="email">
+        </div>
+
+        <div class="field-container">
+          <label for="password" class="field-label">Mot de passe</label>
+          <input 
+            id="password"
+            type="password" 
+            name="password"
+            [(ngModel)]="password" 
+            placeholder="••••••••"
+            class="intellisec-input"
+            required
+            autocomplete="current-password">
+        </div>
+
+        <div *ngIf="error" class="error-alert">
+          <span class="error-badge">ERREUR</span>
+          <span class="error-text">{{ error }}</span>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          Se connecter
+        </button>
+
+      </form>
+
+      <div class="form-footer">
+        <span class="footer-prompt">Pas encore de compte ?</span>
+        <a routerLink="/register" class="footer-link">Créer un compte</a>
       </div>
-
-      <!-- Submit -->
-      <button (click)="login()"
-              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; letter-spacing: 0.5px;">
-        SE CONNECTER →
-      </button>
-
-      <p style="text-align: center; margin-top: 24px; font-size: 14px; color: #8899aa;">
-        Pas encore de compte ?
-        <a routerLink="/register" style="color: #e07b2a; font-weight: 600; text-decoration: none;">Créer un compte</a>
-      </p>
 
     </div>
   </div>

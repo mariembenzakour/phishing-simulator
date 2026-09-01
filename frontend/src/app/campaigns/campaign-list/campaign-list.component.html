@@ -1,113 +1,174 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
-
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-    <div>
-      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">📣 Campagnes</h1>
-      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">Gérez vos campagnes de simulation</p>
+<div class="page-wrapper">
+  
+  <!-- En-tête de la page -->
+  <header class="page-header">
+    <div class="header-titles">
+      <h1 class="page-title">Campagnes de simulation</h1>
+      <p class="page-subtitle">Pilotez, planifiez et analysez vos campagnes de sensibilisation au phishing</p>
     </div>
-    <a *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])" routerLink="/campaigns/create"
-       style="background: #e07b2a; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
-      + Nouvelle campagne
+    
+    <!-- ✅ SUPER_ADMIN inclus via isAdmin() -->
+    <a *ngIf="authService.isAdmin()" routerLink="/campaigns/create" class="btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+      Nouvelle campagne
+    </a>
+  </header>
+
+  <!-- Message d'erreur -->
+  <div *ngIf="error" class="alert alert-danger">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Etat de Chargement -->
+  <div *ngIf="loading" class="state-card">
+    <div class="spinner"></div>
+    <p>Chargement des campagnes en cours...</p>
+  </div>
+
+  <!-- Etat Vide -->
+  <div *ngIf="!loading && campaigns.length === 0" class="state-card empty-state">
+    <div class="empty-icon">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13"></path>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </div>
+    <h3>Aucune campagne enregistrée</h3>
+    <p>Créez votre première campagne pour lancer des tests de sécurité ciblés.</p>
+    <a *ngIf="authService.isAdmin()" routerLink="/campaigns/create" class="btn-secondary">
+      Créer une campagne
     </a>
   </div>
 
-  <div *ngIf="loading" style="text-align: center; padding: 60px;">
-    <p style="color: #6b7a8a;">Chargement...</p>
-  </div>
-
-  <div *ngIf="error"
-       style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-    ⚠️ {{ error }}
-  </div>
-
-  <div *ngIf="!loading && campaigns.length === 0"
-       style="text-align: center; padding: 60px; background: white; border-radius: 12px; border: 1px dashed #e2e8f0;">
-    <p style="color: #6b7a8a; font-size: 16px;">Aucune campagne pour le moment</p>
-    <a *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])" routerLink="/campaigns/create"
-       style="color: #e07b2a; text-decoration: none; font-weight: 600;">Créer la première →</a>
-  </div>
-
-  <div *ngIf="!loading && campaigns.length > 0"
-       style="background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-    <table style="width: 100%; border-collapse: collapse;">
+  <!-- Tableau des Campagnes -->
+  <div *ngIf="!loading && campaigns.length > 0" class="table-card">
+    <table class="data-table">
       <thead>
-        <tr style="background: #e8f0f7;">
-          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">NOM</th>
-          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">EXPÉDITEUR</th>
-          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">GROUPE</th>
-          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">PLANIFIÉE</th>
-          <th style="padding: 14px 16px; text-align: left; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600;">STATUT</th>
-          <th style="padding: 14px 16px; text-align: center; color: #1a3a5c; font-size: 11px; letter-spacing: 0.5px; font-weight: 600; min-width: 180px;">ACTIONS</th>
+        <tr>
+          <th>NOM DE LA CAMPAGNE</th>
+          <th>EXPÉDITEUR</th>
+          <th>GROUPE CIBLE</th>
+          <th>PLANIFICATION</th>
+          <th>STATUT</th>
+          <th class="text-center">ACTIONS</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let campaign of campaigns" style="border-bottom: 1px solid #e2e8f0;">
-          <td style="padding: 14px 16px; color: #1a3a5c; font-weight: 600; font-size: 14px;">{{ campaign.name }}</td>
-          <td style="padding: 14px 16px; color: #6b7a8a; font-size: 13px;">{{ campaign.senderEmail }}</td>
-          <td style="padding: 14px 16px;">
-            <span *ngIf="getGroupName(campaign.targetGroupId)"
-                  style="background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); color: #8b5cf6; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">
+        <tr *ngFor="let campaign of campaigns">
+          <td class="cell-name">
+            <span class="campaign-name">{{ campaign.name }}</span>
+            <span *ngIf="campaign.dryRun" class="dry-run-tag">Dry Run</span>
+          </td>
+          <td class="cell-sender">{{ campaign.senderEmail }}</td>
+          <td>
+            <span *ngIf="getGroupName(campaign.targetGroupId)" class="group-badge">
               {{ getGroupName(campaign.targetGroupId) }}
             </span>
-            <span *ngIf="!getGroupName(campaign.targetGroupId)" style="color: #8899aa; font-size: 12px;">—</span>
+            <span *ngIf="!getGroupName(campaign.targetGroupId)" class="text-muted">—</span>
           </td>
-          <td style="padding: 14px 16px; color: #6b7a8a; font-size: 13px;">
-            {{ campaign.scheduledAt ? (campaign.scheduledAt | date:'dd/MM/yyyy HH:mm') : '—' }}
+          <td class="cell-date">
+            {{ campaign.scheduledAt ? (campaign.scheduledAt | date:'dd/MM/yyyy HH:mm') : 'Immédiat' }}
           </td>
-          <td style="padding: 14px 16px;">
-            <span style="padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;"
-                  [style.background]="
-                    campaign.status === 'AUTHORIZED' ? 'rgba(34,197,94,0.15)' : 
-                    campaign.status === 'RUNNING' ? 'rgba(59,130,246,0.15)' : 
-                    campaign.status === 'PAUSED' ? 'rgba(245,158,11,0.15)' : 
-                    campaign.status === 'SCHEDULED' ? 'rgba(139,92,246,0.15)' : 
-                    'rgba(245,158,11,0.15)'"
-                  [style.color]="
-                    campaign.status === 'AUTHORIZED' ? '#22c55e' : 
-                    campaign.status === 'RUNNING' ? '#3b82f6' : 
-                    campaign.status === 'PAUSED' ? '#f59e0b' : 
-                    campaign.status === 'SCHEDULED' ? '#8b5cf6' : 
-                    '#f59e0b'">
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + campaign.status.toLowerCase()">
               {{ campaign.status }}
             </span>
           </td>
-          <td style="padding: 10px 16px; text-align: center;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;">
-              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && (campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED')"
+          <td class="cell-actions">
+            <div class="actions-wrapper">
+              
+              <!-- Modifier - SUPER_ADMIN inclus -->
+              <button *ngIf="authService.isAdmin() && (campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED')"
                       (click)="editCampaign(campaign.id)"
                       title="Modifier la campagne"
-                      class="action-btn action-btn-edit">✏️</button>
+                      class="action-btn action-edit">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              </button>
+
+              <!-- Autoriser (Admin) - SUPER_ADMIN inclus -->
               <button *ngIf="authService.isAdmin() && (campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED')"
                       (click)="authorize(campaign.id)"
-                      title="Autoriser la campagne"
-                      class="action-btn action-btn-authorize">✅</button>
+                      title="Autoriser l'envoi"
+                      class="action-btn action-authorize">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              </button>
+
+              <!-- Envoyer (Admin) - SUPER_ADMIN inclus -->
               <button *ngIf="authService.isAdmin() && campaign.status === 'AUTHORIZED'"
                       (click)="sendCampaign(campaign.id)"
-                      title="Envoyer la campagne"
-                      class="action-btn action-btn-send">📧</button>
-              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR'])"
+                      title="Lancer la campagne"
+                      class="action-btn action-send">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+
+              <!-- Cloner - SUPER_ADMIN inclus -->
+              <button *ngIf="authService.isAdmin()"
                       (click)="clone(campaign.id)"
-                      title="Cloner la campagne"
-                      class="action-btn action-btn-clone">📋</button>
-              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && campaign.status === 'RUNNING'"
+                      title="Dupliquer la campagne"
+                      class="action-btn action-clone">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+
+              <!-- Mettre en pause - SUPER_ADMIN inclus -->
+              <button *ngIf="authService.isAdmin() && campaign.status === 'RUNNING'"
                       (click)="pause(campaign.id)"
                       title="Mettre en pause"
-                      class="action-btn action-btn-pause">⏸️</button>
-              <button *ngIf="authService.hasAnyRole(['ADMIN', 'OPERATOR']) && campaign.status === 'PAUSED'"
+                      class="action-btn action-pause">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="6" y="4" width="4" height="16"></rect>
+                  <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+              </button>
+
+              <!-- Reprendre - SUPER_ADMIN inclus -->
+              <button *ngIf="authService.isAdmin() && campaign.status === 'PAUSED'"
                       (click)="resume(campaign.id)"
-                      title="Reprendre"
-                      class="action-btn action-btn-resume">▶️</button>
+                      title="Reprendre la campagne"
+                      class="action-btn action-resume">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </button>
+
+              <!-- Supprimer (Admin) - SUPER_ADMIN inclus -->
               <button *ngIf="authService.isAdmin()"
                       (click)="delete(campaign.id)"
-                      title="Supprimer"
-                      class="action-btn action-btn-delete">🗑️</button>
-              <span *ngIf="authService.isViewer()" style="color: #8899aa; font-size: 12px; padding: 6px 0;">🔒 Lecture seule</span>
+                      title="Supprimer définitivement"
+                      class="action-btn action-delete">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+
+              <span *ngIf="authService.isViewer()" class="read-only-tag">Lecture seule</span>
             </div>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+
 </div>

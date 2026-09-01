@@ -1,295 +1,272 @@
 <app-navbar></app-navbar>
 
-<div style="margin-left: 260px; background: #f5f7fa; min-height: calc(100vh - 64px); padding: 32px;">
+<div class="main-wrapper">
 
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-    <div>
-      <h1 style="color: #1a3a5c; font-size: 28px; font-weight: 800; margin: 0;">🤖 Génération IA</h1>
-      <p style="color: #6b7a8a; margin: 4px 0 0 0; font-size: 14px;">
-        Créez un brouillon d'email complet + landing page + sensibilisation
-        <span style="background: #e8f0f7; padding: 2px 10px; border-radius: 12px; font-size: 11px; margin-left: 8px; color: #1a3a5c;">
-          Gemini 3.6 Flash
-        </span>
-      </p>
+  <!-- Header de Page -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="icon-avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+      </div>
+      <div>
+        <h1 class="page-title">Génération par IA</h1>
+        <p class="page-subtitle">
+          Générez un scénario complet : email de phishing, page d'atterrissage et indicateurs de risque.
+          <span class="engine-badge">Gemini Flash</span>
+        </p>
+      </div>
     </div>
-    <a routerLink="/ai/drafts" 
-       style="background: #1a3a5c; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
-      📋 Voir les drafts
+
+    <a routerLink="/ai/drafts" class="btn-secondary-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+      Consulter les brouillons
     </a>
-  </div>
+  </header>
 
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+  <!-- Grille de Contenu -->
+  <div class="content-grid">
 
-    <!-- ===== FORMULAIRE ===== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-
-      <h3 style="color: #1a3a5c; margin: 0 0 16px 0; font-size: 16px;">✏️ Saisir le brief</h3>
-
-      <!-- Scénario -->
-      <div style="margin-bottom: 16px;">
-        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
-          SCÉNARIO *
-        </label>
-        <select [(ngModel)]="form.scenario"
-                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
-          <option value="" disabled>-- Sélectionner un scénario --</option>
-          <option *ngFor="let s of scenarios" [value]="s">{{ s }}</option>
-        </select>
-        <input *ngIf="!scenarios.includes(form.scenario) && form.scenario" 
-               type="text" [(ngModel)]="form.scenario" 
-               placeholder="Ou saisissez un scénario personnalisé"
-               style="width: 100%; padding: 10px 14px; margin-top: 8px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
+    <!-- FORMULAIRE DE PARAMÉTRAGE -->
+    <section class="card form-card">
+      <div class="card-header">
+        <div class="card-header-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <h2>Configuration du brief</h2>
+        </div>
       </div>
 
-      <!-- Département -->
-      <div style="margin-bottom: 16px;">
-        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
-          DÉPARTEMENT
-        </label>
-        <select [(ngModel)]="form.department"
-                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
-          <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
-        </select>
+      <div class="card-body">
+        <!-- Scénario -->
+        <div class="form-group">
+          <label class="form-label">Scénario <span class="required">*</span></label>
+          <select [(ngModel)]="form.scenario" class="form-select">
+            <option value="" disabled>Sélectionner un scénario...</option>
+            <option *ngFor="let s of scenarios" [value]="s">{{ s }}</option>
+          </select>
+          <input *ngIf="!scenarios.includes(form.scenario) && form.scenario" 
+                 type="text" 
+                 [(ngModel)]="form.scenario" 
+                 placeholder="Saisissez un scénario personnalisé..."
+                 class="form-input mt-2">
+        </div>
+
+        <!-- Département -->
+        <div class="form-group">
+          <label class="form-label">Cible / Département</label>
+          <select [(ngModel)]="form.department" class="form-select">
+            <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+          </select>
+        </div>
+
+        <!-- Langue & Urgence -->
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Langue</label>
+            <select [(ngModel)]="form.language" class="form-select">
+              <option *ngFor="let lang of languages" [value]="lang.value">{{ lang.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Niveau d'urgence</label>
+            <select [(ngModel)]="form.urgency" class="form-select">
+              <option *ngFor="let u of urgencies" [value]="u.value">{{ u.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Détails supplémentaires -->
+        <div class="form-group">
+          <label class="form-label">Consignes complémentaires</label>
+          <textarea [(ngModel)]="form.additionalDetails" 
+                    rows="3"
+                    placeholder="Incorporez des contextes spécifiques ou des directives d'ingénierie sociale..."
+                    class="form-textarea">
+          </textarea>
+        </div>
+
+        <!-- Alertes -->
+        <div *ngIf="error" class="alert alert-error">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>{{ error }}</span>
+        </div>
+
+        <div *ngIf="success" class="alert alert-success">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>{{ success }}</span>
+        </div>
+
+        <button (click)="generate()" 
+                [disabled]="loading"
+                class="btn-primary"
+                [class.btn-disabled]="loading">
+          <span *ngIf="loading" class="spinner-inline"></span>
+          <svg *ngIf="!loading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>{{ loading ? 'Génération en cours...' : 'Générer le contenu' }}</span>
+        </button>
       </div>
+    </section>
 
-      <!-- Langue -->
-      <div style="margin-bottom: 16px;">
-        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
-          LANGUE
-        </label>
-        <select [(ngModel)]="form.language"
-                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
-          <option *ngFor="let lang of languages" [value]="lang.value">{{ lang.label }}</option>
-        </select>
-      </div>
-
-      <!-- Urgence -->
-      <div style="margin-bottom: 16px;">
-        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
-          URGENCE
-        </label>
-        <select [(ngModel)]="form.urgency"
-                style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none;">
-          <option *ngFor="let u of urgencies" [value]="u.value">{{ u.label }}</option>
-        </select>
-      </div>
-
-      <!-- Détails supplémentaires -->
-      <div style="margin-bottom: 20px;">
-        <label style="color: #1a3a5c; font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">
-          DÉTAILS SUPPLÉMENTAIRES
-        </label>
-        <textarea [(ngModel)]="form.additionalDetails" rows="3"
-                  placeholder="Informations complémentaires pour l'IA..."
-                  style="width: 100%; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; color: #1a3a5c; font-size: 14px; outline: none; resize: vertical; font-family: inherit;">
-        </textarea>
-      </div>
-
-      <!-- Messages -->
-      <div *ngIf="error" 
-           style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #dc2626; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
-        ⚠️ {{ error }}
-      </div>
-
-      <button (click)="generate()" [disabled]="loading"
-              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;"
-              [style.opacity]="loading ? '0.6' : '1'">
-        <span *ngIf="loading" class="spinner">⏳</span>
-        {{ loading ? 'Génération en cours...' : '🚀 Générer l\'email' }}
-      </button>
-
-    </div>
-
-    <!-- ===== RÉSULTAT ===== -->
-    <div style="background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <h3 style="color: #1a3a5c; margin: 0; font-size: 16px;">📄 Aperçu</h3>
-        <button *ngIf="result" (click)="reset()" 
-                style="background: none; border: none; color: #6b7a8a; cursor: pointer; font-size: 13px;">
-          ✕ Effacer
+    <!-- ZONE DE PRÉVISUALISATION -->
+    <section class="card preview-card">
+      <div class="card-header space-between">
+        <div class="card-header-title">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <h2>Aperçu du livrable</h2>
+        </div>
+        <button *ngIf="result" (click)="reset()" class="btn-tertiary">
+          Réinitialiser
         </button>
       </div>
 
-      <!-- Chargement -->
-      <div *ngIf="loading" style="text-align: center; padding: 60px;">
-        <div style="width: 40px; height: 40px; border: 4px solid #e8f0f7; border-top-color: #e07b2a; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;"></div>
-        <p style="color: #6b7a8a;">L'IA réfléchit...</p>
-      </div>
+      <div class="card-body">
 
-      <!-- Résultat -->
-      <div *ngIf="result && !loading">
-
-        <!-- Statut -->
-        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
-          <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;"
-                [style.background]="result.approved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)'"
-                [style.color]="result.approved ? '#22c55e' : '#f59e0b'">
-            {{ result.status }}
-          </span>
-          <span style="color: #6b7a8a; font-size: 12px;">
-            {{ getLanguageLabel(result.language) }} • {{ result.scenario }}
-          </span>
-          <span style="color: #6b7a8a; font-size: 11px; margin-left: auto;">
-            {{ result.generatedAt | date:'dd/MM/yyyy HH:mm' }}
-          </span>
+        <!-- Chargement -->
+        <div *ngIf="loading" class="loading-container">
+          <div class="spinner-lg"></div>
+          <p class="loading-title">Création du scénario pédagogique</p>
+          <p class="loading-desc">Analyse des directives et génération du contenu en cours...</p>
         </div>
 
-        <!-- ✅ WEEK 6 : Onglets -->
-        <div style="display: flex; gap: 4px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">
-          <button (click)="setActiveTab('email')" 
-                  [style.background]="isActiveTab('email') ? '#e07b2a' : 'transparent'"
-                  [style.color]="isActiveTab('email') ? 'white' : '#6b7a8a'"
-                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
-            📧 Email
-          </button>
-          <button (click)="setActiveTab('landing')" 
-                  [style.background]="isActiveTab('landing') ? '#e07b2a' : 'transparent'"
-                  [style.color]="isActiveTab('landing') ? 'white' : '#6b7a8a'"
-                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
-            🌐 Landing
-          </button>
-          <button (click)="setActiveTab('redflags')" 
-                  [style.background]="isActiveTab('redflags') ? '#e07b2a' : 'transparent'"
-                  [style.color]="isActiveTab('redflags') ? 'white' : '#6b7a8a'"
-                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
-            🚩 Red Flags
-          </button>
-          <button (click)="setActiveTab('preview')" 
-                  [style.background]="isActiveTab('preview') ? '#e07b2a' : 'transparent'"
-                  [style.color]="isActiveTab('preview') ? 'white' : '#6b7a8a'"
-                  style="padding: 8px 16px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; border-radius: 6px 6px 0 0; transition: all 0.2s;">
-            👁️ Aperçu
-          </button>
-        </div>
+        <!-- Résultat -->
+        <div *ngIf="result && !loading" class="result-wrapper">
 
-        <!-- Email Tab -->
-        <div *ngIf="isActiveTab('email')">
-          <div style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; border-left: 3px solid #e07b2a;">
-            <div style="color: #6b7a8a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Sujet</div>
-            <div style="color: #1a3a5c; font-weight: 600; font-size: 15px;">{{ result.subject }}</div>
+          <!-- Barre d'état -->
+          <div class="result-meta-bar">
+            <span class="status-badge" [class.badge-approved]="result.approved" [class.badge-draft]="!result.approved">
+              {{ result.status }}
+            </span>
+            <span class="meta-tag">{{ getLanguageLabel(result.language) }}</span>
+            <span class="meta-tag">{{ result.scenario }}</span>
+            <span class="meta-date">{{ result.generatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
 
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 12px;">
-            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-              Corps HTML
+          <!-- Onglets de navigation -->
+          <nav class="nav-tabs">
+            <button (click)="setActiveTab('email')" class="tab-link" [class.active]="isActiveTab('email')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Email
+            </button>
+            <button (click)="setActiveTab('landing')" class="tab-link" [class.active]="isActiveTab('landing')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              Page d'atterrissage
+            </button>
+            <button (click)="setActiveTab('redflags')" class="tab-link" [class.active]="isActiveTab('redflags')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Indicateurs de risque
+            </button>
+            <button (click)="setActiveTab('preview')" class="tab-link" [class.active]="isActiveTab('preview')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Synthèse
+            </button>
+          </nav>
+
+          <!-- Contenu : EMAIL -->
+          <div *ngIf="isActiveTab('email')" class="tab-pane">
+            <div class="field-display">
+              <span class="field-label">Objet du message</span>
+              <div class="field-value-highlight">{{ result.subject }}</div>
             </div>
-            <div style="padding: 16px; max-height: 200px; overflow-y: auto; font-size: 14px;" [innerHTML]="result.bodyHtml">
+
+            <div class="preview-block">
+              <div class="preview-block-header">Rendu HTML</div>
+              <div class="preview-block-body html-render" [innerHTML]="result.bodyHtml"></div>
+            </div>
+
+            <div class="preview-block mt-3">
+              <div class="preview-block-header">Version Texte Brut</div>
+              <div class="preview-block-body text-render">{{ result.bodyText }}</div>
             </div>
           </div>
 
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
-            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-              Texte brut
+          <!-- Contenu : LANDING PAGE -->
+          <div *ngIf="isActiveTab('landing')" class="tab-pane">
+            <div *ngIf="result.landingPageHtml" class="iframe-wrapper">
+              <iframe [srcdoc]="result.landingPageHtml" title="Prévisualisation Landing Page"></iframe>
             </div>
-            <div style="padding: 16px; max-height: 100px; overflow-y: auto; font-size: 13px; color: #333; white-space: pre-wrap; font-family: monospace;">
-              {{ result.bodyText }}
+            <div *ngIf="!result.landingPageHtml" class="empty-tab-state">
+              <p>Aucune page d'atterrissage associée à ce scénario.</p>
             </div>
           </div>
-        </div>
 
-        <!-- Landing Page Tab -->
-        <div *ngIf="isActiveTab('landing')">
-          <div *ngIf="result.landingPageHtml" 
-               style="border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; max-height: 500px; overflow-y: auto; background: white;">
-            <div style="background: #f8fafc; padding: 8px 16px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #6b7a8a; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-              🌐 Landing Page + Awareness
-            </div>
-            <iframe [srcdoc]="result.landingPageHtml" 
-                    style="width: 100%; height: 450px; border: none; background: white;">
-            </iframe>
-          </div>
-          <div *ngIf="!result.landingPageHtml" style="text-align: center; padding: 40px; color: #6b7a8a;">
-            <p>Aucune landing page générée</p>
-          </div>
-        </div>
+          <!-- Contenu : RED FLAGS -->
+          <div *ngIf="isActiveTab('redflags')" class="tab-pane">
+            <div *ngIf="redFlags.length > 0">
+              <div class="info-banner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Indicateurs de sensibilisation identifiés pour cette simulation :</span>
+              </div>
 
-        <!-- Red Flags Tab -->
-        <div *ngIf="isActiveTab('redflags')">
-          <div *ngIf="redFlags.length > 0">
-            <div style="background: #fef3c7; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;">
-              <p style="margin: 0; color: #92400e; font-weight: 600;">
-                🎓 Voici les 4 signes qui auraient dû vous alerter :
-              </p>
+              <div class="redflags-list">
+                <div *ngFor="let flag of redFlags" class="flag-item" [style.border-left-color]="getSeverityColor(flag.severity)">
+                  <div class="flag-header">
+                    <span class="flag-title">{{ flag.title }}</span>
+                    <span class="severity-pill" [style.color]="getSeverityColor(flag.severity)">
+                      {{ flag.severity }}
+                    </span>
+                  </div>
+                  <p class="flag-desc">{{ flag.description }}</p>
+                  <div class="flag-solution">
+                    <strong>Méthode de détection :</strong> {{ flag.howToDetect }}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div *ngFor="let flag of redFlags" 
-                 style="background: white; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; border-left: 4px solid;"
-                 [style.border-left-color]="getSeverityColor(flag.severity)">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span>{{ getSeverityIcon(flag.severity) }}</span>
-                <span style="font-weight: 700; color: #1a3a5c;">{{ flag.title }}</span>
-                <span style="font-size: 10px; padding: 2px 8px; border-radius: 12px; background: #f0f0f0; color: #555; text-transform: uppercase;">
-                  {{ flag.severity }}
+            <div *ngIf="redFlags.length === 0" class="empty-tab-state">
+              <p>Aucun indicateur de risque enregistré.</p>
+            </div>
+          </div>
+
+          <!-- Contenu : SYNTHÈSE -->
+          <div *ngIf="isActiveTab('preview')" class="tab-pane">
+            <div class="summary-grid">
+              <div class="summary-card">
+                <span class="summary-label">Objet de l'email</span>
+                <span class="summary-value">{{ result.subject }}</span>
+              </div>
+              <div class="summary-card">
+                <span class="summary-label">Page d'atterrissage</span>
+                <span class="summary-status" [class.text-success]="result.landingPageHtml" [class.text-muted]="!result.landingPageHtml">
+                  {{ result.landingPageHtml ? 'Générée' : 'Non incluse' }}
                 </span>
               </div>
-              <p style="color: #555; font-size: 13px; margin: 6px 0 4px 0;">{{ flag.description }}</p>
-              <div style="color: #22c55e; font-size: 12px; font-weight: 600;">
-                ✅ {{ flag.howToDetect }}
+              <div class="summary-card">
+                <span class="summary-label">Points d'attention</span>
+                <span class="summary-value">{{ redFlags.length }} éléments configurés</span>
               </div>
             </div>
           </div>
-          <div *ngIf="redFlags.length === 0" style="text-align: center; padding: 40px; color: #6b7a8a;">
-            <p>Aucun red flag disponible</p>
+
+          <!-- Validation Admin -->
+          <div class="admin-actions">
+            <button *ngIf="isAdmin() && !result.approved" (click)="approve()" class="btn-approve">
+              Approuver le brouillon
+            </button>
+            <button *ngIf="isAdmin() && !result.approved" (click)="reject()" class="btn-reject">
+              Rejeter
+            </button>
+            <button *ngIf="result.approved" class="btn-approved-state" disabled>
+              Brouillon Approuvé
+            </button>
           </div>
-        </div>
 
-        <!-- Preview Tab -->
-        <div *ngIf="isActiveTab('preview')">
-          <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-            <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 12px 16px; text-align: center;">
-              <span style="font-size: 14px;">📧 Email généré</span>
-              <div style="font-weight: 600; color: #1a3a5c;">{{ result.subject }}</div>
-            </div>
-            <div style="background: #f0f4f8; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; text-align: center;">
-              <span style="font-size: 14px;">🌐 Landing Page</span>
-              <div *ngIf="result.landingPageHtml" style="color: #22c55e; font-weight: 600;">✅ Générée</div>
-              <div *ngIf="!result.landingPageHtml" style="color: #dc2626; font-weight: 600;">❌ Non générée</div>
-            </div>
-            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 12px 16px; text-align: center;">
-              <span style="font-size: 14px;">🚩 Red Flags</span>
-              <div style="font-weight: 600; color: #1a3a5c;">{{ redFlags.length }} / 4 identifiés</div>
-            </div>
+          <div *ngIf="result.approvedBy" class="approval-footer">
+            Validé par {{ result.approvedBy }}
           </div>
+
         </div>
 
-        <!-- Actions -->
-        <div style="display: flex; gap: 12px; margin-top: 16px;">
-          <button *ngIf="isAdmin() && !result.approved" 
-                  (click)="approve()"
-                  style="flex: 1; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
-            ✅ Approuver
-          </button>
-          <button *ngIf="isAdmin() && !result.approved" 
-                  (click)="reject()"
-                  style="flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
-            ❌ Rejeter
-          </button>
-          <button *ngIf="result.approved" 
-                  style="flex: 1; padding: 10px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: default; font-size: 14px; font-weight: 600;">
-            ✅ Approuvé
-          </button>
-        </div>
-
-        <div *ngIf="result.approvedBy" 
-             style="margin-top: 12px; color: #6b7a8a; font-size: 12px; text-align: center;">
-          Approuvé par : {{ result.approvedBy }}
+        <!-- État vide -->
+        <div *ngIf="!result && !loading" class="empty-state">
+          <div class="empty-icon-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </div>
+          <h3>Aucun contenu généré</h3>
+          <p>Configurez le brief à gauche et lancez la génération pour prévisualiser le scénario complet.</p>
         </div>
 
       </div>
+    </section>
 
-      <!-- Aucun résultat -->
-      <div *ngIf="!result && !loading" style="text-align: center; padding: 60px; color: #6b7a8a;">
-        <div style="font-size: 48px; margin-bottom: 16px;">✍️</div>
-        <p>Saisissez un scénario et cliquez sur "Générer"</p>
-        <p style="font-size: 12px; margin-top: 8px;">📧 Email + 🌐 Landing Page + 🚩 Red Flags</p>
-      </div>
-
-    </div>
   </div>
-
-  <style>
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
 </div>

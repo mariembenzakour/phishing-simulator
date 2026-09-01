@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../shared/navbar/navbar.component';
 import { AiService, GenerationRequest, GenerationResponse, RedFlag } from '../shared/services/ai.service';
 import { AuthService } from '../shared/services/auth.service';
@@ -9,8 +9,9 @@ import { AuthService } from '../shared/services/auth.service';
 @Component({
   selector: 'app-ai-generation',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
-  templateUrl: './ai-generation.component.html'
+  imports: [CommonModule, FormsModule, NavbarComponent, RouterLink],
+  templateUrl: './ai-generation.component.html',
+  styleUrls: ['./ai-generation.component.scss']
 })
 export class AiGenerationComponent {
 

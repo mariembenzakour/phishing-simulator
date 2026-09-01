@@ -10,7 +10,8 @@ import { TargetGroupService } from '../../shared/services/target-group.service';
   selector: 'app-target-create',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
-  templateUrl: './target-create.component.html'
+  templateUrl: './target-create.component.html',
+  styleUrl: './target-create.component.scss'
 })
 export class TargetCreateComponent implements OnInit {
 

@@ -9,7 +9,8 @@ import { AuthService } from '../../shared/services/auth.service';
   selector: 'app-campaign-detail',
   standalone: true,
   imports: [CommonModule, RouterLink, NavbarComponent],
-  templateUrl: './campaign-detail.component.html'
+  templateUrl: './campaign-detail.component.html',
+  styleUrls: ['./campaign-detail.component.scss']
 })
 export class CampaignDetailComponent implements OnInit {
 
@@ -20,6 +21,9 @@ export class CampaignDetailComponent implements OnInit {
   stats: any = {};
   timeToClick: any = null;
   usersTimeToClick: any[] = [];
+
+  // Onglet actif : 'overview' | 'time' | 'users'
+  activeTab: string = 'overview';
 
   constructor(
     private trackingService: TrackingService,
@@ -52,12 +56,10 @@ export class CampaignDetailComponent implements OnInit {
     });
   }
 
-  // ✅ Time-to-click global
   loadTimeToClick() {
     this.trackingService.getTimeToClick(this.campaignId).subscribe({
       next: (data) => {
         this.timeToClick = data;
-        console.log('⏱️ Time-to-click global:', data);
       },
       error: (err) => {
         console.error('Erreur time-to-click:', err);
@@ -65,17 +67,19 @@ export class CampaignDetailComponent implements OnInit {
     });
   }
 
-  // ✅ Time-to-click par utilisateur
   loadUsersTimeToClick() {
     this.trackingService.getUsersTimeToClick(this.campaignId).subscribe({
       next: (data) => {
         this.usersTimeToClick = data;
-        console.log('👤 Time-to-click par utilisateur:', data);
       },
       error: (err) => {
         console.error('Erreur users time-to-click:', err);
       }
     });
+  }
+
+  setTab(tab: string) {
+    this.activeTab = tab;
   }
 
   getStatusColor(status: string): string {
@@ -106,7 +110,6 @@ export class CampaignDetailComponent implements OnInit {
     return values.length > 0 ? Math.max(...values) : 1;
   }
 
-  // ✅ Formatage du time-to-click
   formatTimeToClick(seconds: number): string {
     if (!seconds || seconds === 0) return 'N/A';
     if (seconds < 60) {
@@ -127,28 +130,24 @@ export class CampaignDetailComponent implements OnInit {
     return days + 'j ' + remainingHours + 'h';
   }
 
-  // ✅ Couleur selon la rapidité du clic
   getTimeToClickColor(seconds: number): string {
     if (!seconds || seconds === 0) return '#6b7280';
-    if (seconds < 60) return '#22c55e';      // < 1 min → vert
-    if (seconds < 300) return '#8b5cf6';     // < 5 min → violet
-    if (seconds < 900) return '#f59e0b';     // < 15 min → orange
-    if (seconds < 3600) return '#dc2626';    // < 1h → rouge
-    return '#6b7280';                         // > 1h → gris
+    if (seconds < 60) return '#22c55e';
+    if (seconds < 300) return '#8b5cf6';
+    if (seconds < 900) return '#f59e0b';
+    if (seconds < 3600) return '#dc2626';
+    return '#6b7280';
   }
 
-  // ✅ Obtenir les clés de distribution
   getDistributionKeys(): string[] {
     if (!this.timeToClick?.distribution) return [];
     return Object.keys(this.timeToClick.distribution);
   }
 
-  // ✅ Obtenir la valeur de distribution
   getDistributionValue(key: string): number {
     return this.timeToClick?.distribution?.[key] || 0;
   }
 
-  // ✅ Couleur pour la distribution
   getDistributionColor(key: string): string {
     const colors: Record<string, string> = {
       '< 1 min': '#22c55e',

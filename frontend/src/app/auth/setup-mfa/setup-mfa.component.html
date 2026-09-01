@@ -1,108 +1,73 @@
-<div style="min-height: 100vh; background: #0a1628; display: flex;">
-
-  <!-- Partie gauche — Branding -->
-  <div style="flex: 1; background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%); display: flex; flex-direction: column; justify-content: center; padding: 60px; position: relative; overflow: hidden;">
-
-    <!-- Background pattern -->
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(0deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #e07b2a, #e07b2a 1px, transparent 1px, transparent 40px);"></div>
-
-    <!-- Logo -->
-    <div style="margin-bottom: 48px; position: relative;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 48px; height: 48px; background: #e07b2a; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🛡️</div>
-        <div>
-          <div style="color: white; font-size: 24px; font-weight: 800; letter-spacing: 1px;">INTELLI<span style="color: #e07b2a;">SEC</span></div>
-          <div style="color: #8899aa; font-size: 11px; letter-spacing: 2px;">SOLUTIONS</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tagline -->
-    <div style="position: relative;">
-      <p style="color: #e07b2a; font-size: 13px; letter-spacing: 2px; margin: 0 0 16px 0; text-transform: uppercase;">Configuration initiale</p>
-      <h1 style="color: white; font-size: 42px; font-weight: 800; margin: 0 0 24px 0; line-height: 1.2;">
-        Activez<br>
-        <span style="color: #e07b2a;">votre</span><br>
-        sécurité
-      </h1>
-      <p style="color: #8899aa; font-size: 15px; line-height: 1.6; margin: 0; max-width: 400px;">
-        La configuration du MFA est obligatoire pour accéder à la plateforme. Cette étape ne se fait qu'une seule fois.
-      </p>
-    </div>
-
-    <!-- Steps -->
-    <div style="margin-top: 48px; position: relative;">
-      <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
-        <div style="width: 32px; height: 32px; background: #e07b2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;">1</div>
-        <div>
-          <p style="color: white; margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Télécharge Google Authenticator</p>
-          <p style="color: #8899aa; margin: 0; font-size: 13px;">Disponible sur App Store et Google Play</p>
-        </div>
-      </div>
-      <div style="display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px;">
-        <div style="width: 32px; height: 32px; background: #e07b2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;">2</div>
-        <div>
-          <p style="color: white; margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Scanne le QR code</p>
-          <p style="color: #8899aa; margin: 0; font-size: 13px;">Ouvre l'app → "+" → Scanner un QR code</p>
-        </div>
-      </div>
-      <div style="display: flex; align-items: flex-start; gap: 16px;">
-        <div style="width: 32px; height: 32px; background: #e07b2a; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px; flex-shrink: 0;">3</div>
-        <div>
-          <p style="color: white; margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">Clique sur Continuer</p>
-          <p style="color: #8899aa; margin: 0; font-size: 13px;">Tu seras redirigé pour entrer ton premier code</p>
-        </div>
-      </div>
-    </div>
+<div class="intellisec-auth-layout">
+  
+  <!-- Section Gauche : Arrière-plan identique aux autres pages -->
+  <div class="code-panel">
+    <div class="dark-vignette"></div>
   </div>
 
-  <!-- Partie droite — QR Code -->
-  <div style="width: 480px; background: #0f1f35; display: flex; align-items: center; justify-content: center; padding: 60px 48px;">
-    <div style="width: 100%; text-align: center;">
-
-      <!-- Icon -->
-      <div style="margin-bottom: 32px;">
-        <div style="width: 80px; height: 80px; background: rgba(224,123,42,0.1); border: 2px solid rgba(224,123,42,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 36px;">📱</div>
-        <h2 style="color: white; font-size: 24px; font-weight: 700; margin: 0 0 8px 0;">Configuration MFA</h2>
-        <p style="color: #8899aa; margin: 0; font-size: 14px;">Scanne ce QR code avec Google Authenticator</p>
+  <!-- Section Droite : Formulaire Configuration MFA -->
+  <div class="form-panel">
+    <div class="form-box">
+      
+      <!-- Logo Officiel Intellisec -->
+      <div class="form-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" class="intellisec-svg-logo-small">
+          <g transform="translate(10, 20)">
+            <path d="M 12,24 L 12,10 M 12,10 A 3,3 0 1,1 12,4 A 3,3 0 1,1 12,10" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 46,24 L 46,2 M 46,2 A 3,3 0 1,1 46,-4 A 3,3 0 1,1 46,2" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 68,24 L 68,12 M 68,12 A 3,3 0 1,1 68,6 A 3,3 0 1,1 68,12" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            <path d="M 85,24 L 85,4 M 85,4 A 3,3 0 1,1 85,-2 A 3,3 0 1,1 85,4" stroke="#E07B2A" stroke-width="2.5" fill="none"/>
+            
+            <text x="0" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="34" fill="#E07B2A">INTELLI</text>
+            <text x="140" y="44" font-family="'Segoe UI', Arial, sans-serif" font-weight="900" font-size="34" fill="#0B1B3D">SEC</text>
+            <text x="2" y="62" font-family="'Segoe UI', Arial, sans-serif" font-weight="600" font-size="11" fill="#0B1B3D" letter-spacing="8.5">SOLUTIONS</text>
+          </g>
+        </svg>
       </div>
 
-      <!-- QR Code -->
-      <div *ngIf="qrUrl" style="margin-bottom: 32px;">
-        <div style="background: white; padding: 20px; border-radius: 12px; display: inline-block; box-shadow: 0 0 40px rgba(224,123,42,0.2);">
-          <img [src]="qrUrl" alt="QR Code MFA" style="width: 200px; height: 200px; display: block;">
+      <div class="form-header">
+        <h2 class="auth-title">Configuration MFA</h2>
+        <p class="auth-subtitle">Scannez ce QR code avec Google Authenticator pour sécuriser votre compte</p>
+      </div>
+
+      <div class="setup-container">
+        
+        <!-- Affichage du QR Code -->
+        <div *ngIf="qrUrl" class="qr-wrapper">
+          <div class="qr-card">
+            <img [src]="qrUrl" alt="QR Code MFA" class="qr-image">
+          </div>
         </div>
-      </div>
 
-      <!-- Loading -->
-      <div *ngIf="!qrUrl && !error" style="margin-bottom: 32px;">
-        <div style="width: 200px; height: 200px; background: #162032; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-          <p style="color: #8899aa; font-size: 14px;">Génération du QR code...</p>
+        <!-- Chargement -->
+        <div *ngIf="!qrUrl && !error" class="loading-wrapper">
+          <div class="loading-box">
+            <span class="loading-text">Génération du QR code...</span>
+          </div>
         </div>
+
+        <!-- Alerte Avertissement -->
+        <div class="warning-alert">
+          <span class="warning-icon">⚠️</span>
+          <p class="warning-text">Scannez ce QR code <strong>maintenant</strong> — il ne sera plus affiché par la suite.</p>
+        </div>
+
+        <!-- Alerte Erreur -->
+        <div *ngIf="error" class="error-alert">
+          <span class="error-badge">ERREUR</span>
+          <span class="error-text">{{ error }}</span>
+        </div>
+
+        <!-- Bouton Continuer -->
+        <button (click)="next()" class="btn-primary">
+          J'AI SCANNÉ — CONTINUER →
+        </button>
+
       </div>
 
-      <!-- Error -->
-      <div *ngIf="error"
-           style="background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3); color: #f87171; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
-        ⚠️ {{ error }}
+      <div class="form-footer">
+        <a routerLink="/login" class="footer-link">← Retour à la connexion</a>
       </div>
-
-      <!-- Info -->
-      <div style="background: rgba(224,123,42,0.1); border: 1px solid rgba(224,123,42,0.2); border-radius: 8px; padding: 12px 16px; margin-bottom: 28px;">
-        <p style="color: #e07b2a; font-size: 13px; margin: 0;">
-          ⚠️ Scanne ce QR code <strong>maintenant</strong> — il ne sera plus affiché.
-        </p>
-      </div>
-
-      <!-- Continue -->
-      <button (click)="next()"
-              style="width: 100%; padding: 14px; background: #e07b2a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; letter-spacing: 0.5px;">
-        J'AI SCANNÉ — CONTINUER →
-      </button>
-
-      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: #8899aa;">
-        <a routerLink="/login" style="color: #556677; text-decoration: none;">← Retour à la connexion</a>
-      </p>
 
     </div>
   </div>

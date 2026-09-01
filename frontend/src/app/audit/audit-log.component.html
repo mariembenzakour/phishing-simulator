@@ -1,141 +1,206 @@
 <app-navbar></app-navbar>
 
 <div class="audit-container">
-  <!-- Header -->
-  <div class="header">
-    <div>
-      <h1>📋 Audit Log</h1>
-      <p>Historique complet et immuable de toutes les actions</p>
+
+  <!-- En-tête de la page -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <h1 class="page-title">Journal d'Audit</h1>
+        <p class="page-subtitle">Historique complet et immuable de toutes les actions système</p>
+      </div>
     </div>
     <div class="header-actions">
-      <button class="btn-refresh" (click)="refresh()">
+      <button class="btn-refresh" (click)="refresh()" [disabled]="loading">
         <span class="spinner" *ngIf="loading"></span>
-        <span *ngIf="!loading">🔄 Rafraîchir</span>
+        <svg *ngIf="!loading" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        <span>Rafraîchir</span>
       </button>
     </div>
-  </div>
+  </header>
 
-  <!-- Integrity Banner -->
+  <!-- Bannière d'Intégrité Cryptographique -->
   <div class="integrity-banner" *ngIf="integrity" [class.valid]="integrity.valid" [class.invalid]="!integrity.valid">
-    <div class="integrity-icon">{{ getIntegrityIcon() }}</div>
-    <div>
+    <div class="integrity-status-icon">
+      <svg *ngIf="integrity.valid" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+      <svg *ngIf="!integrity.valid" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="integrity-text">
       <div class="integrity-title">{{ integrity.message }}</div>
       <div class="integrity-details">
         {{ integrity.totalLogs }} logs vérifiés
-        <span *ngIf="integrity.valid">✓</span>
-        <span *ngIf="!integrity.valid">⚠️ {{ integrity.checked }}/{{ integrity.totalLogs }} valides</span>
+        <span *ngIf="integrity.valid" class="text-success-badge">• Intégrité garantie</span>
+        <span *ngIf="!integrity.valid" class="text-danger-badge">• {{ integrity.checked }}/{{ integrity.totalLogs }} valides</span>
       </div>
     </div>
     <button class="btn-verify" (click)="verifyIntegrity()" [disabled]="verifying">
-      {{ verifying ? '⏳ Vérification...' : '🔍 Vérifier' }}
+      <span class="spinner-sm" *ngIf="verifying"></span>
+      <svg *ngIf="!verifying" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>{{ verifying ? 'Vérification...' : 'Vérifier l\'intégrité' }}</span>
     </button>
   </div>
 
-  <!-- Stats -->
+  <!-- Grille de Statistiques -->
   <div class="stats-grid" *ngIf="stats">
     <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Total des logs</span>
+        <div class="stat-icon-wrapper blue">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+      </div>
       <div class="stat-value">{{ stats.totalLogs || 0 }}</div>
-      <div class="stat-label">📊 Total logs</div>
     </div>
+
     <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Emails envoyés</span>
+        <div class="stat-icon-wrapper sky">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+      </div>
       <div class="stat-value">{{ stats.totalSends || 0 }}</div>
-      <div class="stat-label">📧 Emails envoyés</div>
     </div>
+
     <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Dernières 24h</span>
+        <div class="stat-icon-wrapper amber">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+      </div>
       <div class="stat-value">{{ stats.sendsLast24h || 0 }}</div>
-      <div class="stat-label">🕐 Dernières 24h</div>
     </div>
+
     <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">7 derniers jours</span>
+        <div class="stat-icon-wrapper emerald">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+      </div>
       <div class="stat-value">{{ stats.sendsLast7Days || 0 }}</div>
-      <div class="stat-label">📅 7 derniers jours</div>
     </div>
   </div>
 
-  <!-- Filters -->
-  <div class="filters">
+  <!-- Zone de Filtres -->
+  <div class="filters-card">
     <div class="filter-group">
       <label>Action</label>
-      <select [formControl]="filterAction" (change)="applyFilters()">
-        <option value="">Toutes</option>
-        <option *ngFor="let action of actions" [value]="action.value">{{ action.label }}</option>
-      </select>
+      <div class="input-with-icon">
+        <select [formControl]="filterAction" (change)="applyFilters()">
+          <option value="">Toutes les actions</option>
+          <option *ngFor="let action of actions" [value]="action.value">{{ action.label }}</option>
+        </select>
+      </div>
     </div>
 
     <div class="filter-group">
       <label>Acteur</label>
-      <input [formControl]="filterActor" (input)="applyFilters()" placeholder="Email...">
+      <input [formControl]="filterActor" (input)="applyFilters()" placeholder="Filtrer par email..." type="text">
     </div>
 
-    <div class="filter-group">
-      <label>Recherche</label>
-      <input [formControl]="filterSearch" (input)="applyFilters()" placeholder="Rechercher...">
+    <div class="filter-group flex-2">
+      <label>Recherche globale</label>
+      <div class="search-input-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input [formControl]="filterSearch" (input)="applyFilters()" placeholder="Rechercher dans les détails, cibles, actions..." type="text">
+      </div>
     </div>
 
-    <button class="btn-clear" (click)="clearFilters()">✕ Effacer</button>
+    <button class="btn-clear" (click)="clearFilters()" title="Réinitialiser tous les filtres">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Effacer
+    </button>
   </div>
 
-  <!-- Table -->
-  <div class="table-container">
-    <div *ngIf="loading" class="loading-state">
-      <div class="loader"></div>
-      <p>Chargement des logs...</p>
+  <!-- Tableau Principal des Logs -->
+  <div class="table-card">
+    
+    <!-- État de chargement -->
+    <div *ngIf="loading" class="state-container">
+      <div class="loader-spinner"></div>
+      <p class="state-title">Chargement du journal d'audit...</p>
     </div>
 
-    <div *ngIf="!loading && filteredLogs.length === 0" class="empty-state">
-      <span class="empty-icon">📭</span>
-      <p>Aucun log trouvé</p>
-      <p class="empty-sub">Aucune action n'a encore été enregistrée dans l'audit log.</p>
+    <!-- État vide -->
+    <div *ngIf="!loading && filteredLogs.length === 0" class="state-container">
+      <div class="empty-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><polyline points="22 6 12 13 2 6"/><circle cx="18" cy="18" r="3"/><line x1="20.2" y1="20.2" x2="22" y2="22"/></svg>
+      </div>
+      <p class="state-title">Aucun log correspondant</p>
+      <p class="state-sub">Aucun événement ne correspond à vos critères de recherche actuels.</p>
     </div>
 
-    <table *ngIf="!loading && filteredLogs.length > 0">
-      <thead>
-        <tr>
-          <th>DATE</th>
-          <th>ACTION</th>
-          <th>ACTEUR</th>
-          <th>CIBLE</th>
-          <th>DÉTAILS</th>
-          <th>HASH</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let log of filteredLogs">
-          <td class="date-cell">{{ formatDate(log.createdAt) }}</td>
-          <td>
-            <span class="action-badge" [style.background]="getActionColor(log.action)">
-              {{ getActionIcon(log.action) }} {{ getActionLabel(log.action) }}
-            </span>
-          </td>
-          <td class="actor-cell">{{ log.actor }}</td>
-          <td class="target-cell">
-            {{ log.target ? (log.target | slice:0:8) + '...' : '—' }}
-          </td>
-          <td class="details-cell" [title]="log.details">
-            {{ getDetailsSummary(log.details) }}
-          </td>
-          <td class="hash-cell" [title]="log.hash">
-            {{ getHashShort(log.hash) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Tableau de données -->
+    <div class="table-responsive" *ngIf="!loading && filteredLogs.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Horodatage</th>
+            <th>Action</th>
+            <th>Acteur</th>
+            <th>Cible</th>
+            <th>Détails</th>
+            <th>Empreinte Hash</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of filteredLogs">
+            <td class="cell-date">{{ formatDate(log.createdAt) }}</td>
+            <td class="cell-action">
+              <span class="action-chip" [style.border-color]="getActionColor(log.action)" [style.color]="getActionColor(log.action)">
+                <span class="chip-dot" [style.background-color]="getActionColor(log.action)"></span>
+                {{ getActionLabel(log.action) }}
+              </span>
+            </td>
+            <td class="cell-actor">{{ log.actor }}</td>
+            <td class="cell-target">
+              <code class="code-tag">{{ log.target ? (log.target | slice:0:10) + '...' : '—' }}</code>
+            </td>
+            <td class="cell-details" [title]="log.details">
+              {{ getDetailsSummary(log.details) }}
+            </td>
+            <td class="cell-hash">
+              <span class="hash-tag" [title]="log.hash">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                {{ getHashShort(log.hash) }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
+    <!-- Pied de Tableau -->
     <div class="table-footer" *ngIf="!loading && filteredLogs.length > 0">
-      <span>{{ filteredLogs.length }} logs affichés sur {{ logs.length }}</span>
+      <span>Affichage de <strong>{{ filteredLogs.length }}</strong> sur <strong>{{ logs.length }}</strong> événement(s) enregistré(s)</span>
     </div>
   </div>
 
-  <!-- Recent Sends -->
+  <!-- Section Derniers Envois -->
   <ng-container *ngIf="stats?.recentSends as recentSends">
-    <div class="recent-sends" *ngIf="recentSends.length > 0">
-      <h3>📧 Derniers envois</h3>
+    <div class="recent-sends-card" *ngIf="recentSends.length > 0">
+      <div class="card-header">
+        <div class="title-with-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <h3>Derniers envois d'emails de la plateforme</h3>
+        </div>
+      </div>
       <div class="send-list">
         <div class="send-item" *ngFor="let send of recentSends">
-          <span class="send-date">{{ formatDate(send.createdAt) }}</span>
+          <span class="send-date">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {{ formatDate(send.createdAt) }}
+          </span>
           <span class="send-actor">{{ send.actor }}</span>
           <span class="send-details">{{ getDetailsSummary(send.details) }}</span>
         </div>
       </div>
     </div>
   </ng-container>
+
 </div>
