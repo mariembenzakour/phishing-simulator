@@ -1,5 +1,6 @@
 package com.intellisec.phishsim.email;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.intellisec.phishsim.audit.AuditLogService;
 import com.intellisec.phishsim.campaign.Campaign;
 import com.intellisec.phishsim.common.config.UrlConfig;
@@ -44,6 +45,8 @@ public class EmailService {
     private final AtomicInteger emailSentCount = new AtomicInteger(0);
     private final AtomicInteger emailReceivedCount = new AtomicInteger(0);
     private final AtomicInteger totalSent = new AtomicInteger(0);
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public int getEmailSentCount() {
         return emailSentCount.get();
@@ -143,19 +146,16 @@ public class EmailService {
         String bodyText;
 
         if (campaign.getCustomSubject() != null && !campaign.getCustomSubject().isEmpty()) {
-            // ✅ Contenu IA (priorité 1)
             subject = campaign.getCustomSubject();
             bodyHtml = campaign.getCustomBodyHtml() != null ? campaign.getCustomBodyHtml() : "";
             bodyText = campaign.getCustomBodyText() != null ? campaign.getCustomBodyText() : "";
             log.info("📧 Utilisation du contenu IA (draft: {})", campaign.getAiGenerationId());
         } else if (template != null && template.getBodyHtml() != null && !template.getBodyHtml().isEmpty()) {
-            // ✅ Template existant (priorité 2)
             subject = template.getSubject();
             bodyHtml = template.getBodyHtml();
             bodyText = template.getBodyText() != null ? template.getBodyText() : "";
             log.info("📧 Utilisation du template: {}", template.getName());
         } else {
-            // ❌ PLUS DE TEMPLATE PAR DÉFAUT - On lève une exception
             throw new RuntimeException(
                     "❌ Aucun contenu d'email défini pour la campagne '" + campaign.getName() + "'. " +
                             "Veuillez soit :\n" +
@@ -175,6 +175,9 @@ public class EmailService {
                             "❌ L'email de test " + campaign.getDryRunEmail() +
                                     " n'appartient pas au groupe sélectionné."
                     ));
+
+            // ✅ Scope Enforcement pour le Dry Run
+            enforceScope(campaign, dryRunTarget);
 
             log.info("🔬 DRY RUN : Envoi à {}", campaign.getDryRunEmail());
 
@@ -210,6 +213,7 @@ public class EmailService {
         for (int i = 0; i < targets.size(); i++) {
             Target target = targets.get(i);
             try {
+                // ✅ Scope Enforcement avec Allow-List
                 enforceScope(campaign, target);
 
                 SendEvent sendEvent = trackingService.createSendEvent(
@@ -251,6 +255,48 @@ public class EmailService {
     }
 
     // ─────────────────────────────────────────────────
+    // SCOPE ENFORCEMENT GATE AVEC ALLOW-LIST
+    // ─────────────────────────────────────────────────
+    /**
+     * ✅ Vérifie que la cible est autorisée à recevoir l'email
+     * - Soit elle appartient au groupe de la campagne
+     * - Soit elle est dans l'allow-list personnalisée
+     */
+    private void enforceScope(Campaign campaign, Target target) {
+        boolean isInGroup = target.getGroupId() != null
+                && target.getGroupId().equals(campaign.getTargetGroupId());
+
+        boolean isInAllowList = false;
+        if (campaign.getAllowList() != null && !campaign.getAllowList().isEmpty()) {
+            try {
+                List<String> allowList = objectMapper.readValue(campaign.getAllowList(), List.class);
+                isInAllowList = allowList.stream()
+                        .anyMatch(email -> email.equalsIgnoreCase(target.getEmail()));
+            } catch (Exception e) {
+                log.warn("⚠️ Erreur de parsing de l'allow-list: {}", e.getMessage());
+            }
+        }
+
+        // ✅ La cible doit être dans le groupe OU dans l'allow-list
+        if (!isInGroup && !isInAllowList) {
+            String errorMsg = String.format(
+                    "❌ Scope Enforcement : La cible %s (groupe %s) n'est pas autorisée. " +
+                            "Elle n'appartient pas au groupe de la campagne %s (groupe %s) " +
+                            "et n'est pas dans l'allow-list.",
+                    target.getEmail(),
+                    target.getGroupId(),
+                    campaign.getName(),
+                    campaign.getTargetGroupId()
+            );
+            log.error(errorMsg);
+            throw new RuntimeException(errorMsg);
+        }
+
+        log.debug("✅ Cible {} autorisée (groupe: {}, allow-list: {})",
+                target.getEmail(), isInGroup, isInAllowList);
+    }
+
+    // ─────────────────────────────────────────────────
     // STATISTIQUES DE DÉLIVRABILITÉ
     // ─────────────────────────────────────────────────
     private void logDeliverabilityStats(String campaignName) {
@@ -289,23 +335,6 @@ public class EmailService {
         }
 
         return new DeliverabilityStats(campaignId, sent, received, opens, clicks, submits);
-    }
-
-    // ─────────────────────────────────────────────────
-    // SCOPE ENFORCEMENT GATE
-    // ─────────────────────────────────────────────────
-    private void enforceScope(Campaign campaign, Target target) {
-        if (target.getGroupId() == null || !target.getGroupId().equals(campaign.getTargetGroupId())) {
-            String errorMsg = String.format(
-                    "❌ Scope Enforcement : La cible %s (groupe %s) n'appartient pas au groupe de la campagne %s (groupe %s)",
-                    target.getEmail(),
-                    target.getGroupId(),
-                    campaign.getName(),
-                    campaign.getTargetGroupId()
-            );
-            log.error(errorMsg);
-            throw new RuntimeException(errorMsg);
-        }
     }
 
     // ─────────────────────────────────────────────────

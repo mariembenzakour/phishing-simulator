@@ -47,16 +47,29 @@ public class TargetController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * ✅ Import CSV avec validation, déduplication et reporting
+     * Retourne un résultat détaillé avec le nombre d'imports et les erreurs
+     */
     @PostMapping("/upload")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
-    public ResponseEntity<String> uploadCsv(
+    public ResponseEntity<TargetService.ImportResult> uploadCsv(
             @RequestParam("file") MultipartFile file,
             @RequestParam("groupId") UUID groupId) {
         try {
-            targetService.importCsv(file, groupId);
-            return ResponseEntity.ok("Import réussi !");
+            TargetService.ImportResult result = targetService.importCsv(file, groupId);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erreur : " + e.getMessage());
+            // Retourner un résultat d'erreur
+            List<String> errors = List.of("Erreur lors de l'import: " + e.getMessage());
+            TargetService.ImportResult errorResult = new TargetService.ImportResult(
+                    0,
+                    1,
+                    errors,
+                    List.of(),
+                    List.of()
+            );
+            return ResponseEntity.badRequest().body(errorResult);
         }
     }
 }

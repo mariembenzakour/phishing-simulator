@@ -34,7 +34,8 @@ export class CampaignCreateComponent implements OnInit {
     aiGenerationId: '',
     customSubject: '',
     customBodyHtml: '',
-    customBodyText: ''
+    customBodyText: '',
+    allowList: ''  // ✅ NOUVEAU
   };
 
   groups: any[] = [];
@@ -139,7 +140,8 @@ export class CampaignCreateComponent implements OnInit {
           aiGenerationId: data.aiGenerationId || '',
           customSubject: data.customSubject || '',
           customBodyHtml: data.customBodyHtml || '',
-          customBodyText: data.customBodyText || ''
+          customBodyText: data.customBodyText || '',
+          allowList: data.allowList || ''  // ✅ NOUVEAU
         };
         this.loading = false;
       },
@@ -174,7 +176,8 @@ export class CampaignCreateComponent implements OnInit {
       aiGenerationId: this.form.aiGenerationId || null,
       customSubject: this.form.customSubject || null,
       customBodyHtml: this.form.customBodyHtml || null,
-      customBodyText: this.form.customBodyText || null
+      customBodyText: this.form.customBodyText || null,
+      allowList: this.form.allowList || null  // ✅ NOUVEAU
     };
 
     if (this.isEditMode) {

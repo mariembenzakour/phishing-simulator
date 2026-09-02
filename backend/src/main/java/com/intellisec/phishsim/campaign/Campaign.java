@@ -58,4 +58,8 @@ public class Campaign {
 
     @Column(name = "custom_body_text", columnDefinition = "TEXT")
     private String customBodyText;
+
+    // ✅ NOUVEAU : Allow-list (emails autorisés en plus du groupe)
+    @Column(name = "allow_list", columnDefinition = "TEXT")
+    private String allowList;  // JSON array: ["email1@test.com", "email2@test.com"]
 }

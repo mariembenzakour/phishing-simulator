@@ -127,6 +127,21 @@
           </div>
         </div>
 
+        <!-- ✅ SECTION 4B: ALLOW-LIST -->
+        <div class="form-group">
+          <label class="form-label">
+            ALLOW-LIST (EMILS AUTORISÉS SUPPLÉMENTAIRES)
+            <span class="label-hint">(optionnel — emails séparés par des virgules)</span>
+          </label>
+          <input type="text" [(ngModel)]="form.allowList" 
+                 placeholder="email1@entreprise.com, email2@entreprise.com" 
+                 class="form-input">
+          <div class="field-hint">
+            Les emails de cette liste seront autorisés même s'ils n'appartiennent pas au groupe sélectionné.
+            <br><strong>⚠️ Utilisez cette fonction avec précaution — elle contourne le groupe de cibles.</strong>
+          </div>
+        </div>
+
         <!-- SECTION 5: PLANIFICATION & PARAMÈTRES -->
         <div class="form-row">
           <div class="form-group flex-1">
