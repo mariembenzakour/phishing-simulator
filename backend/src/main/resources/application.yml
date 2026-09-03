@@ -26,7 +26,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # ✅ CONFIGURATION MAILPIT (pour les tests)
+  # ✅ CONFIGURATION MAILPIT (Serveur SMTP local de test)
   mail:
     host: localhost
     port: 1025
@@ -46,20 +46,36 @@ server:
   port: 8086
   address: 0.0.0.0
 
-# ✅ Configuration du chiffrement
+# ✅ Configuration métier de PhishSim
 app:
   encryption:
     password: phishsim-encryption-key-2026
     salt: phishsim-salt-2026
 
-  # ✅ Configuration des URLs (Cloudflare)
-  base-url:   https://css-kong-roommates-installed.trycloudflare.com
+  # ✅ Configuration des URLs
+  base-url: https://wood-tulsa-hitachi-durable.trycloudflare.com
   frontend-url: http://localhost:4200
 
-  # ✅ Configuration de l'expéditeur (pour Mailpit, n'importe quelle adresse fonctionne)
+  # ✅ Configuration de l'expéditeur
   email:
     sender: test@intellisec.com
     sender-name: PhishSim Test
+    sender-domain-check: true
+
+  # ✅ Serveur DNS utilisé pour la vérification SPF / DKIM / DMARC
+  # Utiliser "system" pour le DNS de votre réseau local, ou "dns://8.8.8.8" pour Google DNS
+  dns:
+    server: "dns://8.8.8.8"
+
+  # ✅ Configuration Rspamd (Vérification Anti-Spam / Délivrabilité)
+  rspamd:
+    url: http://localhost:11333/checkv2
+
+# ✅ Niveaux de journaux (Logs)
+logging:
+  level:
+    root: INFO
+    com.intellisec.phishsim: DEBUG
 
 # ✅ Configuration Actuator
 management:
@@ -73,12 +89,13 @@ management:
       show-details: always
       show-components: always
 
-# ✅ Configuration Gemini
+# ✅ Configuration Gemini AI - Modèle Principal et Modèle de Secours
 ai:
   gemini:
     api:
       key: ${GEMINI_API_KEY}
-    model: gemini-3.6-flash  # ✅ Recommandé (plus stable que 3.6)
+    primary-model: gemini-3.5-flash
+    fallback-model: gemini-2.5-flash
   generation:
     max-tokens: 8192
     temperature: 0.7

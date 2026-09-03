@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   db:
     image: postgres:15
@@ -10,12 +9,37 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phishsim -d phishsim"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mailpit:
     image: axllent/mailpit
     ports:
       - "1025:1025"
       - "8025:8025"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ✅ Rspamd - Anti-spam / Deliverability Check
+  rspamd:
+    image: rspamd/rspamd:latest
+    ports:
+      - "11333:11333"   # API HTTP
+      - "11334:11334"   # WebUI (optionnel)
+    volumes:
+      - ./rspamd/conf:/etc/rspamd/local.d
+      - ./rspamd/worker:/etc/rspamd/worker-local.d
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:11333/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:

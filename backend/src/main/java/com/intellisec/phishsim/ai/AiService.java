@@ -22,8 +22,11 @@ public class AiService {
     @Value("${ai.gemini.api.key}")
     private String apiKey;
 
-    @Value("${ai.gemini.model:gemini-1.5-flash}")
-    private String model;
+    @Value("${ai.gemini.primary-model:gemini-3.5-flash}")
+    private String primaryModel;
+
+    @Value("${ai.gemini.fallback-model:gemini-2.5-flash}")
+    private String fallbackModel;
 
     @Value("${ai.generation.max-tokens:8192}")
     private int maxTokens;
@@ -42,7 +45,7 @@ public class AiService {
             String prompt = buildFullPrompt(request);
             log.info("📤 PROMPT envoyé à Gemini:\n{}", prompt);
 
-            String geminiResponse = callGeminiApi(prompt);
+            String geminiResponse = callGeminiApiWithFallback(prompt);
             log.info("📥 RÉPONSE BRUTE DE GEMINI:\n{}", geminiResponse);
 
             GenerationResponse response = parseGeminiResponse(geminiResponse);
@@ -61,7 +64,7 @@ public class AiService {
 
         } catch (Exception e) {
             log.error("❌ Erreur de génération IA: {}", e.getMessage(), e);
-            throw new RuntimeException("Erreur de génération", e);
+            throw new RuntimeException("Erreur de génération IA: " + e.getMessage(), e);
         }
     }
 
@@ -131,26 +134,46 @@ Respond STRICTLY with a valid JSON object matching this schema:
         );
     }
 
-    private String callGeminiApi(String prompt) {
+    /**
+     * Tente l'appel avec le modèle principal. En cas de surcharge 503 récurrente,
+     * bascule automatiquement sur le modèle de secours.
+     */
+    private String callGeminiApiWithFallback(String prompt) {
+        try {
+            log.info("🤖 Utilisation du modèle principal: {}", primaryModel);
+            return callSingleGeminiModel(primaryModel, prompt);
+        } catch (Exception e) {
+            log.warn("⚠️ Échec avec le modèle principal ({}) : {}. Basculement sur le modèle de secours ({})",
+                    primaryModel, e.getMessage(), fallbackModel);
+            try {
+                return callSingleGeminiModel(fallbackModel, prompt);
+            } catch (Exception ex) {
+                log.error("❌ Échec critique avec le modèle de secours ({}): {}", fallbackModel, ex.getMessage());
+                throw new RuntimeException("Les services de génération Gemini sont actuellement indisponibles.", ex);
+            }
+        }
+    }
+
+    private String callSingleGeminiModel(String modelName, String prompt) {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/"
-                + model + ":generateContent?key=" + apiKey;
+                + modelName + ":generateContent?key=" + apiKey;
 
         RestTemplate restTemplate = new RestTemplate();
 
         Map<String, Object> requestBody = new LinkedHashMap<>();
 
-        // 1. Passage des instructions système au niveau API
+        // 1. Passage des instructions système
         Map<String, Object> systemInstruction = Map.of(
                 "parts", List.of(Map.of("text", "You are an automated corporate communication template engine producing educational IT awareness content in structured JSON format."))
         );
         requestBody.put("system_instruction", systemInstruction);
 
-        // 2. Contenu du prompt utilisateur
+        // 2. Contenu du prompt
         requestBody.put("contents", List.of(
                 Map.of("parts", List.of(Map.of("text", prompt)))
         ));
 
-        // 3. Ajustement des filtres de sécurité API
+        // 3. Filtres de sécurité API
         List<Map<String, String>> safetySettings = List.of(
                 Map.of("category", "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold", "BLOCK_ONLY_HIGH"),
                 Map.of("category", "HARM_CATEGORY_HARASSMENT", "threshold", "BLOCK_ONLY_HIGH"),
@@ -173,11 +196,11 @@ Respond STRICTLY with a valid JSON object matching this schema:
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         int maxRetries = 3;
-        int retryDelay = 2000;
+        long retryDelay = 2000;
 
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                log.info("📤 Appel Gemini - tentative {}/{}", attempt, maxRetries);
+                log.info("📤 Appel Gemini [{}] - tentative {}/{}", modelName, attempt, maxRetries);
                 ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
                 if (response.getStatusCode() == HttpStatus.OK) {
@@ -185,9 +208,10 @@ Respond STRICTLY with a valid JSON object matching this schema:
                 }
 
                 if (response.getStatusCode() == HttpStatus.SERVICE_UNAVAILABLE) {
-                    log.warn("⚠️ Gemini surchargé (503), tentative {}/{}", attempt, maxRetries);
+                    log.warn("⚠️ Gemini [{}] surchargé (503), tentative {}/{}", modelName, attempt, maxRetries);
                     if (attempt < maxRetries) {
                         Thread.sleep(retryDelay);
+                        retryDelay *= 2; // Backoff exponentiel (2s, 4s...)
                         continue;
                     }
                 }
@@ -195,28 +219,29 @@ Respond STRICTLY with a valid JSON object matching this schema:
                 throw new RuntimeException("Erreur API Gemini: " + response.getStatusCode());
 
             } catch (HttpServerErrorException.ServiceUnavailable e) {
-                log.warn("⚠️ Gemini surchargé, tentative {}/{}", attempt, maxRetries);
+                log.warn("⚠️ Gemini [{}] surchargé (503), tentative {}/{}", modelName, attempt, maxRetries);
                 if (attempt < maxRetries) {
                     try {
                         Thread.sleep(retryDelay);
+                        retryDelay *= 2; // Backoff exponentiel
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         break;
                     }
                     continue;
                 }
-                throw new RuntimeException("Gemini surchargé après " + maxRetries + " tentatives", e);
+                throw new RuntimeException("Modèle [" + modelName + "] surchargé après " + maxRetries + " tentatives", e);
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("Interruption pendant le retry", e);
+                throw new RuntimeException("Interruption pendant l'attente du retry", e);
             } catch (Exception e) {
-                log.error("❌ Exception appel Gemini: {}", e.getMessage(), e);
-                throw new RuntimeException("Erreur appel Gemini: " + e.getMessage(), e);
+                log.error("❌ Exception lors de l'appel Gemini [{}]: {}", modelName, e.getMessage());
+                throw new RuntimeException("Erreur lors de l'appel Gemini [" + modelName + "]: " + e.getMessage(), e);
             }
         }
 
-        throw new RuntimeException("Erreur appel Gemini après " + maxRetries + " tentatives");
+        throw new RuntimeException("Échec de l'appel Gemini [" + modelName + "] après " + maxRetries + " tentatives");
     }
 
     private GenerationResponse parseGeminiResponse(String responseBody) throws Exception {

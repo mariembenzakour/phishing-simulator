@@ -56,4 +56,8 @@ export class CampaignService {
   sendTestEmail(to: string, subject: string, body: string): Observable<string> {
     return this.http.post(`${this.emailApiUrl}/test`, { to, subject, body }, { responseType: 'text' });
   }
+  
+checkDeliverability(payload: { senderEmail: string; subject: string; bodyHtml: string; bodyText: string }): Observable<any> {
+  return this.http.post(`${this.apiUrl}/check-deliverability`, payload);
+}
 }

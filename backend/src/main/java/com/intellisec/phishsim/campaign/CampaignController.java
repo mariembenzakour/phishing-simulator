@@ -1,5 +1,6 @@
 package com.intellisec.phishsim.campaign;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +34,6 @@ public class CampaignController {
         return ResponseEntity.ok(campaignService.create(campaign));
     }
 
-    // ✅ NOUVEAU : Mettre à jour une campagne
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Campaign> update(@PathVariable UUID id,
@@ -71,5 +71,21 @@ public class CampaignController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         campaignService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ✅ NOUVEAU : Endpoint de délivrabilité appelé par le Angular
+    @PostMapping("/check-deliverability")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
+    public ResponseEntity<CampaignService.DeliverabilityResponseDto> checkDeliverability(@RequestBody DeliverabilityRequest request) {
+        return ResponseEntity.ok(campaignService.checkDeliverability(request));
+    }
+
+    // DTO de requête transmis par Angular
+    @Data
+    public static class DeliverabilityRequest {
+        private String senderEmail;
+        private String subject;
+        private String bodyHtml;
+        private String bodyText;
     }
 }

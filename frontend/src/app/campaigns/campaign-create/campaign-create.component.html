@@ -127,10 +127,10 @@
           </div>
         </div>
 
-        <!-- ✅ SECTION 4B: ALLOW-LIST -->
+        <!-- SECTION 4B: ALLOW-LIST -->
         <div class="form-group">
           <label class="form-label">
-            ALLOW-LIST (EMILS AUTORISÉS SUPPLÉMENTAIRES)
+            ALLOW-LIST (EMAILS AUTORISÉS SUPPLÉMENTAIRES)
             <span class="label-hint">(optionnel — emails séparés par des virgules)</span>
           </label>
           <input type="text" [(ngModel)]="form.allowList" 
@@ -139,6 +139,107 @@
           <div class="field-hint">
             Les emails de cette liste seront autorisés même s'ils n'appartiennent pas au groupe sélectionné.
             <br><strong>⚠️ Utilisez cette fonction avec précaution — elle contourne le groupe de cibles.</strong>
+          </div>
+        </div>
+
+        <!-- ✅ NOUVELLE SECTION: TEST DE DÉLIVRABILITÉ ET SCORE ANTI-SPAM -->
+        <div class="deliverability-box">
+          <div class="deliverability-header">
+            <div class="deliverability-title-group">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+              <div>
+                <span class="deliverability-title">Analyse de Délivrabilité & Anti-Spam</span>
+                <span class="deliverability-subtitle">Vérifiez le score DNS, SPF/DKIM/DMARC et l'analyse du contenu</span>
+              </div>
+            </div>
+            <button type="button" 
+                    (click)="testDeliverability()" 
+                    [disabled]="testingDeliverability || !form.senderEmail"
+                    class="btn-test-deliverability">
+              <span *ngIf="testingDeliverability" class="spinner-sm"></span>
+              {{ testingDeliverability ? 'Analyse...' : 'Tester la délivrabilité' }}
+            </button>
+          </div>
+
+          <!-- RÉSULTAT DU TEST DE DÉLIVRABILITÉ -->
+          <div *ngIf="deliverabilityResult" class="deliverability-results">
+            
+            <!-- Gauge / Score Global -->
+            <div class="score-banner" [ngClass]="getScoreClass(deliverabilityResult.score)">
+              <div class="score-circle">
+                <span class="score-num">{{ deliverabilityResult.score }}</span>
+                <span class="score-max">/100</span>
+              </div>
+              <div class="score-details">
+                <div class="score-label">{{ deliverabilityResult.statusText }}</div>
+                <div class="score-desc">{{ deliverabilityResult.summary }}</div>
+              </div>
+            </div>
+
+            <!-- Grille des indicateurs -->
+            <div class="checks-grid">
+              
+              <!-- Authentification DNS -->
+              <div class="check-item" [class.passed]="deliverabilityResult.dnsSpf" [class.failed]="!deliverabilityResult.dnsSpf">
+                <div class="check-icon">
+                  <svg *ngIf="deliverabilityResult.dnsSpf" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg *ngIf="!deliverabilityResult.dnsSpf" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <div class="check-info">
+                  <span class="check-name">SPF / DKIM / DMARC</span>
+                  <span class="check-status">{{ deliverabilityResult.dnsSpf ? 'Configuration DNS valide' : 'Domaine non vérifié ou incomplet' }}</span>
+                </div>
+              </div>
+
+              <!-- Mots-clés Spam -->
+              <div class="check-item" [class.passed]="deliverabilityResult.spamKeywordsScore >= 80" [class.failed]="deliverabilityResult.spamKeywordsScore < 80">
+                <div class="check-icon">
+                  <svg *ngIf="deliverabilityResult.spamKeywordsScore >= 80" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg *ngIf="deliverabilityResult.spamKeywordsScore < 80" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <div class="check-info">
+                  <span class="check-name">Mots déclencheurs de Spam</span>
+                  <span class="check-status">{{ deliverabilityResult.spamKeywordsCount === 0 ? 'Aucun mot à risque détecté' : deliverabilityResult.spamKeywordsCount + ' mot(s) suspect(s) trouvé(s)' }}</span>
+                </div>
+              </div>
+
+              <!-- Format & Ratio HTML/Texte -->
+              <div class="check-item" [class.passed]="deliverabilityResult.htmlRatioValid" [class.failed]="!deliverabilityResult.htmlRatioValid">
+                <div class="check-icon">
+                  <svg *ngIf="deliverabilityResult.htmlRatioValid" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg *ngIf="!deliverabilityResult.htmlRatioValid" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <div class="check-info">
+                  <span class="check-name">Ratio HTML & Texte brut</span>
+                  <span class="check-status">{{ deliverabilityResult.htmlRatioValid ? 'Version HTML & Texte équilibrées' : 'Ajoutez une version Texte Brut' }}</span>
+                </div>
+              </div>
+
+              <!-- Réputation Domaine -->
+              <div class="check-item" [class.passed]="!deliverabilityResult.isBlacklisted" [class.failed]="deliverabilityResult.isBlacklisted">
+                <div class="check-icon">
+                  <svg *ngIf="!deliverabilityResult.isBlacklisted" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  <svg *ngIf="deliverabilityResult.isBlacklisted" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </div>
+                <div class="check-info">
+                  <span class="check-name">Listes noires (Blacklists)</span>
+                  <span class="check-status">{{ deliverabilityResult.isBlacklisted ? 'Domaine/IP répertorié en liste noire' : 'Domaine non listé' }}</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Recommendations -->
+            <div *ngIf="deliverabilityResult.recommendations.length > 0" class="recommendations-box">
+              <span class="rec-title">Recommandations pour optimiser la réception :</span>
+              <ul>
+                <li *ngFor="let rec of deliverabilityResult.recommendations">{{ rec }}</li>
+              </ul>
+            </div>
+
           </div>
         </div>
 

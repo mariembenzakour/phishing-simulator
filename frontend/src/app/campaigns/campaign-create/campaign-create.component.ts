@@ -9,6 +9,18 @@ import { SenderProfileService } from '../../shared/services/sender-profile.servi
 import { AuthService } from '../../shared/services/auth.service';
 import { AiService, AiGenerationLog } from '../../shared/services/ai.service';
 
+export interface DeliverabilityResult {
+  score: number;
+  statusText: string;
+  summary: string;
+  dnsSpf: boolean;
+  spamKeywordsScore: number;
+  spamKeywordsCount: number;
+  htmlRatioValid: boolean;
+  isBlacklisted: boolean;
+  recommendations: string[];
+}
+
 @Component({
   selector: 'app-campaign-create',
   standalone: true,
@@ -35,7 +47,7 @@ export class CampaignCreateComponent implements OnInit {
     customSubject: '',
     customBodyHtml: '',
     customBodyText: '',
-    allowList: ''  // ✅ NOUVEAU
+    allowList: ''
   };
 
   groups: any[] = [];
@@ -45,6 +57,10 @@ export class CampaignCreateComponent implements OnInit {
   error = '';
   success = '';
   loading = false;
+
+  // ÉTATS DÉLIVRABILITÉ
+  testingDeliverability = false;
+  deliverabilityResult: DeliverabilityResult | null = null;
 
   constructor(
     private campaignService: CampaignService,
@@ -123,6 +139,41 @@ export class CampaignCreateComponent implements OnInit {
     }
   }
 
+  // ✅ TEST DÉLIVRABILITÉ - EXÉCUTION HTTP DEPUIS LE BACKEND
+  testDeliverability() {
+    if (!this.form.senderEmail) {
+      this.error = 'Veuillez renseigner l\'email expéditeur avant de lancer le test.';
+      return;
+    }
+
+    this.testingDeliverability = true;
+    this.error = '';
+
+    const payload = {
+      senderEmail: this.form.senderEmail,
+      subject: this.form.customSubject,
+      bodyHtml: this.form.customBodyHtml,
+      bodyText: this.form.customBodyText
+    };
+
+    this.campaignService.checkDeliverability(payload).subscribe({
+      next: (result) => {
+        this.deliverabilityResult = result;
+        this.testingDeliverability = false;
+      },
+      error: (err) => {
+        this.error = 'Erreur lors de la vérification de délivrabilité sur le serveur.';
+        this.testingDeliverability = false;
+      }
+    });
+  }
+
+  getScoreClass(score: number): string {
+    if (score >= 80) return 'score-good';
+    if (score >= 50) return 'score-warning';
+    return 'score-danger';
+  }
+
   loadCampaign(id: string) {
     this.loading = true;
     this.campaignService.getById(id).subscribe({
@@ -141,7 +192,7 @@ export class CampaignCreateComponent implements OnInit {
           customSubject: data.customSubject || '',
           customBodyHtml: data.customBodyHtml || '',
           customBodyText: data.customBodyText || '',
-          allowList: data.allowList || ''  // ✅ NOUVEAU
+          allowList: data.allowList || ''
         };
         this.loading = false;
       },
@@ -177,7 +228,7 @@ export class CampaignCreateComponent implements OnInit {
       customSubject: this.form.customSubject || null,
       customBodyHtml: this.form.customBodyHtml || null,
       customBodyText: this.form.customBodyText || null,
-      allowList: this.form.allowList || null  // ✅ NOUVEAU
+      allowList: this.form.allowList || null
     };
 
     if (this.isEditMode) {

@@ -3,9 +3,12 @@ package com.intellisec.phishsim.campaign;
 import com.intellisec.phishsim.ai.AiGenerationLog;
 import com.intellisec.phishsim.ai.AiGenerationLogRepository;
 import com.intellisec.phishsim.audit.AuditLogService;
+import com.intellisec.phishsim.email.DeliverabilityService;
 import com.intellisec.phishsim.tracking.SendEvent;
 import com.intellisec.phishsim.tracking.SendEventRepository;
 import com.intellisec.phishsim.tracking.TrackingEventRepository;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -24,8 +29,11 @@ public class CampaignService {
     private final CampaignRepository campaignRepository;
     private final AuditLogService auditLogService;
     private final AiGenerationLogRepository aiGenerationLogRepository;
-    private final SendEventRepository sendEventRepository;        // ✅ AJOUTÉ
-    private final TrackingEventRepository trackingEventRepository; // ✅ AJOUTÉ
+    private final SendEventRepository sendEventRepository;
+    private final TrackingEventRepository trackingEventRepository;
+
+    // ✅ INJECTION DE VOTRE SERVICE DE DÉLIVRABILITÉ DÉDIÉ
+    private final DeliverabilityService deliverabilityService;
 
     // ── GET ALL ──────────────────────────────────────
     public List<Campaign> getAll() {
@@ -216,7 +224,6 @@ public class CampaignService {
             throw new RuntimeException("Cannot delete a RUNNING campaign");
         }
 
-        // ✅ Supprimer les dépendances : send_events et tracking_events
         List<SendEvent> sendEvents = sendEventRepository.findByCampaignId(id);
         if (!sendEvents.isEmpty()) {
             for (SendEvent se : sendEvents) {
@@ -236,6 +243,68 @@ public class CampaignService {
         log.info("✅ Campagne '{}' supprimée avec succès", campaign.getName());
     }
 
+    // ── CHECK DELIVERABILITY (DÉLÉGUÉ À DELIVERABILITYSERVICE) ──
+    public DeliverabilityResponseDto checkDeliverability(CampaignController.DeliverabilityRequest request) {
+        String senderEmail = request.getSenderEmail() != null ? request.getSenderEmail() : "";
+
+        // Extraction du domaine expéditeur (ex: admin@intellisec.com -> intellisec.com)
+        String domain = "example.com";
+        if (senderEmail.contains("@") && senderEmail.indexOf("@") < senderEmail.length() - 1) {
+            domain = senderEmail.substring(senderEmail.indexOf("@") + 1);
+        }
+
+        String subject = request.getSubject() != null ? request.getSubject() : "";
+        String bodyHtml = request.getBodyHtml() != null ? request.getBodyHtml() : "";
+
+        // 1. Appel du service de délivrabilité réel (DNS + Rspamd)
+        DeliverabilityService.DeliverabilityReport report = deliverabilityService.getDeliverabilityReport(
+                domain, subject, bodyHtml, senderEmail
+        );
+
+        // 2. Conversion du score (DeliverabilityReport renvoie sur 20 -> conversion sur 100)
+        int score = Math.min(100, Math.max(0, report.getTotalScore() * 5));
+
+        // Vérification de la présence du texte brut
+        boolean hasBodyText = request.getBodyText() != null && !request.getBodyText().trim().isEmpty();
+        List<String> recommendations = report.getRecommendations() != null ? new ArrayList<>(report.getRecommendations()) : new ArrayList<>();
+
+        if (!hasBodyText) {
+            score = Math.max(0, score - 10);
+            recommendations.add("Ajoutez une version texte brut (Plain Text) pour équilibrer le format de l'email.");
+        }
+
+        // Vérification de l'état du SPF depuis le rapport DNS
+        boolean spfPass = false;
+        if (report.getDnsCheck() != null && report.getDnsCheck().getChecks() != null) {
+            Object spfObj = report.getDnsCheck().getChecks().get("spf");
+            if (spfObj instanceof Map<?, ?> spfMap) {
+                spfPass = Boolean.TRUE.equals(spfMap.get("pass"));
+            }
+        }
+
+        // Récupération des détails Rspamd
+        double spamScore = report.getSpamCheck() != null ? report.getSpamCheck().getScore() : 0.0;
+        int rulesCount = (report.getSpamCheck() != null && report.getSpamCheck().getRules() != null)
+                ? report.getSpamCheck().getRules().size() : 0;
+
+        String statusText = score >= 80 ? "Excellente" : (score >= 50 ? "Moyenne" : "Faible");
+        String summary = score >= 80 ? "L'email respecte la majorité des règles de sécurité et d'anti-spam."
+                : (score >= 50 ? "L'email risque d'être classé en indésirable sur certains serveurs."
+                : "Alerte : risque élevé de blocage par les filtres anti-spam.");
+
+        return DeliverabilityResponseDto.builder()
+                .score(score)
+                .statusText(statusText)
+                .summary(summary)
+                .dnsSpf(spfPass)
+                .spamKeywordsScore((int) Math.round(spamScore))
+                .spamKeywordsCount(rulesCount)
+                .htmlRatioValid(hasBodyText)
+                .isBlacklisted(!report.isPass() && spamScore > 10)
+                .recommendations(recommendations)
+                .build();
+    }
+
     // ── SCHEDULER ────────────────────────────────────
     @Scheduled(fixedRate = 60000)
     public void checkScheduledCampaigns() {
@@ -251,5 +320,20 @@ public class CampaignService {
                     "Campagne démarrée automatiquement (scheduled)"
             );
         }
+    }
+
+    // ── DTO DE RÉPONSE DÉLIVRABILITÉ ─────────────────
+    @Data
+    @Builder
+    public static class DeliverabilityResponseDto {
+        private int score;
+        private String statusText;
+        private String summary;
+        private boolean dnsSpf;
+        private int spamKeywordsScore;
+        private int spamKeywordsCount;
+        private boolean htmlRatioValid;
+        private boolean isBlacklisted;
+        private List<String> recommendations;
     }
 }
