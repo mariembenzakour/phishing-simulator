@@ -135,14 +135,15 @@ public class AiController {
     }
 
     /**
-     * ✅ Vérifie le statut du service IA
+     * ✅ Vérifie le statut du service IA avec les modèles actifs
      */
     @GetMapping("/status")
     public ResponseEntity<Map<String, String>> getStatus() {
         Map<String, String> status = new LinkedHashMap<>();
         status.put("status", "ready");
         status.put("provider", "Google Gemini");
-        status.put("model", "gemini-3.6-flash");
+        status.put("primaryModel", aiService.getPrimaryModel());
+        status.put("fallbackModel", aiService.getFallbackModel());
         return ResponseEntity.ok(status);
     }
 

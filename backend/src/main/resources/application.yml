@@ -7,7 +7,7 @@ spring:
       enabled: false
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/phishsim
+    url: jdbc:postgresql://localhost:5432/phishsim?useUnicode=true&characterEncoding=UTF-8
     username: phishsim
     password: phishsim
     driver-class-name: org.postgresql.Driver
@@ -26,6 +26,13 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+  # ✅ NOUVEAU : Configuration des uploads multipart (ex: avatar lors de l'inscription)
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 6MB
+
   # ✅ CONFIGURATION MAILPIT (Serveur SMTP local de test)
   mail:
     host: localhost
@@ -34,6 +41,8 @@ spring:
     password: ""
     properties:
       mail:
+        mime:
+          allowutf8: true
         smtp:
           auth: false
           starttls:
@@ -46,6 +55,7 @@ server:
   port: 8086
   address: 0.0.0.0
 
+
 # ✅ Configuration métier de PhishSim
 app:
   encryption:
@@ -53,13 +63,13 @@ app:
     salt: phishsim-salt-2026
 
   # ✅ Configuration des URLs
-  base-url: https://wood-tulsa-hitachi-durable.trycloudflare.com
+  base-url: ${APP_BASE_URL:http://localhost:8086}
   frontend-url: http://localhost:4200
 
   # ✅ Configuration de l'expéditeur
   email:
-    sender: test@intellisec.com
-    sender-name: PhishSim Test
+    sender: security-admin@intellisecsolution.com
+    sender-name: "Portail Sécurité IntelliSec"
     sender-domain-check: true
 
   # ✅ Serveur DNS utilisé pour la vérification SPF / DKIM / DMARC

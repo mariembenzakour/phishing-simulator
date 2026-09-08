@@ -169,7 +169,6 @@ public class TrackingController {
     // DASHBOARD
     // ============================================================
 
-    // ✅ VIEWER peut voir le dashboard global
     @GetMapping("/dashboard/global")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getGlobalDashboard() {
@@ -217,7 +216,6 @@ public class TrackingController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ VIEWER peut voir les détails d'une campagne
     @GetMapping("/campaign/{campaignId}/details")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getCampaignDetails(@PathVariable UUID campaignId) {
@@ -235,10 +233,9 @@ public class TrackingController {
     }
 
     // ============================================================
-    // ✅ TIME-TO-CLICK ENDPOINTS
+    // TIME-TO-CLICK ENDPOINTS
     // ============================================================
 
-    // ✅ VIEWER peut voir le time-to-click global d'une campagne
     @GetMapping("/campaign/{campaignId}/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR', 'VIEWER')")
     public ResponseEntity<Map<String, Object>> getTimeToClick(@PathVariable UUID campaignId) {
@@ -247,7 +244,6 @@ public class TrackingController {
         return ResponseEntity.ok(stats);
     }
 
-    // ❌ VIEWER ne peut pas voir le time-to-click par utilisateur (données sensibles)
     @GetMapping("/user/{targetId}/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<Map<String, Object>> getUserTimeToClick(@PathVariable UUID targetId) {
@@ -256,21 +252,18 @@ public class TrackingController {
         return ResponseEntity.ok(stats);
     }
 
-    // ❌ VIEWER ne peut pas voir les statistiques utilisateurs
     @GetMapping("/campaign/{campaignId}/users/time-to-click")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<Map<String, Object>>> getUsersTimeToClick(@PathVariable UUID campaignId) {
         return ResponseEntity.ok(trackingService.getUsersTimeToClick(campaignId));
     }
 
-    // ❌ VIEWER ne peut pas voir les stats utilisateurs
     @GetMapping("/user/stats")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<Map<String, Object>>> getUserStats() {
         return ResponseEntity.ok(trackingService.getUserStats());
     }
 
-    // ❌ VIEWER ne peut pas voir l'historique utilisateur
     @GetMapping("/user/{targetId}/history")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<List<TrackingEvent>> getUserHistory(@PathVariable UUID targetId) {
@@ -338,9 +331,6 @@ public class TrackingController {
         return html;
     }
 
-    /**
-     * ✅ Injecte les red flags dans l'awareness page
-     */
     private String injectRedFlagsInAwarenessPage(String html, String redFlagsJson) {
         if (redFlagsJson == null || redFlagsJson.isEmpty()) {
             return html;
@@ -393,14 +383,9 @@ public class TrackingController {
         redFlagsHtml.append("</ul>");
         redFlagsHtml.append("</div>");
 
-        html = html.replace("RED_FLAGS_CONTENT", redFlagsHtml.toString());
-
-        return html;
+        return html.replace("RED_FLAGS_CONTENT", redFlagsHtml.toString());
     }
 
-    /**
-     * ⚠️ FALLBACK : Landing page par défaut
-     */
     private String buildDefaultLandingPage(String token) {
         String submitUrl = urlConfig.getSubmitUrl(token);
         String awarenessUrl = urlConfig.getAwarenessPageUrl(token);
@@ -457,11 +442,7 @@ public class TrackingController {
     """.formatted(submitUrl, awarenessUrl);
     }
 
-    /**
-     * ⚠️ FALLBACK : Awareness page par défaut avec red flags
-     */
     private String buildDefaultAwarenessPage(String redFlagsJson) {
-        // ✅ Construire les red flags par défaut
         String redFlagsHtml = """
         <div class="red-flags-container">
             <h3>🚨 Signes d'une tentative de phishing :</h3>
@@ -490,7 +471,6 @@ public class TrackingController {
         </div>
         """;
 
-        // ✅ Si on a des red flags de l'IA, on les utilise
         if (redFlagsJson != null && !redFlagsJson.isEmpty()) {
             String parsedFlags = injectRedFlagsInAwarenessPage("RED_FLAGS_CONTENT", redFlagsJson);
             if (!parsedFlags.contains("RED_FLAGS_CONTENT")) {
@@ -498,8 +478,7 @@ public class TrackingController {
             }
         }
 
-        // ✅ Retourner le HTML SANS String.formatted() pour éviter les problèmes de %
-        return """
+        String pageTemplate = """
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -599,7 +578,7 @@ public class TrackingController {
             <h1>⚠️ Simulation de phishing</h1>
             <p>Test de sécurité organisé par Intellisec Solutions</p>
         </div>
-        %s
+        RED_FLAGS_CONTENT
         <div class="footer">
             <strong>Intellisec Solutions — Formation cybersécurité</strong><br>
             Vos données n'ont pas été compromises.
@@ -607,12 +586,11 @@ public class TrackingController {
     </div>
 </body>
 </html>
-""".formatted(redFlagsHtml);
+""";
+
+        return pageTemplate.replace("RED_FLAGS_CONTENT", redFlagsHtml);
     }
 
-    /**
-     * ⚠️ Page d'erreur en cas de problème
-     */
     private String buildErrorPage(String token, String error) {
         return """
     <!DOCTYPE html>

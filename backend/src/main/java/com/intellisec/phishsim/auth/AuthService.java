@@ -5,7 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +27,12 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final MfaService mfaService;
+
+    // ✅ Dossier de stockage des avatars + préfixe de l'URL exposée au front
+    private static final String AVATAR_UPLOAD_DIR = "uploads/avatars/";
+    private static final String AVATAR_URL_PREFIX = "/api/auth/avatars/";
+    private static final List<String> ALLOWED_AVATAR_TYPES = List.of("image/jpeg", "image/png", "image/webp");
+    private static final long MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5 Mo
 
     // ✅ LOGIN
     public AuthResponse login(String email, String password) {
@@ -40,19 +52,19 @@ public class AuthService {
         return new AuthResponse(token, toDTO(operator), mfaConfigured);
     }
 
-    // ✅ REGISTER : Version publique (force VIEWER)
+    // ✅ REGISTER : Version publique (force VIEWER), avec avatar optionnel
     public AuthResponse register(String email, String password, String role,
                                  String firstName, String lastName,
-                                 String phone, LocalDate birthDate) {
-        return registerInternal(email, password, role, firstName, lastName, phone, birthDate, false, null);
+                                 String phone, LocalDate birthDate, MultipartFile avatar) {
+        return registerInternal(email, password, role, firstName, lastName, phone, birthDate, false, null, avatar);
     }
 
-    // ✅ REGISTER : Version admin
+    // ✅ REGISTER : Version admin, avec avatar optionnel
     public AuthResponse registerAdmin(String email, String password, String role,
                                       String firstName, String lastName,
                                       String phone, LocalDate birthDate,
-                                      String currentUserEmail) {
-        return registerInternal(email, password, role, firstName, lastName, phone, birthDate, true, currentUserEmail);
+                                      String currentUserEmail, MultipartFile avatar) {
+        return registerInternal(email, password, role, firstName, lastName, phone, birthDate, true, currentUserEmail, avatar);
     }
 
     // ✅ Méthode interne commune
@@ -60,7 +72,8 @@ public class AuthService {
                                           String firstName, String lastName,
                                           String phone, LocalDate birthDate,
                                           boolean isAdminCreation,
-                                          String currentUserEmail) {
+                                          String currentUserEmail,
+                                          MultipartFile avatar) {
 
         if (isAdminCreation && currentUserEmail != null) {
             Operator currentUser = operatorRepository.findByEmail(currentUserEmail)
@@ -77,6 +90,9 @@ public class AuthService {
             }
         }
 
+        // ✅ Stocker l'avatar (si fourni) avant de créer l'opérateur
+        String avatarUrl = storeAvatar(avatar);
+
         Operator operator = new Operator();
         operator.setEmail(email);
         operator.setPasswordHash(passwordEncoder.encode(password));
@@ -91,12 +107,62 @@ public class AuthService {
         operator.setLastName(lastName);
         operator.setPhone(phone);
         operator.setBirthDate(birthDate);
+        operator.setAvatar(avatarUrl);
         operator.setCreatedAt(LocalDateTime.now());
 
         Operator saved = operatorRepository.save(operator);
 
         String token = jwtUtil.generateToken(saved.getEmail(), saved.getRole(), saved.getId());
         return new AuthResponse(token, toDTO(saved), false);
+    }
+
+    // ✅ Valide et enregistre le fichier avatar sur le disque, retourne l'URL relative à stocker en BD
+    private String storeAvatar(MultipartFile avatar) {
+        if (avatar == null || avatar.isEmpty()) {
+            return null;
+        }
+
+        if (!ALLOWED_AVATAR_TYPES.contains(avatar.getContentType())) {
+            throw new RuntimeException("❌ Format d'image non supporté (JPEG, PNG ou WEBP uniquement).");
+        }
+
+        if (avatar.getSize() > MAX_AVATAR_SIZE) {
+            throw new RuntimeException("❌ L'image ne doit pas dépasser 5 Mo.");
+        }
+
+        try {
+            Path uploadPath = Paths.get(AVATAR_UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String originalFilename = avatar.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+            }
+            String filename = UUID.randomUUID() + extension;
+
+            Path targetPath = uploadPath.resolve(filename);
+            Files.copy(avatar.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            return AVATAR_URL_PREFIX + filename;
+        } catch (IOException e) {
+            log.error("Erreur lors de l'enregistrement de l'avatar", e);
+            throw new RuntimeException("❌ Erreur lors de l'enregistrement de la photo de profil.");
+        }
+    }
+
+    // ✅ Résout le chemin disque d'un avatar à partir de son nom de fichier (pour le servir)
+    public Path getAvatarPath(String filename) {
+        return Paths.get(AVATAR_UPLOAD_DIR).resolve(filename).normalize();
+    }
+
+    // ✅ NOUVEAU : Profil complet de l'utilisateur connecté (utilisé par GET /api/auth/me)
+    public OperatorDTO getCurrentUser(String email) {
+        Operator operator = operatorRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Operator not found"));
+        return toDTO(operator);
     }
 
     // ✅ Supprimer un opérateur
@@ -135,6 +201,7 @@ public class AuthService {
         dto.setLastName(operator.getLastName());
         dto.setPhone(operator.getPhone());
         dto.setBirthDate(operator.getBirthDate());
+        dto.setAvatar(operator.getAvatar());
         dto.setCreatedAt(operator.getCreatedAt());
         return dto;
     }

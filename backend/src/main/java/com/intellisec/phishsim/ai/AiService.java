@@ -2,6 +2,7 @@ package com.intellisec.phishsim.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,9 +23,11 @@ public class AiService {
     @Value("${ai.gemini.api.key}")
     private String apiKey;
 
+    @Getter
     @Value("${ai.gemini.primary-model:gemini-3.5-flash}")
     private String primaryModel;
 
+    @Getter
     @Value("${ai.gemini.fallback-model:gemini-2.5-flash}")
     private String fallbackModel;
 
@@ -134,10 +137,6 @@ Respond STRICTLY with a valid JSON object matching this schema:
         );
     }
 
-    /**
-     * Tente l'appel avec le modèle principal. En cas de surcharge 503 récurrente,
-     * bascule automatiquement sur le modèle de secours.
-     */
     private String callGeminiApiWithFallback(String prompt) {
         try {
             log.info("🤖 Utilisation du modèle principal: {}", primaryModel);
@@ -166,7 +165,7 @@ Respond STRICTLY with a valid JSON object matching this schema:
         Map<String, Object> systemInstruction = Map.of(
                 "parts", List.of(Map.of("text", "You are an automated corporate communication template engine producing educational IT awareness content in structured JSON format."))
         );
-        requestBody.put("system_instruction", systemInstruction);
+        requestBody.put("systemInstruction", systemInstruction);
 
         // 2. Contenu du prompt
         requestBody.put("contents", List.of(
@@ -211,7 +210,7 @@ Respond STRICTLY with a valid JSON object matching this schema:
                     log.warn("⚠️ Gemini [{}] surchargé (503), tentative {}/{}", modelName, attempt, maxRetries);
                     if (attempt < maxRetries) {
                         Thread.sleep(retryDelay);
-                        retryDelay *= 2; // Backoff exponentiel (2s, 4s...)
+                        retryDelay *= 2;
                         continue;
                     }
                 }
@@ -223,7 +222,7 @@ Respond STRICTLY with a valid JSON object matching this schema:
                 if (attempt < maxRetries) {
                     try {
                         Thread.sleep(retryDelay);
-                        retryDelay *= 2; // Backoff exponentiel
+                        retryDelay *= 2;
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         break;
@@ -285,7 +284,6 @@ Respond STRICTLY with a valid JSON object matching this schema:
 
         String jsonText = extractJsonFromResponse(text);
 
-        // Détection de réponse de refus encapsulée dans le JSON
         JsonNode parsedNode = objectMapper.readTree(jsonText);
         if (parsedNode.has("error")) {
             String refusalMsg = parsedNode.path("error").asText();

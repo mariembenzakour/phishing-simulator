@@ -143,6 +143,91 @@
   color: #b45309;
 }
 
+.hint-error {
+  color: #dc2626;
+}
+
+/* ── NOUVEAU : Upload de l'avatar ── */
+.avatar-upload-container {
+  padding-bottom: 4px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 24px;
+}
+
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-placeholder {
+    font-size: 22px;
+    color: #94a3b8;
+  }
+}
+
+.avatar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.avatar-input-hidden {
+  display: none;
+}
+
+.avatar-upload-btn {
+  display: inline-block;
+  padding: 7px 14px;
+  background-color: #ffffff;
+  border: 1px solid #4f46e5;
+  color: #4f46e5;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background-color: #4f46e5;
+    color: #ffffff;
+  }
+}
+
+.avatar-remove-btn {
+  padding: 6px 12px;
+  background-color: transparent;
+  border: none;
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 /* Aperçu dynamique */
 .preview-box {
   background: #f8fafc;
@@ -184,6 +269,13 @@
   font-weight: 700;
   font-size: 13px;
   flex-shrink: 0;
+  overflow: hidden;
+
+  .preview-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .preview-info {

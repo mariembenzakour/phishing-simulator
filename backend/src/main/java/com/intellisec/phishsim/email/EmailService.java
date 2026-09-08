@@ -75,10 +75,15 @@ public class EmailService {
 
     public void sendEmail(String to, String from, String fromName, String subject, String body, boolean isHtml) {
         try {
+            // ✅ Activer la prise en charge UTF-8 globale dans JavaMail
+            System.setProperty("mail.mime.allowutf8", "true");
+
             MimeMessage message = mailSender.createMimeMessage();
+
+            // ✅ Utilisation du mode MIXED_RELATED avec encodage UTF-8 explicite
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
 
@@ -97,7 +102,12 @@ public class EmailService {
             }
 
             helper.setSubject(subject);
+
+            // ✅ Force l'encodage UTF-8 et la génération du header Content-Type: text/html; charset=UTF-8
             helper.setText(body, isHtml);
+
+            // ✅ Forcer la finalisation des en-têtes et des boundaries MIME avant envoi
+            message.saveChanges();
 
             mailSender.send(message);
 
@@ -257,11 +267,6 @@ public class EmailService {
     // ─────────────────────────────────────────────────
     // SCOPE ENFORCEMENT GATE AVEC ALLOW-LIST
     // ─────────────────────────────────────────────────
-    /**
-     * ✅ Vérifie que la cible est autorisée à recevoir l'email
-     * - Soit elle appartient au groupe de la campagne
-     * - Soit elle est dans l'allow-list personnalisée
-     */
     private void enforceScope(Campaign campaign, Target target) {
         boolean isInGroup = target.getGroupId() != null
                 && target.getGroupId().equals(campaign.getTargetGroupId());
@@ -277,7 +282,6 @@ public class EmailService {
             }
         }
 
-        // ✅ La cible doit être dans le groupe OU dans l'allow-list
         if (!isInGroup && !isInAllowList) {
             String errorMsg = String.format(
                     "❌ Scope Enforcement : La cible %s (groupe %s) n'est pas autorisée. " +
@@ -338,7 +342,7 @@ public class EmailService {
     }
 
     // ─────────────────────────────────────────────────
-    // INJECTION TRACKING
+    // INJECTION TRACKING & GARANTIE UTF-8
     // ─────────────────────────────────────────────────
     private String injectTracking(String body, Target target, String token) {
         String trackingLink = urlConfig.getTrackingClickUrl(token);
@@ -363,6 +367,13 @@ public class EmailService {
             body = body.replace("</body>", pixel + "</body>");
         } else {
             body = body + pixel;
+        }
+
+        // ✅ Injecter la balise meta UTF-8 si absente pour forcer le rendu correct des caractères accentués
+        if (body.toLowerCase().contains("<head>") && !body.toLowerCase().contains("charset=")) {
+            body = body.replaceFirst("(?i)<head>", "<head><meta charset=\"UTF-8\">");
+        } else if (!body.toLowerCase().contains("charset=")) {
+            body = "<meta charset=\"UTF-8\">" + body;
         }
 
         return body;

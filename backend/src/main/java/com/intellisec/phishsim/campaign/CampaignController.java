@@ -73,7 +73,7 @@ public class CampaignController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ NOUVEAU : Endpoint de délivrabilité appelé par le Angular
+    // ✅ Endpoint de délivrabilité appelé par Angular
     @PostMapping("/check-deliverability")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN', 'OPERATOR')")
     public ResponseEntity<CampaignService.DeliverabilityResponseDto> checkDeliverability(@RequestBody DeliverabilityRequest request) {

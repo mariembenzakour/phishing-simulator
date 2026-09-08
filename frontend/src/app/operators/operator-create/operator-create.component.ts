@@ -27,10 +27,55 @@ export class OperatorCreateComponent {
   error = '';
   success = '';
 
+  // ✅ NOUVEAU : gestion de l'avatar
+  avatarFile: File | null = null;
+  avatarPreview: string | ArrayBuffer | null = null;
+  avatarError = '';
+  private readonly allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  private readonly maxAvatarSize = 5 * 1024 * 1024; // 5 Mo
+
   constructor(
     public authService: AuthService,
     private router: Router
   ) {}
+
+  // ✅ NOUVEAU : déclenché à la sélection d'un fichier
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      return;
+    }
+
+    if (!this.allowedAvatarTypes.includes(file.type)) {
+      this.avatarError = 'Formats acceptés : JPEG, PNG ou WEBP';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.maxAvatarSize) {
+      this.avatarError = 'L\'image ne doit pas dépasser 5 Mo';
+      input.value = '';
+      return;
+    }
+
+    this.avatarError = '';
+    this.avatarFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.avatarPreview = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ✅ NOUVEAU : retire l'avatar sélectionné
+  removeAvatar(): void {
+    this.avatarFile = null;
+    this.avatarPreview = null;
+    this.avatarError = '';
+  }
 
   create() {
     // Validation des champs obligatoires
@@ -52,7 +97,7 @@ export class OperatorCreateComponent {
       return;
     }
 
-    this.authService.createOperator(this.form).subscribe({
+    this.authService.createOperator(this.form, this.avatarFile).subscribe({
       next: () => {
         this.success = `Opérateur ${this.form.role} créé avec succès !`;
         setTimeout(() => {

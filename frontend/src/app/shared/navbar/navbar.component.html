@@ -117,7 +117,7 @@
               <circle cx="12" cy="12" r="3"/>
             </svg>
           </span>
-          <span class="nav-label" *ngIf="!isCollapsed">Intelligence Artificielle</span>
+          <span class="nav-label" *ngIf="!isCollapsed">Génerateur d'Email</span>
         </a>
       </li>
 
@@ -159,7 +159,8 @@
     <!-- Profil utilisateur -->
     <div class="user-profile" [title]="authService.getUserInfo()?.email || 'Profil utilisateur'">
       <div class="user-avatar">
-        {{ authService.getUserInfo()?.email?.charAt(0)?.toUpperCase() || 'U' }}
+        <img *ngIf="avatarUrl" [src]="avatarUrl" alt="Avatar" class="user-avatar-img">
+        <span *ngIf="!avatarUrl">{{ authService.getUserInfo()?.email?.charAt(0)?.toUpperCase() || 'U' }}</span>
       </div>
       <div class="user-info" *ngIf="!isCollapsed">
         <div class="user-name">{{ authService.getUserInfo()?.email || 'Utilisateur' }}</div>

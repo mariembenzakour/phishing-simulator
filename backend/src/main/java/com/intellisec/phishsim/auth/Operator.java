@@ -35,6 +35,10 @@ public class Operator {
     private String phone;
     private LocalDate birthDate;
 
+    // ✅ NOUVEAU : URL/chemin relatif vers la photo de profil de l'opérateur
+    @Column(name = "avatar")
+    private String avatar;
+
     private LocalDateTime createdAt;
 
     // ✅ Pour le chiffrement/déchiffrement

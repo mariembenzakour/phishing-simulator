@@ -13,7 +13,12 @@ public class OperatorDTO {
     private String firstName;
     private String lastName;
     private String phone;
+
     private LocalDate birthDate;
     private String role;
+
+    // ✅ NOUVEAU : exposé au front pour afficher la photo de profil
+    private String avatar;
+
     private LocalDateTime createdAt;
 }

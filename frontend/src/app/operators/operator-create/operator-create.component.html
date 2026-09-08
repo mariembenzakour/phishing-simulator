@@ -16,6 +16,36 @@
     <!-- CARD FORMULAIRE -->
     <div class="form-card">
 
+      <!-- ✅ NOUVEAU : Photo de profil (avatar) -->
+      <div class="form-group avatar-upload-container">
+        <label class="form-label">Photo de profil</label>
+        <div class="avatar-upload-row">
+          <div class="avatar-preview">
+            <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Aperçu de l'avatar" class="avatar-img">
+            <span *ngIf="!avatarPreview" class="avatar-placeholder">👤</span>
+          </div>
+
+          <div class="avatar-actions">
+            <label for="avatar" class="avatar-upload-btn">
+              {{ avatarFile ? 'Changer la photo' : 'Ajouter une photo' }}
+            </label>
+            <input
+              id="avatar"
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              (change)="onAvatarSelected($event)"
+              class="avatar-input-hidden">
+
+            <button *ngIf="avatarFile" type="button" class="avatar-remove-btn" (click)="removeAvatar()">
+              Retirer
+            </button>
+
+            <span *ngIf="avatarError" class="form-hint hint-error">{{ avatarError }}</span>
+            <span *ngIf="!avatarError" class="form-hint">JPEG, PNG ou WEBP • Max. 5 Mo (optionnel)</span>
+          </div>
+        </div>
+      </div>
+
       <!-- EMAIL -->
       <div class="form-group">
         <label class="form-label">Adresse Email <span class="required">*</span></label>
@@ -88,7 +118,10 @@
         <span class="preview-title">Aperçu du compte</span>
         <div class="preview-card">
           <div class="preview-avatar">
-            {{ form.firstName ? form.firstName.charAt(0).toUpperCase() : '?' }}{{ form.lastName ? form.lastName.charAt(0).toUpperCase() : '' }}
+            <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Avatar" class="preview-avatar-img">
+            <span *ngIf="!avatarPreview">
+              {{ form.firstName ? form.firstName.charAt(0).toUpperCase() : '?' }}{{ form.lastName ? form.lastName.charAt(0).toUpperCase() : '' }}
+            </span>
           </div>
           <div class="preview-info">
             <span class="preview-name">

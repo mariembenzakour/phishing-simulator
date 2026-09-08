@@ -7,7 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
 
-  private apiUrl = 'http://localhost:8086/api/auth';
+  // ✅ NOUVEAU : base séparée de apiUrl pour pouvoir reconstruire l'URL complète des avatars
+  private baseUrl = 'http://localhost:8086';
+  private apiUrl = `${this.baseUrl}/api/auth`;
   private tokenKey = 'token';
   private roleKey = 'role';
   private tempEmailKey = 'temp_email';
@@ -22,12 +24,17 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, { email, password });
   }
 
+  // ✅ MODIFIÉ : envoi en multipart/form-data pour supporter l'upload d'avatar
   register(email: string, password: string, role: string,
            firstName: string, lastName: string,
-           phone: string, birthDate: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, {
-      email, password, role, firstName, lastName, phone, birthDate
-    });
+           phone: string, birthDate: string, avatar?: File | null): Observable<any> {
+
+    const data = { email, password, role, firstName, lastName, phone, birthDate };
+    const formData = this.buildOperatorFormData(data, avatar);
+
+    // ⚠️ Ne pas fixer manuellement le header Content-Type : le navigateur
+    // ajoute automatiquement le bon "boundary" pour le multipart.
+    return this.http.post(`${this.apiUrl}/register`, formData);
   }
 
   enableMfa(email: string): Observable<any> {
@@ -43,8 +50,10 @@ export class AuthService {
     });
   }
 
-  createOperator(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/create-operator`, data);
+  // ✅ MODIFIÉ : envoi en multipart/form-data pour supporter l'upload d'avatar
+  createOperator(data: any, avatar?: File | null): Observable<any> {
+    const formData = this.buildOperatorFormData(data, avatar);
+    return this.http.post(`${this.apiUrl}/admin/create-operator`, formData);
   }
 
   deleteOperator(id: string): Observable<any> {
@@ -53,6 +62,31 @@ export class AuthService {
 
   getAllOperators(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/admin/operators`);
+  }
+
+  // ✅ NOUVEAU : profil complet de l'utilisateur connecté (contient l'avatar, absent du JWT)
+  getCurrentUser(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me`);
+  }
+
+  // ✅ NOUVEAU : construit l'URL absolue d'un avatar à partir du chemin relatif renvoyé par le backend
+  getAvatarUrl(avatarPath: string | null | undefined): string | null {
+    if (!avatarPath) {
+      return null;
+    }
+    return avatarPath.startsWith('http') ? avatarPath : `${this.baseUrl}${avatarPath}`;
+  }
+
+  // ✅ NOUVEAU : helper commun pour construire le FormData (JSON "data" + fichier "avatar")
+  private buildOperatorFormData(data: any, avatar?: File | null): FormData {
+    const formData = new FormData();
+    formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+
+    if (avatar) {
+      formData.append('avatar', avatar, avatar.name);
+    }
+
+    return formData;
   }
 
   // ============================================

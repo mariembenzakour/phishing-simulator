@@ -31,7 +31,34 @@
       </div>
 
       <form class="register-form" (ngSubmit)="register()">
-        
+
+        <!-- ✅ NOUVEAU : Photo de profil (avatar) -->
+        <div class="avatar-upload-container">
+          <div class="avatar-preview">
+            <img *ngIf="avatarPreview" [src]="avatarPreview" alt="Aperçu de l'avatar" class="avatar-img">
+            <span *ngIf="!avatarPreview" class="avatar-placeholder">👤</span>
+          </div>
+
+          <div class="avatar-actions">
+            <label for="avatar" class="avatar-upload-btn">
+              {{ avatarFile ? 'Changer la photo' : 'Ajouter une photo' }}
+            </label>
+            <input
+              id="avatar"
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              (change)="onAvatarSelected($event)"
+              class="avatar-input-hidden">
+
+            <button *ngIf="avatarFile" type="button" class="avatar-remove-btn" (click)="removeAvatar()">
+              Retirer
+            </button>
+          </div>
+
+          <span *ngIf="errors.avatar" class="field-error-text">{{ errors.avatar }}</span>
+          <span *ngIf="!errors.avatar" class="field-hint">JPEG, PNG ou WEBP • Max. 5 Mo (optionnel)</span>
+        </div>
+
         <!-- Prénom & Nom -->
         <div class="field-grid">
           <div class="field-container">

@@ -26,7 +26,51 @@ export class RegisterComponent {
   errors: any = {};
   success = '';
 
+  // ✅ NOUVEAU : gestion de l'avatar
+  avatarFile: File | null = null;
+  avatarPreview: string | ArrayBuffer | null = null;
+  private readonly allowedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  private readonly maxAvatarSize = 5 * 1024 * 1024; // 5 Mo
+
   constructor(private authService: AuthService, private router: Router) {}
+
+  // ✅ NOUVEAU : déclenché à la sélection d'un fichier
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+    if (!file) {
+      return;
+    }
+
+    if (!this.allowedAvatarTypes.includes(file.type)) {
+      this.errors.avatar = 'Formats acceptés : JPEG, PNG ou WEBP';
+      input.value = '';
+      return;
+    }
+
+    if (file.size > this.maxAvatarSize) {
+      this.errors.avatar = 'L\'image ne doit pas dépasser 5 Mo';
+      input.value = '';
+      return;
+    }
+
+    delete this.errors.avatar;
+    this.avatarFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.avatarPreview = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ✅ NOUVEAU : retire l'avatar sélectionné
+  removeAvatar(): void {
+    this.avatarFile = null;
+    this.avatarPreview = null;
+    delete this.errors.avatar;
+  }
 
   validate(): boolean {
     this.errors = {};
@@ -100,7 +144,8 @@ export class RegisterComponent {
       this.form.firstName,
       this.form.lastName,
       this.form.phone,
-      this.form.birthDate
+      this.form.birthDate,
+      this.avatarFile
     ).subscribe({
       next: () => {
         this.authService.saveTempEmail(this.form.email);
